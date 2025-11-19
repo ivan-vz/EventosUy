@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EventosUy.Dominio.Entidades
+﻿namespace EventosUy.Dominio.Entidades
 {
     public class Evento
     {
@@ -14,6 +8,7 @@ namespace EventosUy.Dominio.Entidades
         public string Descripcion { get; private set; }
         public DateTimeOffset Creacion { get; private set; }
         public HashSet<Guid> Categorias { get; private set; }
+        public HashSet<Guid> Ediciones { get; private set; }
 
         public Evento(string nombre, string sigla, string descripcion)
         {
@@ -22,9 +17,11 @@ namespace EventosUy.Dominio.Entidades
             Sigla = sigla;
             Descripcion = descripcion;
             Creacion = DateTimeOffset.UtcNow;
-            Categorias = new HashSet<Guid>();
+            Categorias = [];
+            Ediciones = [];
         }
 
         public void AgregarCategoria(Guid id_categoria) { Categorias.Add(id_categoria); }
+        public void AgregarEdicion(Guid id_edicion) { Ediciones.Add(id_edicion); }
     }
 }
