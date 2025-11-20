@@ -11,11 +11,13 @@ namespace EventosUy.Dominio.Entidades
         public int Consumidos { get; private set; }
         public string Codigo { get; private set; }
         public NivelPatrocinio Nivel { get; private set; }
+        public EstadoPatrocinio Estado { get; private set; }
+        public DateOnly Hasta { get; private set; }
         public Guid Institucion { get; private set; }
         public Guid Edicion { get; private set; }
         public Guid TipoRegistro { get; private set; }
 
-        public Patrocinio(DateOnly creacion, float monto, int gratuitos, string codigo, NivelPatrocinio nivel, Guid id_institucion, Guid id_edicion, Guid id_tipoRegistro) 
+        public Patrocinio(DateOnly creacion, float monto, int gratuitos, string codigo, NivelPatrocinio nivel, Guid id_institucion, Guid id_edicion, Guid id_tipoRegistro, DateOnly hasta)
         {
             Creacion = creacion;
             Monto = monto;
@@ -26,6 +28,8 @@ namespace EventosUy.Dominio.Entidades
             Institucion = id_institucion;
             Edicion = id_edicion;
             TipoRegistro = id_tipoRegistro;
+            Estado = EstadoPatrocinio.DISPONIBLE;
+            Hasta = hasta;
         }
     }
 }

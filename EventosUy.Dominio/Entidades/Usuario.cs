@@ -1,4 +1,5 @@
-﻿using EventosUy.Dominio.ValueObjects;
+﻿using EventosUy.Dominio.Enumerados;
+using EventosUy.Dominio.ValueObjects;
 
 namespace EventosUy.Dominio.Entidades
 {
@@ -10,6 +11,7 @@ namespace EventosUy.Dominio.Entidades
         public string Nombre { get; private set; }
         public Email Email { get; private set; }
         public DateOnly Desde { get; set; }
+        public EstadoUsuario Estado { get; set; }
 
         protected Usuario(string nickname, string password, string nombre, Email email) 
         {
@@ -19,6 +21,7 @@ namespace EventosUy.Dominio.Entidades
             Nombre = nombre;
             Email = email;
             Desde = DateOnly.FromDateTime(DateTime.UtcNow);
+            Estado = EstadoUsuario.ACTIVO;
         }
     }
 }
