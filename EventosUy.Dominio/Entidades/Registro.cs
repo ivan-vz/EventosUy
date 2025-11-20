@@ -4,15 +4,15 @@ namespace EventosUy.Dominio.Entidades
 {
     public class Registro
     {
-        public Guid Id { get; set; }
-        public DateOnly Creacion { get; private set; }
-        public float Costo { get; private set; }
-        public string CodigoPatrocinio { get; private set; }
-        public Participacion Participacion { get; private set; }
+        public Guid Id { get; init; }
+        public DateOnly Creacion { get; init; }
+        public float Costo { get; init; }
+        public string CodigoPatrocinio { get; init; }
+        public Participacion Participacion { get; init; }
         public EstadoAsistencia Estado { get; private set; }
-        public Guid Persona { get; private set; }
-        public Guid Edicion { get; private set; }
-        public Guid TipoRegistro { get; private set; }
+        public Guid Persona { get; init; }
+        public Guid Edicion { get; init; }
+        public Guid TipoRegistro { get; init; }
 
         public Registro(DateOnly creacion, float costo, string codigo, Guid id_persona, Guid id_edicion, Guid id_tipoRegistro, Participacion participacion) 
         {

@@ -2,14 +2,14 @@
 {
     public class TipoRegistro
     {
-        public Guid ID { get; private set; }
-        public string Nombre { get; private set; }
+        public Guid ID { get; init; }
+        public string Nombre { get; init; }
         public string Descripcion { get; private set; }
-        public float Costo { get; private set; }
-        public int Cupos { get; private set; }
+        public float Costo { get; init; }
+        public int Cupos { get; init; }
         public bool Activo { get; private set; }
-        public DateTimeOffset Creacion { get; private set; }
-        public Guid Edicion { get; private set; }
+        public DateTimeOffset Creacion { get; init; }
+        public Guid Edicion { get; init; }
 
         public TipoRegistro(string nombre, string descripcion, float costo, int cupos, Guid id_edicion) 
         {

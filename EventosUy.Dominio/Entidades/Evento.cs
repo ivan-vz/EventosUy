@@ -2,15 +2,16 @@
 {
     public class Evento
     {
-        public Guid Id { get; private set; }
-        public string Nombre { get; private set; }
-        public string Sigla { get; private set; }
+        public Guid Id { get; init; }
+        public string Nombre { get; init; }
+        public string Sigla { get; init; }
         public string Descripcion { get; private set; }
-        public DateTimeOffset Creacion { get; private set; }
+        public DateTimeOffset Creacion { get; init; }
         public bool Activo { get; private set; }
         public HashSet<Guid> Categorias { get; private set; }
+        public Guid? Institucion { get; init; }
 
-        public Evento(string nombre, string sigla, string descripcion)
+        public Evento(string nombre, string sigla, string descripcion, Guid? institucion)
         {
             Id = Guid.NewGuid();
             Nombre = nombre;
@@ -19,6 +20,7 @@
             Creacion = DateTimeOffset.UtcNow;
             Activo = true;
             Categorias = [];
+            Institucion = institucion;
         }
 
         public void AgregarCategoria(Guid id_categoria) { Categorias.Add(id_categoria); }

@@ -4,13 +4,13 @@ namespace EventosUy.Dominio.Entidades
 {
     public class Empleo
     {
-        public Guid Id { get; set; }
-        public DateOnly Inicio { get; set; }
-        public DateOnly Fin { get; set; }
+        public Guid Id { get; init; }
+        public DateOnly Inicio { get; init; }
+        public DateOnly Fin { get; init; }
         public EstadoEmpleo Estado { get; set; }
         public Guid Cargo { get; set; }
-        public Guid Empleado { get; set; }
-        public Guid Institucion { get; set; }
+        public Guid Empleado { get; init; }
+        public Guid Institucion { get; init; }
 
         public Empleo(DateOnly inicio, DateOnly fin, Guid id_cargo, Guid id_empleado, Guid id_institucion) 
         {

@@ -5,16 +5,16 @@ namespace EventosUy.Dominio.Entidades
 {
     public class Edicion
     {
-        public Guid Id { get; private set; }
-        public string Nombre { get; private set; }
-        public string Siglas { get; private set; }
+        public Guid Id { get; init; }
+        public string Nombre { get; init; }
+        public string Siglas { get; init; }
         public DateOnly Inicio { get; private set; }
         public DateOnly Fin { get; private set; }
-        public DateOnly Creacion { get; private set; }
+        public DateOnly Creacion { get; init; }
         public Direccion Direccion { get; private set; }
         public EstadoEdicion Estado { get; private set; }
-        public Guid Evento { get; private set; }
-        public Guid Institucion { get; private set; }
+        public Guid Evento { get; init; }
+        public Guid Institucion { get; init; }
 
         public Edicion(string nombre, string siglas, DateOnly inicio, DateOnly fin, DateOnly creacion, Direccion direccion, Guid id_evento, Guid id_institucion) 
         {
