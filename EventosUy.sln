@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36705.20 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventosUy.Dominio", "EventosUy.Dominio\EventosUy.Dominio.csproj", "{3477DF3E-1B52-40E1-A5A3-86B8D6E93E55}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventosUy.Domain", "EventosUy.Domain\EventosUy.Domain.csproj", "{3477DF3E-1B52-40E1-A5A3-86B8D6E93E55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventosUy.Aplicacion", "EventosUy.Aplicacion\EventosUy.Aplicacion.csproj", "{217BAB26-87C6-4ED1-A06E-0E5C7928F711}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventosUy.Application", "EventosUy.Application\EventosUy.Application.csproj", "{217BAB26-87C6-4ED1-A06E-0E5C7928F711}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventosUy.Infraestructura", "EventosUy.Infraestructura\EventosUy.Infraestructura.csproj", "{1D31F6A8-C9A6-4850-8398-E899FC67B511}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventosUy.Infrastructure", "EventosUy.Infrastructure\EventosUy.Infrastructure.csproj", "{1D31F6A8-C9A6-4850-8398-E899FC67B511}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventosUy.API", "EventosUy.API\EventosUy.API.csproj", "{C9382E31-DFC8-4315-A959-9075432973E1}"
 EndProject
