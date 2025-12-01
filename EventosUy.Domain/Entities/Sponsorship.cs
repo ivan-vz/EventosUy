@@ -1,4 +1,6 @@
-﻿using EventosUy.Domain.Enumerates;
+﻿using EventosUy.Domain.DTOs.DataTypes;
+using EventosUy.Domain.DTOs.Records;
+using EventosUy.Domain.Enumerates;
 
 namespace EventosUy.Domain.Entities
 {
@@ -33,5 +35,12 @@ namespace EventosUy.Domain.Entities
             State = SponsorshipState.AVAILABLE;
             Expired = expired;
         }
+
+        public DTSponsorship GetDT(Edition editionInstance, Institution institutionInstance) 
+        { 
+            return new DTSponsorship(Name, Created, Expired, Amount, Free, Code, Tier, editionInstance.Name, institutionInstance.Nickname); 
+        }
+
+        public SponsorshipCard GetCard() { return new SponsorshipCard(Id, Name, Expired, Tier); }
     }
 }

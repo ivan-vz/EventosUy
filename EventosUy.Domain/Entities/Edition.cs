@@ -1,4 +1,6 @@
-﻿using EventosUy.Domain.Enumerates;
+﻿using EventosUy.Domain.DTOs.DataTypes;
+using EventosUy.Domain.DTOs.Records;
+using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Domain.Entities
@@ -28,6 +30,11 @@ namespace EventosUy.Domain.Entities
             Event = eventId;
             Institution = insititutionId;
         }
-    }
 
+        public void Approve() { State = EditionState.PUBLISHED; }
+        public void Reject() { State = EditionState.CANCELLED; }
+
+        public DTEdition GetDTEdition(Event eventInstance, Institution institutionInstance) { return new DTEdition(Name, Initials, From, To, Created, Address, eventInstance.Name, institutionInstance.Nickname); }
+        public ActivityCard GetCard() { return new ActivityCard(Id, Name, Initials); }
+    }
 }

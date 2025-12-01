@@ -1,4 +1,7 @@
-﻿namespace EventosUy.Domain.Entities
+﻿using EventosUy.Domain.DTOs.DataTypes;
+using EventosUy.Domain.DTOs.Records;
+
+namespace EventosUy.Domain.Entities
 {
     public class Event
     {
@@ -23,6 +26,9 @@
             Institution = institution;
         }
 
-        public void AgregarCategoria(Guid id_categoria) { Categories.Add(id_categoria); }
+        public void AddCategory(Guid categoryId) { Categories.Add(categoryId); }
+
+        public DTEvent GetDT(Institution institutionInstance) { return new DTEvent(Name, Initials, Description, institutionInstance.Name, Created); }
+        public ActivityCard GetCard() { return new ActivityCard(Id, Name, Initials); }
     }
 }

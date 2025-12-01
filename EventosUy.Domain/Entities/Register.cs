@@ -1,4 +1,7 @@
-﻿using EventosUy.Domain.Enumerates;
+﻿using EventosUy.Domain.DTOs.DataTypes;
+using EventosUy.Domain.DTOs.Records;
+using EventosUy.Domain.Entities;
+using EventosUy.Domain.Enumerates;
 
 namespace EventosUy.Domain.Entidades
 {
@@ -25,5 +28,14 @@ namespace EventosUy.Domain.Entidades
             Participation = participation;
             State = RegisterState.CONFIRMED;
         }
+
+        public DTRegister GetDT(Edition editionInstance, RegisterType registerTypeInstance) 
+        { 
+            return new DTRegister(registerTypeInstance.Name, editionInstance.Name, Created, Total, SponsorCode, Participation, State); 
+        }
+
+        public RegisterCardByEdition GetCardByEdition(Person personInstance) { return new RegisterCardByEdition(Id, personInstance.Nickname, Participation); }
+
+        public RegisterCardByPerson GetRegisterCardByPerson(Edition editionInstance) { return new RegisterCardByPerson(Id, editionInstance.Name, Participation); }
     }
 }

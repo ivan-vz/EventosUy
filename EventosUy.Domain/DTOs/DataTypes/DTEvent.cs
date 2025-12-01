@@ -6,9 +6,9 @@
         public string Initials { get; init; }
         public string Description { get; init; }
         public string Institution { get; init; }
-        public DateOnly Created { get; init; }
+        public DateTimeOffset Created { get; init; }
 
-        public DTEvent(string name, string initials, string description, string institution, DateOnly created) 
+        public DTEvent(string name, string initials, string description, string institution, DateTimeOffset created) 
         {
             Name = name;
             Initials = initials;

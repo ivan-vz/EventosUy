@@ -7,9 +7,9 @@
         public string Name { get; init; }
         public string Description { get; init; }
         public string Url { get; init; }
-        public DateOnly Created { get; init; }
+        public DateTimeOffset Created { get; init; }
 
-        public DTInsitution(string nickname, string email, string name, string description, string url, DateOnly created)
+        public DTInsitution(string nickname, string email, string name, string description, string url, DateTimeOffset created)
         {
             Nickname = nickname;
             Email = email;

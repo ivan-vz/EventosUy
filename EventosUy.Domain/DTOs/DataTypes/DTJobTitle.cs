@@ -5,9 +5,9 @@
         public string Name { get; init; }
         public string Description { get; init; }
         public string Institution { get; init; }
-        public DateOnly Created { get; init; }
+        public DateTimeOffset Created { get; init; }
 
-        public DTJobTitle(string name, string description, string institution, DateOnly created)
+        public DTJobTitle(string name, string description, string institution, DateTimeOffset created)
         {
             Name = name;
             Description = description;

@@ -1,4 +1,6 @@
-﻿using EventosUy.Domain.ValueObjects;
+﻿using EventosUy.Domain.DTOs.DataTypes;
+using EventosUy.Domain.DTOs.Records;
+using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Domain.Entities
 {
@@ -15,5 +17,9 @@ namespace EventosUy.Domain.Entities
             Address = address;
             Url = url;
         }
+
+        public DTInsitution GetDT() { return new DTInsitution(Nickname, Email.Value, Name, Description, Url.Value, Created); }
+
+        public ProfileCard GetCard() { return new ProfileCard(Id, Nickname, Email.Value); }
     }
 }

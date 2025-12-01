@@ -1,4 +1,6 @@
-﻿namespace EventosUy.Domain.Entities
+﻿using EventosUy.Domain.DTOs.Records;
+
+namespace EventosUy.Domain.Entities
 {
     public class Category
     {
@@ -16,5 +18,7 @@
             Created = DateTimeOffset.UtcNow;
             Active = true;
         }
+
+        public CategoryCard GetCard() { return new CategoryCard(Id, Name, Description, Created); }
     }
 }

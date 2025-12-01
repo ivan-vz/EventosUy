@@ -8,12 +8,12 @@ namespace EventosUy.Domain.DTOs.DataTypes
         public string Initials { get; init; }
         public DateOnly From { get; init; }
         public DateOnly To { get; init; }
-        public DateOnly Created { get; init; }
+        public DateTimeOffset Created { get; init; }
         public Address Address { get; init; }
         public string Event { get; init; }
         public string Institution { get; init; }
 
-        public DTEdition(string name, string initials, DateOnly from, DateOnly to, DateOnly created, Address address, string eventName, string institution)
+        public DTEdition(string name, string initials, DateOnly from, DateOnly to, DateTimeOffset created, Address address, string eventName, string institution)
         {
             Name = name;
             Initials = initials;
@@ -24,6 +24,5 @@ namespace EventosUy.Domain.DTOs.DataTypes
             Event = eventName;
             Institution = institution;
         }
-
     }
 }

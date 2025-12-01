@@ -7,9 +7,9 @@
         public string Name { get; init; }
         public string Surname { get; init; }
         public DateOnly Birthday { get; init; }
-        public DateOnly Created { get; init; }
+        public DateTimeOffset Created { get; init; }
 
-        public DTPerson(string nickname, string email, string name, string surname, DateOnly birthday, DateOnly created) 
+        public DTPerson(string nickname, string email, string name, string surname, DateOnly birthday, DateTimeOffset created) 
         {
             Nickname = nickname;
             Email = email;
