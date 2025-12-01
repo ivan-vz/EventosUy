@@ -6,8 +6,8 @@
 
         public Url(string value)
         {
-            if (string.IsNullOrWhiteSpace(value)) { throw new ArgumentException("La URL no puede ser vacia."); }
-            if ( Uri.IsWellFormedUriString(value, UriKind.Absolute)) { throw new ArgumentException("La URL no tiene el formato correcta."); }
+            if (string.IsNullOrWhiteSpace(value)) { throw new ArgumentException("URL can not be empty."); }
+            if ( Uri.IsWellFormedUriString(value, UriKind.Absolute)) { throw new ArgumentException("URL is not formatted correctly."); }
 
             Value = value;
         }

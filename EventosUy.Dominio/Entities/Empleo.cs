@@ -7,7 +7,7 @@ namespace EventosUy.Dominio.Entidades
         public Guid Id { get; init; }
         public DateOnly Inicio { get; init; }
         public DateOnly Fin { get; init; }
-        public EstadoEmpleo Estado { get; set; }
+        public EmploymentState Estado { get; set; }
         public Guid Cargo { get; set; }
         public Guid Empleado { get; init; }
         public Guid Institucion { get; init; }
@@ -16,7 +16,7 @@ namespace EventosUy.Dominio.Entidades
         {
             Inicio = inicio;
             Fin = fin;
-            Estado = EstadoEmpleo.ACTIVO;
+            Estado = EmploymentState.ACTIVO;
             Cargo = id_cargo;
             Empleado = id_empleado;
             Institucion = id_institucion;

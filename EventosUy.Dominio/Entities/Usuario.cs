@@ -11,7 +11,7 @@ namespace EventosUy.Dominio.Entidades
         public string Nombre { get; init; }
         public Email Email { get; private set; }
         public DateOnly Desde { get; init; }
-        public EstadoUsuario Estado { get; set; }
+        public UserState Estado { get; set; }
 
         protected Usuario(string nickname, string password, string nombre, Email email) 
         {
@@ -21,7 +21,7 @@ namespace EventosUy.Dominio.Entidades
             Nombre = nombre;
             Email = email;
             Desde = DateOnly.FromDateTime(DateTime.UtcNow);
-            Estado = EstadoUsuario.ACTIVO;
+            Estado = UserState.ACTIVO;
         }
     }
 }
