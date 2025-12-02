@@ -27,7 +27,7 @@ namespace EventosUy.Domain.Entities
         }
 
         public void AddCategory(Guid categoryId) { Categories.Add(categoryId); }
-
+        public HashSet<Guid> GetCategories() { return Categories; }
         public DTEvent GetDT(Institution institutionInstance) { return new DTEvent(Name, Initials, Description, institutionInstance.Name, Created); }
         public ActivityCard GetCard() { return new ActivityCard(Id, Name, Initials); }
     }

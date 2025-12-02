@@ -6,7 +6,7 @@
 
         public Email(string value) 
         {
-            if (string.IsNullOrWhiteSpace(value) && !value.Contains('@')) { throw new ArgumentException("Email is not formatted correctly."); }
+            if (string.IsNullOrWhiteSpace(value) || !value.Contains('@')) { throw new ArgumentException("Email is not formatted correctly."); }
 
             Value = value;
         }

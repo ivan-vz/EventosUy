@@ -4,10 +4,10 @@ namespace EventosUy.Domain.Interfaces
 {
     public interface IJobTitleRepo
     {
-        public Task<JobTitle> GetByIdAsync(Guid id);
-        public IEnumerable<Guid> GetAllAsync();
-        public IEnumerable<Guid> GetAllByInstitutionAsync(Guid institutionId);
+        public Task<JobTitle?> GetByIdAsync(Guid id);
+        public Task<List<Guid>> GetAllByInstitutionAsync(Guid institutionId);
+        public Task<bool> ExistsAsync(string name, Guid institutionId);
         public Task AddAsync(JobTitle jobTitle);
-        public Task RemoveAsync(Guid id);
+        public Task<bool> RemoveAsync(Guid id);
     }
 }

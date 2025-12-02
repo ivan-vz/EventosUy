@@ -4,12 +4,11 @@ namespace EventosUy.Domain.Interfaces
 {
     public interface ISponsorshipRepo
     {
-        public Task<Sponsorship> GetByIdAsync(Guid id);
-        public IEnumerable<Guid> GetAllAsync();
-        public IEnumerable<Guid> GetAllByEdition(Guid editionId);
-        public IEnumerable<Guid> GetAllByInstitution(Guid institutionId);
-        public IEnumerable<Guid> GetAllByRegisterType(Guid registerTypeId);
+        public Task<Sponsorship?> GetByIdAsync(Guid id);
+        public Task<List<Guid>> GetAllByEdition(Guid editionId);
+        public Task<List<Guid>> GetAllByInstitution(Guid institutionId);
+        public Task<bool> ExistsAsync(Guid editionId, Guid institutionId);
         public Task AddAsync(Sponsorship sponsorship);
-        public Task RemoveAsync(Guid id);
+        public Task<bool> RemoveAsync(Guid id);
     }
 }
