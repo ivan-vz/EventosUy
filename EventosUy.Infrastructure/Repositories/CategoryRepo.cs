@@ -1,7 +1,7 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 
-namespace EventosUy.Infrastructure.Repositorios
+namespace EventosUy.Infrastructure.Repositories
 {
     internal class CategoryRepo : ICategoryRepo
     {
@@ -14,8 +14,8 @@ namespace EventosUy.Infrastructure.Repositorios
             _categories.Add(category);
             return Task.CompletedTask;
         }
-
-        public Task<bool> ExistsAsync(string name) { return Task.FromResult(_categories.Any(category => category.Name.Equals(name))); }
+        
+        public Task<bool> ExistsAsync(string name) { return Task.FromResult(_categories.Any(category => category.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); }
 
         public Task<List<Guid>> GetAllAsync() { return Task.FromResult(_categories.Select(category => category.Id).ToList()); }
 

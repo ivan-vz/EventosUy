@@ -3,7 +3,7 @@ using EventosUy.Domain.Interfaces;
 using EventosUy.Domain.ValueObjects;
 using System.Net;
 
-namespace EventosUy.Infrastructure.Repositorios
+namespace EventosUy.Infrastructure.Repositories
 {
     internal class InstitutionRepo : IInstitutionRepo
     {
@@ -20,8 +20,8 @@ namespace EventosUy.Infrastructure.Repositorios
         public Task<bool> ExistsByAddressAsync(Address address) { return Task.FromResult(_institutions.Any(institution => institution.Address.Equals(address))); }
 
         public Task<bool> ExistsByEmailAsync(Email email) { return Task.FromResult(_institutions.Any(institution => institution.Email.Equals(email))); }
-
-        public Task<bool> ExistsByNicknameAsync(string nickname) { return Task.FromResult(_institutions.Any(institution => institution.Nickname.Equals(nickname))); }
+        
+        public Task<bool> ExistsByNicknameAsync(string nickname) { return Task.FromResult(_institutions.Any(institution => institution.Nickname.Equals(nickname, StringComparison.OrdinalIgnoreCase))); }
 
         public Task<bool> ExistsByUrlAsync(Url url) { return Task.FromResult(_institutions.Any(institution => institution.Url.Equals(url))); }
 

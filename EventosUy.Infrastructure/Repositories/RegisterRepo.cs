@@ -2,7 +2,7 @@
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 
-namespace EventosUy.Infrastructure.Repositorios
+namespace EventosUy.Infrastructure.Repositories
 {
     internal class RegisterRepo : IRegisterRepo
     {

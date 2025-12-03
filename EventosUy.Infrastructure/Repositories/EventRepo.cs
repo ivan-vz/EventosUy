@@ -1,7 +1,7 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 
-namespace EventosUy.Infrastructure.Repositorios
+namespace EventosUy.Infrastructure.Repositories
 {
     internal class EventRepo : IEventRepo
     {
@@ -10,8 +10,8 @@ namespace EventosUy.Infrastructure.Repositorios
         public EventRepo() { _events = []; }
 
         public Task AddAsync(Event eventInstance) { return Task.FromResult(_events.Add(eventInstance)); }
-
-        public Task<bool> ExistsAsync(string name) { return Task.FromResult(_events.Any(eventInstance => eventInstance.Name.Equals(name))); }
+        
+        public Task<bool> ExistsAsync(string name) { return Task.FromResult(_events.Any(eventInstance => eventInstance.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); }
 
         public Task<List<Guid>> GetAllAsync() { return Task.FromResult(_events.Select(eventInstance => eventInstance.Id).ToList()); }
 

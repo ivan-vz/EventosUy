@@ -1,7 +1,7 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 
-namespace EventosUy.Infrastructure.Repositorios
+namespace EventosUy.Infrastructure.Repositories
 {
     internal class JobTitleRepo : IJobTitleRepo
     {
@@ -15,7 +15,7 @@ namespace EventosUy.Infrastructure.Repositorios
             return Task.CompletedTask;
         }
 
-        public Task<bool> ExistsAsync(string name, Guid institutionId) { return Task.FromResult(_jobs.Any(job => job.Institution == institutionId && job.Name.Equals(name))); }
+        public Task<bool> ExistsAsync(string name, Guid institutionId) { return Task.FromResult(_jobs.Any(job => job.Institution == institutionId && job.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); }
 
         public Task<List<Guid>> GetAllByInstitutionAsync(Guid institutionId) { return Task.FromResult(_jobs.Where(job => job.Institution == institutionId).Select(job => job.Id).ToList()); }
 

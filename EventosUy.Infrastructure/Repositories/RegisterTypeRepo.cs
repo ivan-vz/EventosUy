@@ -1,7 +1,7 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 
-namespace EventosUy.Infrastructure.Repositorios
+namespace EventosUy.Infrastructure.Repositories
 {
     internal class RegisterTypeRepo : IRegisterTypeRepo
     {
@@ -15,7 +15,7 @@ namespace EventosUy.Infrastructure.Repositorios
             return Task.CompletedTask;
         }
 
-        public Task<bool> ExistsAsync(string name) { return Task.FromResult(_registerTypes.Any(registerType => registerType.Name.Equals(name))); }
+        public Task<bool> ExistsAsync(string name) { return Task.FromResult(_registerTypes.Any(registerType => registerType.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); }
 
         public Task<List<Guid>> GetAllByEdition(Guid editionId) { return Task.FromResult(_registerTypes.Where(registerType => registerType.Edition == editionId).Select(registerType => registerType.Id).ToList()); }
 

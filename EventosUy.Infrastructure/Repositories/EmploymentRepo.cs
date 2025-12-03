@@ -1,7 +1,7 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 
-namespace EventosUy.Infrastructure.Repositorios
+namespace EventosUy.Infrastructure.Repositories
 {
     internal class EmploymentRepo : IEmploymentRepo
     {

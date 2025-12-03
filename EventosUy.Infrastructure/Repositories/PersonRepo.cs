@@ -2,7 +2,7 @@
 using EventosUy.Domain.Interfaces;
 using EventosUy.Domain.ValueObjects;
 
-namespace EventosUy.Infrastructure.Repositorios
+namespace EventosUy.Infrastructure.Repositories
 {
     internal class PersonRepo : IPersonRepo
     {
@@ -18,7 +18,7 @@ namespace EventosUy.Infrastructure.Repositorios
 
         public Task<bool> ExistsByEmailAsync(Email email) { return Task.FromResult(_persons.Any(person => person.Email.Equals(email))); }
 
-        public Task<bool> ExistsByNicknameAsync(string nickname) { return Task.FromResult(_persons.Any(person => person.Nickname.Equals(nickname))); }
+        public Task<bool> ExistsByNicknameAsync(string nickname) { return Task.FromResult(_persons.Any(person => person.Nickname.Equals(nickname, StringComparison.OrdinalIgnoreCase))); }
 
         public Task<List<Guid>> GetAllAsync() { return Task.FromResult(_persons.Select(person => person.Id).ToList()); }
 
