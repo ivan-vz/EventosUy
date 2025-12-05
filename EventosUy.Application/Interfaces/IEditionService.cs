@@ -2,6 +2,7 @@
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.ValueObjects;
 using EventosUy.Domain.Entities;
+using EventosUy.Domain.DTOs.DataTypes;
 
 namespace EventosUy.Application.Interfaces
 {
@@ -10,10 +11,11 @@ namespace EventosUy.Application.Interfaces
         public Task<Result<Guid>> CreateAsync(string name, string initials, Address address, DateOnly from, DateOnly to, Guid eventId, Guid institutionId);
         public Task<Result> ApproveAsync(Guid id);
         public Task<Result> RejectAsync(Guid id);
-        public Task<Result<Edition>> GetById(Guid id);
-        public Task<Result<List<ActivityCard>>> GetAll();
-        public Task<Result<List<ActivityCard>>> GetAllByInstitution(Guid institutionId);
-        public Task<Result<List<ActivityCard>>> GetAllByEvent(Guid eventId);
-        public Task<Result<List<ActivityCard>>> GetAllPendingByEvent(Guid eventId);
+        public Task<Result<Edition>> GetByIdAsync(Guid id);
+        public Task<Result<DTEdition>> GetDTAsync(Guid id);
+        public Task<Result<List<ActivityCard>>> GetAllAsync();
+        public Task<Result<List<ActivityCard>>> GetAllByInstitutionAsync(Guid institutionId);
+        public Task<Result<List<ActivityCard>>> GetAllByEventAsync(Guid eventId);
+        public Task<Result<List<ActivityCard>>> GetAllPendingByEventAsync(Guid eventId);
     }
 }

@@ -1,4 +1,5 @@
-﻿using EventosUy.Domain.DTOs.DataTypes;
+﻿using EventosUy.Domain.Common;
+using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.ValueObjects;
@@ -18,7 +19,7 @@ namespace EventosUy.Domain.Entities
         public Guid Event { get; init; }
         public Guid Institution { get; init; }
 
-        public Edition(string name, string initials, DateOnly from, DateOnly to, Address address, Guid eventId, Guid insititutionId) 
+        private Edition(string name, string initials, DateOnly from, DateOnly to, Address address, Guid eventId, Guid institutionId) 
         {
             Name = name;
             Initials = initials;
@@ -28,13 +29,26 @@ namespace EventosUy.Domain.Entities
             Address = address;
             State = EditionState.PENDING;
             Event = eventId;
-            Institution = insititutionId;
+            Institution = institutionId;
+        }
+
+        public static Result<Edition> Create(string name, string initials, DateOnly from, DateOnly to, Address address, Guid eventId, Guid institutionId) 
+        {
+            if (String.IsNullOrWhiteSpace(name)) { return Result<Edition>.Failure("Name can not be empty."); }
+            if (String.IsNullOrWhiteSpace(initials)) { return Result<Edition>.Failure("Initials can not be empty."); }
+
+            if (from > to) { return Result<Edition>.Failure("The start of editing cannot be later than its completion."); }
+            if (from <= DateOnly.FromDateTime(DateTime.UtcNow)) { return Result<Edition>.Failure("The start date of the edition cannot be earlier than today's date."); }
+
+            Edition editionInstance = new Edition(name, initials, from, to, address, eventId, institutionId); 
+
+            return Result<Edition>.Success(editionInstance);
         }
 
         public void Approve() { State = EditionState.PUBLISHED; }
         public void Reject() { State = EditionState.CANCELLED; }
 
-        public DTEdition GetDTEdition(Event eventInstance, Institution institutionInstance) { return new DTEdition(Name, Initials, From, To, Created, Address, eventInstance.Name, institutionInstance.Nickname); }
+        public DTEdition GetDT(Event eventInstance, Institution institutionInstance) { return new DTEdition(Name, Initials, From, To, Created, Address, eventInstance.Name, institutionInstance.Nickname); }
         public ActivityCard GetCard() { return new ActivityCard(Id, Name, Initials); }
     }
 }

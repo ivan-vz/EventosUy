@@ -1,5 +1,6 @@
 ﻿using EventosUy.Application.Interfaces;
 using EventosUy.Domain.Common;
+using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
@@ -20,63 +21,105 @@ namespace EventosUy.Application.Services
             _institutionService = institutionService;
         }
 
-        public Task<Result> ApproveAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<Result<Guid>> CreateAsync(string name, string initials, Address address, DateOnly from, DateOnly to, Guid eventId, Guid institutionId)
         {
-            if (String.IsNullOrWhiteSpace(name)) { return Result<Guid>.Failure("Name can not be empty."); }
-            if (String.IsNullOrWhiteSpace(initials)) { return Result<Guid>.Failure("Initials can not be empty."); }
+            Result<Event> eventResult = await _eventService.GetByIdAsync(eventId);
+            if (!eventResult.IsSuccess) { return Result<Guid>.Failure(eventResult.Error!); }
 
-            if (from > to) { return Result<Guid>.Failure("The start of editing cannot be later than its completion."); }
-            if (from <= DateOnly.FromDateTime(DateTime.UtcNow)) { return Result<Guid>.Failure("The start date of the edition cannot be earlier than today's date."); }
-
-            if (eventId == Guid.Empty) { return Result<Guid>.Failure("Event can not be empty."); }
-            Event eventInstance = await _eventService.GetByIdAsync(eventId);
-            if (eventInstance == null) { return Result<Guid>.Failure("The event does not exist."); }
-
-            if (institutionId == Guid.Empty) { return Result<Guid>.Failure("Institution can not be empty."); }
-            Institution institutionInstance = _institutionService.GetByIdAsync(institutionId);
-            if (institutionInstance == null) { return Result<Guid>.Failure("The institution does not exist."); }
+            Result<Institution> institutionResult = await _institutionService.GetByIdAsync(institutionId);
+            if (!institutionResult.IsSuccess) { return Result<Guid>.Failure(institutionResult.Error!); }
 
             if (await _editionRepo.ExistsAsync(name)) { return Result<Guid>.Failure("Edition already exists."); }
 
-            Edition edition = new Edition(name, initials, from, to, address, eventId, institutionId);
-            await _editionRepo.AddAsync(edition);
+            Result<Edition> editionResult = Edition.Create(name, initials, from, to, address, eventId, institutionId);
 
-            return Result<Guid>.Success(edition.Id);
+            if (!editionResult.IsSuccess) { return Result<Guid>.Failure(editionResult.Error!); }
+
+            Edition editionInstance = editionResult.Value!;
+            await _editionRepo.AddAsync(editionInstance!);
+
+            return Result<Guid>.Success(editionInstance!.Id);
         }
 
-        public Task<Result<List<ActivityCard>>> GetAll()
+        public async Task<Result<List<ActivityCard>>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            List<Edition> editions = await _editionRepo.GetAllAsync();
+            List<ActivityCard> cards = editions.Select(edition => edition.GetCard()).ToList();
+
+            return Result<List<ActivityCard>>.Success(cards);
         }
 
-        public Task<Result<List<ActivityCard>>> GetAllByEvent(Guid eventId)
+        public async Task<Result<List<ActivityCard>>> GetAllByEventAsync(Guid eventId)
         {
-            throw new NotImplementedException();
+            if (eventId == Guid.Empty) { return Result<List<ActivityCard>>.Failure("Event can not be empty."); }
+            List<Edition> editions = await _editionRepo.GetAllByEventAsync(eventId);
+            List<ActivityCard> cards = editions.Select(edition => edition.GetCard()).ToList();
+
+            return Result<List<ActivityCard>>.Success(cards);
         }
 
-        public Task<Result<List<ActivityCard>>> GetAllByInstitution(Guid institutionId)
+        public async Task<Result<List<ActivityCard>>> GetAllByInstitutionAsync(Guid institutionId)
         {
-            throw new NotImplementedException();
+            if (institutionId == Guid.Empty) { return Result<List<ActivityCard>>.Failure("Institution can not be empty."); }
+            List<Edition> editions = await _editionRepo.GetAllByInstitutionAsync(institutionId);
+            List<ActivityCard> cards = editions.Select(edition => edition.GetCard()).ToList();
+
+            return Result<List<ActivityCard>>.Success(cards);
         }
 
-        public Task<Result<List<ActivityCard>>> GetAllPendingByEvent(Guid eventId)
+        public async Task<Result<List<ActivityCard>>> GetAllPendingByEventAsync(Guid eventId)
         {
-            throw new NotImplementedException();
+            if (eventId == Guid.Empty) { return Result<List<ActivityCard>>.Failure("Event can not be empty."); }
+            List<Edition> editions = await _editionRepo.GetAllPendingByEventAsync(eventId);
+            List<ActivityCard> cards = editions.Select(edition => edition.GetCard()).ToList();
+
+            return Result<List<ActivityCard>>.Success(cards);
         }
 
-        public Task<Result<Edition>> GetById(Guid id)
+        public async Task<Result<Edition>> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            if (id == Guid.Empty) { return Result<Edition>.Failure("Edition can not be empty."); }
+            Edition? editionInstance = await _editionRepo.GetByIdAsync(id);
+            if (editionInstance is null) { return Result<Edition>.Failure("Edition not Found."); }
+
+            return Result<Edition>.Success(editionInstance);
         }
 
-        public Task<Result> RejectAsync(Guid id)
+        public async Task<Result<DTEdition>> GetDTAsync(Guid id)
         {
-            throw new NotImplementedException();
+            if (id == Guid.Empty) { return Result<DTEdition>.Failure("Edition can not be empty."); }
+            Edition? editionInstance = await _editionRepo.GetByIdAsync(id);
+            if (editionInstance is null) { return Result<DTEdition>.Failure("Edition not Found."); }
+
+            Result<Event> eventResult = await _eventService.GetByIdAsync(editionInstance.Event);
+            if (!eventResult.IsSuccess) { return Result<DTEdition>.Failure(eventResult.Error!); }
+
+            Result<Institution> institutionResult = await _institutionService.GetByIdAsync(editionInstance.Institution);
+            if (!institutionResult.IsSuccess) { return Result<DTEdition>.Failure(institutionResult.Error!); }
+
+            return Result<DTEdition>.Success(editionInstance.GetDT(eventResult.Value!, institutionResult.Value!));
+        }
+
+        public async Task<Result> ApproveAsync(Guid id)
+        {
+            if (id == Guid.Empty) { return Result.Failure("Edition can not be empty."); }
+            Edition? editionInstance = await _editionRepo.GetByIdAsync(id);
+            if (editionInstance is null) { return Result.Failure("Edition not Found."); }
+
+            editionInstance.Approve();
+
+            return Result.Success();
+        }
+
+        public async Task<Result> RejectAsync(Guid id)
+        {
+            if (id == Guid.Empty) { return Result.Failure("Edition can not be empty."); }
+            Edition? editionInstance = await _editionRepo.GetByIdAsync(id);
+            if (editionInstance is null) { return Result.Failure("Edition not Found."); }
+
+            editionInstance.Reject();
+
+            return Result.Success();
         }
     }
 }

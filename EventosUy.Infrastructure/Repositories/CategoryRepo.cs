@@ -17,12 +17,9 @@ namespace EventosUy.Infrastructure.Repositories
         
         public Task<bool> ExistsAsync(string name) { return Task.FromResult(_categories.Any(category => category.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); }
 
-        public Task<List<Guid>> GetAllAsync() { return Task.FromResult(_categories.Select(category => category.Id).ToList()); }
+        public Task<List<Category>> GetAllAsync() { return Task.FromResult(_categories.ToList()); }
 
-        public Task<Category?> GetByIdAsync(Guid id)
-        {
-            return Task.FromResult(_categories.SingleOrDefault(category => category.Id == id));
-        }
+        public Task<Category?> GetByIdAsync(Guid id) { return Task.FromResult(_categories.SingleOrDefault(category => category.Id == id)); }
 
         public Task<bool> RemoveAsync(Guid id)
         {

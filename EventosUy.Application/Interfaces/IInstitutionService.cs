@@ -5,6 +5,6 @@ namespace EventosUy.Application.Interfaces
 {
     internal interface IInstitutionService
     {
-        public Task<Result<Event>> GetByIdAsync(Guid id);
+        public Task<Result<Institution>> GetByIdAsync(Guid id);
     }
 }
