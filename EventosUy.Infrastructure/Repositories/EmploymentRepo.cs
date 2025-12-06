@@ -15,17 +15,19 @@ namespace EventosUy.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
-        public Task<List<Guid>> GetAllByInstitutionn(Guid institutionId) 
-        { 
-            return Task.FromResult(_employments.Where(employment => employment.Institution == institutionId).Select(employment => employment.Id).ToList()); 
-        }
+        public Task<List<Employment>> GetAllByInstitutionAsync(Guid institutionId) { return Task.FromResult(_employments.Where(employment => employment.Institution == institutionId).ToList()); }
 
-        public Task<List<Guid>> GetAllByProfessional(Guid professionalId)
+        public Task<List<Employment>> GetAllByProfessionalAsync(Guid professionalId) 
         {
-            return Task.FromResult(_employments.Where(employment => employment.ProfessionalProfile == professionalId).Select(employment => employment.Id).ToList());
+            return Task.FromResult(_employments.Where(employment => employment.ProfessionalProfile == professionalId).ToList());
         }
 
         public Task<Employment?> GetByIdAsync(Guid id) { return Task.FromResult(_employments.SingleOrDefault(employment => employment.Id == id)); }
+
+        public Task<bool> ExistsAsync(Guid institutionId, Guid professionalId, Guid jobTitleId) 
+        { 
+            return Task.FromResult(_employments.Any(employment => employment.Institution == institutionId && employment.ProfessionalProfile == professionalId && employment.JobTitle == jobTitleId));
+        }
 
         public Task<bool> RemoveAsync(Guid id)
         {

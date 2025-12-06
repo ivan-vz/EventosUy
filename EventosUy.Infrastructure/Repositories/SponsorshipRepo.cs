@@ -17,9 +17,9 @@ namespace EventosUy.Infrastructure.Repositories
 
         public Task<bool> ExistsAsync(Guid editionId, Guid institutionId) { return Task.FromResult(_sponsorships.Any(sponsor => sponsor.Edition == editionId && sponsor.Institution == institutionId)); }
 
-        public Task<List<Guid>> GetAllByEdition(Guid editionId) { return Task.FromResult(_sponsorships.Where(sponsor => sponsor.Edition == editionId).Select(sponsor => sponsor.Id).ToList()); }
+        public Task<List<Sponsorship>> GetAllByEditionAsync(Guid editionId) { return Task.FromResult(_sponsorships.Where(sponsor => sponsor.Edition == editionId).ToList()); }
 
-        public Task<List<Guid>> GetAllByInstitution(Guid institutionId) { return Task.FromResult(_sponsorships.Where(sponsor => sponsor.Institution == institutionId).Select(sponsor => sponsor.Id).ToList()); }
+        public Task<List<Sponsorship>> GetAllByInstitutionAsync(Guid institutionId) { return Task.FromResult(_sponsorships.Where(sponsor => sponsor.Institution == institutionId).ToList()); }
 
         public Task<Sponsorship?> GetByIdAsync(Guid id) { return Task.FromResult(_sponsorships.SingleOrDefault(sponsor => sponsor.Id == id)); }
 

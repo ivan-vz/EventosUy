@@ -38,7 +38,8 @@ namespace EventosUy.Application.Services
             Result<RegisterType> registerTypeResult = await _registerTypeService.GetByIdAsync(registerTypeId);
             if (!registerTypeResult.IsSuccess) { return Result<Guid>.Failure(registerTypeResult.Error!); }
 
-            if (await _sponsorshipService.ValidateCode(registerTypeId, sponsorCode)) { return Result<Guid>.Failure("Invalid code."); }
+            Result codeResult = await _sponsorshipService.ValidateCodeAsync(registerTypeId, sponsorCode);
+            if (!codeResult.IsSuccess) { return Result<Guid>.Failure(codeResult.Error!); }
 
             if (await _repo.ExistsAsync(personId, editionId)) { return Result<Guid>.Failure("Register already exist."); }
 
