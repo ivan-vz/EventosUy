@@ -8,28 +8,30 @@ namespace EventosUy.Application.Services
 {
     internal class CategoryService : ICategoryService
     {
-        private readonly ICategoryRepo _categoryRepo;
+        private readonly ICategoryRepo _repo;
 
         public CategoryService(ICategoryRepo categoryRepo)
         {
-            _categoryRepo = categoryRepo;
+            _repo = categoryRepo;
         }
 
         public async Task<Result<Guid>> CreateAsync(string name, string description)
         {
-            if (await _categoryRepo.ExistsAsync(name)) { return Result<Guid>.Failure("Category already exist.");  }
+            if (await _repo.ExistsAsync(name)) { return Result<Guid>.Failure("Category already exist.");  }
 
             Result<Category> categoryResult = Category.Create(name, description);
 
             if (!categoryResult.IsSuccess) { return Result<Guid>.Failure(categoryResult.Error!); }
 
             Category categoryInstance = categoryResult.Value!;
+            await _repo.AddAsync(categoryInstance);
+
             return Result<Guid>.Success(categoryInstance.Id);
         }
 
         public async Task<Result<List<CategoryCard>>> GetAllAsync()
         {
-            List<Category> categories = await _categoryRepo.GetAllAsync();
+            List<Category> categories = await _repo.GetAllAsync();
             List<CategoryCard> cards = categories.Select(category => category.GetCard()).ToList();
 
             return Result<List<CategoryCard>>.Success(cards);
@@ -38,7 +40,7 @@ namespace EventosUy.Application.Services
         public async Task<Result<Category>> GetByIdAsync(Guid id)
         {
             if (id == Guid.Empty) { return Result<Category>.Failure("Category can not be empty."); }
-            Category? categoryInstance = await _categoryRepo.GetByIdAsync(id);
+            Category? categoryInstance = await _repo.GetByIdAsync(id);
 
             if (categoryInstance is null) { return Result<Category>.Failure("Category not Found."); }
 

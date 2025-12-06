@@ -17,7 +17,7 @@ namespace EventosUy.Infrastructure.Repositories
 
         public Task<bool> ExistsAsync(string name) { return Task.FromResult(_registerTypes.Any(registerType => registerType.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); }
 
-        public Task<List<Guid>> GetAllByEdition(Guid editionId) { return Task.FromResult(_registerTypes.Where(registerType => registerType.Edition == editionId).Select(registerType => registerType.Id).ToList()); }
+        public Task<List<RegisterType>> GetAllByEditionAsync(Guid editionId) { return Task.FromResult(_registerTypes.Where(registerType => registerType.Edition == editionId).ToList()); }
 
         public Task<RegisterType?> GetByIdAsync(Guid id) { return Task.FromResult(_registerTypes.SingleOrDefault(registerType => registerType.Id == id)); }
 

@@ -1,4 +1,5 @@
-﻿using EventosUy.Domain.DTOs.DataTypes;
+﻿using EventosUy.Domain.Common;
+using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 
 namespace EventosUy.Domain.Entities
@@ -14,7 +15,7 @@ namespace EventosUy.Domain.Entities
         public DateTimeOffset Created { get; init; }
         public Guid Edition { get; init; }
 
-        public RegisterType(string name, string description, float price, int quota, Guid editionId) 
+        private RegisterType(string name, string description, float price, int quota, Guid editionId) 
         {
             Id = Guid.NewGuid();
             Name = name;
@@ -24,6 +25,18 @@ namespace EventosUy.Domain.Entities
             Edition = editionId;
             Active = true;
             Created = DateTimeOffset.UtcNow;
+        }
+
+        public static Result<RegisterType> Create(string name, string description, float price, int quota, Guid editionId) 
+        {
+            if (string.IsNullOrWhiteSpace(name)) { return Result<RegisterType>.Failure("Name can not be empty."); }
+            if (string.IsNullOrWhiteSpace(description)) { return Result<RegisterType>.Failure("Description can not be empty."); }
+            if (price < 0) { return Result<RegisterType>.Failure("Price must be greater than or equal to 0."); }
+            if (quota <= 0) { return Result<RegisterType>.Failure("Quota must be greater than 0."); }
+
+            RegisterType registerTypeInstance = new RegisterType(name, description, price, quota, editionId);
+
+            return Result<RegisterType>.Success(registerTypeInstance);
         }
 
         public DTRegisterType GetDT(Edition editionInstance) { return new DTRegisterType(Name, editionInstance.Name, Description, Price, Quota, Created); }

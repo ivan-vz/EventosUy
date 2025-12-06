@@ -8,6 +8,7 @@ namespace EventosUy.Domain.Interfaces
         public Task<List<Guid>> GetAllByEdition(Guid editionId);
         public Task<List<Guid>> GetAllByInstitution(Guid institutionId);
         public Task<bool> ExistsAsync(Guid editionId, Guid institutionId);
+        public Task<bool> ValidateCodeAsync(Guid registerTypeId, string code);
         public Task AddAsync(Sponsorship sponsorship);
         public Task<bool> RemoveAsync(Guid id);
     }

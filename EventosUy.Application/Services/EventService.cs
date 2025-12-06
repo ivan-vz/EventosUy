@@ -9,13 +9,13 @@ namespace EventosUy.Application.Services
 {
     internal class EventService : IEventService
     {
-        private readonly IEventRepo _eventRepo;
+        private readonly IEventRepo _repo;
         private readonly ICategoryService _categoryService;
         private readonly IInstitutionService _institutionService;
 
         public EventService(IEventRepo eventRepo, ICategoryService categoryService, IInstitutionService institutionService) 
         {
-            _eventRepo = eventRepo; 
+            _repo = eventRepo; 
             _categoryService = categoryService;
             _institutionService = institutionService;
         }
@@ -25,14 +25,14 @@ namespace EventosUy.Application.Services
             foreach (var id in categories) 
             {
                 Result<Category> categoryResult = await _categoryService.GetByIdAsync(id);
-                if (!categoryResult.IsSuccess) { return Result<Guid>.Failure("Categoria invalida"); }
+                if (!categoryResult.IsSuccess) { return Result<Guid>.Failure(categoryResult.Error!); }
             }
 
             if (institutionId == Guid.Empty) { return Result<Guid>.Failure("Institution can not be empty."); }
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(institutionId);
-            if (!institutionResult.IsSuccess) { return Result<Guid>.Failure("Institution not Found."); }
+            if (!institutionResult.IsSuccess) { return Result<Guid>.Failure(institutionResult.Error!); }
 
-            if (await _eventRepo.ExistsAsync(name)) { return Result<Guid>.Failure("Event already exist."); }
+            if (await _repo.ExistsAsync(name)) { return Result<Guid>.Failure("Event already exist."); }
 
             Result<Event> eventResult = Event.Create(name, initials, description, institutionId);
 
@@ -40,12 +40,14 @@ namespace EventosUy.Application.Services
             Event eventInstance = eventResult.Value!;
             eventInstance.AddCategories(categories);
 
+            await _repo.AddAsync(eventInstance);
+
             return Result<Guid>.Success(eventInstance.Id);
         }
 
         public async Task<Result<List<ActivityCard>>> GetAllAsync()
         {
-            List<Event> events = await _eventRepo.GetAllAsync();
+            List<Event> events = await _repo.GetAllAsync();
             List<ActivityCard> cards = events.Select(eventInstance => eventInstance.GetCard()).ToList();
 
             return Result<List<ActivityCard>>.Success(cards);
@@ -54,7 +56,7 @@ namespace EventosUy.Application.Services
         public async Task<Result<Event>> GetByIdAsync(Guid id)
         {
             if (id == Guid.Empty) { return Result<Event>.Failure("Event can not be empty."); }
-            Event? eventInstance = await _eventRepo.GetByIdAsync(id);
+            Event? eventInstance = await _repo.GetByIdAsync(id);
 
             if (eventInstance is null) { return Result<Event>.Failure("Event not Found."); }
 
@@ -64,7 +66,7 @@ namespace EventosUy.Application.Services
         public async Task<Result<List<ActivityCard>>> GetByInstitutionAsync(Guid institutionId)
         {
             if (institutionId == Guid.Empty) { return Result<List<ActivityCard>>.Failure("Institution can not be empty."); }
-            List<Event> events = await _eventRepo.GetAllByInstitutionAsync(institutionId);
+            List<Event> events = await _repo.GetAllByInstitutionAsync(institutionId);
             List<ActivityCard> cards = events.Select(eventInstance => eventInstance.GetCard()).ToList();
 
             return Result<List<ActivityCard>>.Success(cards);
@@ -73,12 +75,12 @@ namespace EventosUy.Application.Services
         public async Task<Result<DTEvent>> GetDTAsync(Guid id)
         {
             if (id == Guid.Empty) { return Result<DTEvent>.Failure("Event can not be empty."); }
-            Event? eventInstance = await _eventRepo.GetByIdAsync(id);
+            Event? eventInstance = await _repo.GetByIdAsync(id);
 
             if (eventInstance is null) { return Result<DTEvent>.Failure("Event not Found."); }
 
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(eventInstance.Institution);
-            if (!institutionResult.IsSuccess) { return Result<DTEvent>.Failure("Institution not Found."); }
+            if (!institutionResult.IsSuccess) { return Result<DTEvent>.Failure(institutionResult.Error!); }
 
             return Result<DTEvent>.Success(eventInstance.GetDT(institutionResult.Value!));
         }

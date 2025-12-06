@@ -10,13 +10,13 @@ namespace EventosUy.Application.Services
 {
     internal class EditionService : IEditionService
     {
-        private readonly IEditionRepo _editionRepo;
+        private readonly IEditionRepo _repo;
         private readonly IEventService _eventService;
         private readonly IInstitutionService _institutionService;
 
         public EditionService(IEditionRepo editionRepo, IEventService eventService, IInstitutionService institutionService)
         {
-            _editionRepo = editionRepo;
+            _repo = editionRepo;
             _eventService = eventService;
             _institutionService = institutionService;
         }
@@ -29,21 +29,21 @@ namespace EventosUy.Application.Services
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(institutionId);
             if (!institutionResult.IsSuccess) { return Result<Guid>.Failure(institutionResult.Error!); }
 
-            if (await _editionRepo.ExistsAsync(name)) { return Result<Guid>.Failure("Edition already exists."); }
+            if (await _repo.ExistsAsync(name)) { return Result<Guid>.Failure("Edition already exists."); }
 
             Result<Edition> editionResult = Edition.Create(name, initials, from, to, address, eventId, institutionId);
 
             if (!editionResult.IsSuccess) { return Result<Guid>.Failure(editionResult.Error!); }
 
             Edition editionInstance = editionResult.Value!;
-            await _editionRepo.AddAsync(editionInstance!);
+            await _repo.AddAsync(editionInstance);
 
-            return Result<Guid>.Success(editionInstance!.Id);
+            return Result<Guid>.Success(editionInstance.Id);
         }
 
         public async Task<Result<List<ActivityCard>>> GetAllAsync()
         {
-            List<Edition> editions = await _editionRepo.GetAllAsync();
+            List<Edition> editions = await _repo.GetAllAsync();
             List<ActivityCard> cards = editions.Select(edition => edition.GetCard()).ToList();
 
             return Result<List<ActivityCard>>.Success(cards);
@@ -52,7 +52,7 @@ namespace EventosUy.Application.Services
         public async Task<Result<List<ActivityCard>>> GetAllByEventAsync(Guid eventId)
         {
             if (eventId == Guid.Empty) { return Result<List<ActivityCard>>.Failure("Event can not be empty."); }
-            List<Edition> editions = await _editionRepo.GetAllByEventAsync(eventId);
+            List<Edition> editions = await _repo.GetAllByEventAsync(eventId);
             List<ActivityCard> cards = editions.Select(edition => edition.GetCard()).ToList();
 
             return Result<List<ActivityCard>>.Success(cards);
@@ -61,7 +61,7 @@ namespace EventosUy.Application.Services
         public async Task<Result<List<ActivityCard>>> GetAllByInstitutionAsync(Guid institutionId)
         {
             if (institutionId == Guid.Empty) { return Result<List<ActivityCard>>.Failure("Institution can not be empty."); }
-            List<Edition> editions = await _editionRepo.GetAllByInstitutionAsync(institutionId);
+            List<Edition> editions = await _repo.GetAllByInstitutionAsync(institutionId);
             List<ActivityCard> cards = editions.Select(edition => edition.GetCard()).ToList();
 
             return Result<List<ActivityCard>>.Success(cards);
@@ -70,7 +70,7 @@ namespace EventosUy.Application.Services
         public async Task<Result<List<ActivityCard>>> GetAllPendingByEventAsync(Guid eventId)
         {
             if (eventId == Guid.Empty) { return Result<List<ActivityCard>>.Failure("Event can not be empty."); }
-            List<Edition> editions = await _editionRepo.GetAllPendingByEventAsync(eventId);
+            List<Edition> editions = await _repo.GetAllPendingByEventAsync(eventId);
             List<ActivityCard> cards = editions.Select(edition => edition.GetCard()).ToList();
 
             return Result<List<ActivityCard>>.Success(cards);
@@ -79,7 +79,7 @@ namespace EventosUy.Application.Services
         public async Task<Result<Edition>> GetByIdAsync(Guid id)
         {
             if (id == Guid.Empty) { return Result<Edition>.Failure("Edition can not be empty."); }
-            Edition? editionInstance = await _editionRepo.GetByIdAsync(id);
+            Edition? editionInstance = await _repo.GetByIdAsync(id);
             if (editionInstance is null) { return Result<Edition>.Failure("Edition not Found."); }
 
             return Result<Edition>.Success(editionInstance);
@@ -88,7 +88,7 @@ namespace EventosUy.Application.Services
         public async Task<Result<DTEdition>> GetDTAsync(Guid id)
         {
             if (id == Guid.Empty) { return Result<DTEdition>.Failure("Edition can not be empty."); }
-            Edition? editionInstance = await _editionRepo.GetByIdAsync(id);
+            Edition? editionInstance = await _repo.GetByIdAsync(id);
             if (editionInstance is null) { return Result<DTEdition>.Failure("Edition not Found."); }
 
             Result<Event> eventResult = await _eventService.GetByIdAsync(editionInstance.Event);
@@ -103,7 +103,7 @@ namespace EventosUy.Application.Services
         public async Task<Result> ApproveAsync(Guid id)
         {
             if (id == Guid.Empty) { return Result.Failure("Edition can not be empty."); }
-            Edition? editionInstance = await _editionRepo.GetByIdAsync(id);
+            Edition? editionInstance = await _repo.GetByIdAsync(id);
             if (editionInstance is null) { return Result.Failure("Edition not Found."); }
 
             editionInstance.Approve();
@@ -114,7 +114,7 @@ namespace EventosUy.Application.Services
         public async Task<Result> RejectAsync(Guid id)
         {
             if (id == Guid.Empty) { return Result.Failure("Edition can not be empty."); }
-            Edition? editionInstance = await _editionRepo.GetByIdAsync(id);
+            Edition? editionInstance = await _repo.GetByIdAsync(id);
             if (editionInstance is null) { return Result.Failure("Edition not Found."); }
 
             editionInstance.Reject();

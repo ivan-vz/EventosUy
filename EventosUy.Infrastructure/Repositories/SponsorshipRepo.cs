@@ -28,5 +28,10 @@ namespace EventosUy.Infrastructure.Repositories
             int result = _sponsorships.RemoveWhere(sponsor => sponsor.Id == id);
             return Task.FromResult(result > 0);
         }
+
+        public Task<bool> ValidateCodeAsync(Guid registerTypeId, string code)
+        {
+            return Task<bool>.FromResult(_sponsorships.Any(sponsor => sponsor.RegisterType == registerTypeId && sponsor.Code.Equals(code, StringComparison.OrdinalIgnoreCase)));
+        }
     }
 }
