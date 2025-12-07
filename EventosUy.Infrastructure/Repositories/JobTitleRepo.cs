@@ -17,7 +17,7 @@ namespace EventosUy.Infrastructure.Repositories
 
         public Task<bool> ExistsAsync(string name, Guid institutionId) { return Task.FromResult(_jobs.Any(job => job.Institution == institutionId && job.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); }
 
-        public Task<List<Guid>> GetAllByInstitutionAsync(Guid institutionId) { return Task.FromResult(_jobs.Where(job => job.Institution == institutionId).Select(job => job.Id).ToList()); }
+        public Task<List<JobTitle>> GetAllByInstitutionAsync(Guid institutionId) { return Task.FromResult(_jobs.Where(job => job.Institution == institutionId).ToList()); }
 
         public Task<JobTitle?> GetByIdAsync(Guid id) { return Task.FromResult(_jobs.SingleOrDefault(job => job.Id == id)); }
 

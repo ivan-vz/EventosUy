@@ -1,4 +1,5 @@
-﻿using EventosUy.Domain.DTOs.DataTypes;
+﻿using EventosUy.Domain.Common;
+using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.ValueObjects;
@@ -14,7 +15,7 @@ namespace EventosUy.Domain.Entities
         public DateTimeOffset Response { get; private set; }
         public RequestState State { get; private set; }
 
-        public ProfessionalProfile(Guid personId, Url linkTree, HashSet<string> specialities) 
+        private ProfessionalProfile(Guid personId, Url linkTree, HashSet<string> specialities) 
         {
             Id = personId;
             LinkTree = linkTree;
@@ -22,6 +23,15 @@ namespace EventosUy.Domain.Entities
             Request = DateTimeOffset.Now;
             Response = DateTimeOffset.MinValue;
             State = RequestState.PENDING;
+        }
+
+        public static Result<ProfessionalProfile> Create(Guid personId, Url linkTree, IEnumerable<string> specialities) 
+        {
+            if (personId == Guid.Empty) { return Result<ProfessionalProfile>.Failure("Person can not be empty."); }
+
+            ProfessionalProfile professionalInstance = new ProfessionalProfile(personId, linkTree, specialities.ToHashSet());
+
+            return Result<ProfessionalProfile>.Success(professionalInstance);
         }
 
         public void ResendRequest()

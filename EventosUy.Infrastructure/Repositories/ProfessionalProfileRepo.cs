@@ -1,5 +1,6 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
+using EventosUy.Domain.Enumerates;
 
 namespace EventosUy.Infrastructure.Repositories
 {
@@ -14,6 +15,10 @@ namespace EventosUy.Infrastructure.Repositories
             _professionals.Add(profile);
             return Task.CompletedTask;
         }
+
+        public Task<List<ProfessionalProfile>> GetAllAsync() { return Task.FromResult(_professionals.Where(profile => profile.State == RequestState.APPROVED).ToList()); }
+
+        public Task<List<ProfessionalProfile>> GetAllPendingAsync() { return Task.FromResult(_professionals.Where(profile => profile.State == RequestState.PENDING).ToList()); }
 
         public Task<ProfessionalProfile?> GetByPersonAsync(Guid personId) { return Task.FromResult(_professionals.SingleOrDefault(professional => professional.Id == personId)); }
 
