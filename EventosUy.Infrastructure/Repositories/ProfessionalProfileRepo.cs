@@ -16,7 +16,7 @@ namespace EventosUy.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
-        public Task<List<ProfessionalProfile>> GetAllAsync() { return Task.FromResult(_professionals.Where(profile => profile.State == RequestState.APPROVED).ToList()); }
+        public Task<List<ProfessionalProfile>> GetAllVerifiedAsync() { return Task.FromResult(_professionals.Where(profile => profile.State == RequestState.APPROVED).ToList()); }
 
         public Task<List<ProfessionalProfile>> GetAllPendingAsync() { return Task.FromResult(_professionals.Where(profile => profile.State == RequestState.PENDING).ToList()); }
 

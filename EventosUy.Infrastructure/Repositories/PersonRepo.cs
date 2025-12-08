@@ -20,7 +20,9 @@ namespace EventosUy.Infrastructure.Repositories
 
         public Task<bool> ExistsByNicknameAsync(string nickname) { return Task.FromResult(_persons.Any(person => person.Nickname.Equals(nickname, StringComparison.OrdinalIgnoreCase))); }
 
-        public Task<List<Guid>> GetAllAsync() { return Task.FromResult(_persons.Select(person => person.Id).ToList()); }
+        public Task<List<Person>> GetAllAsync() { return Task.FromResult(_persons.ToList()); }
+
+        public Task<List<Person>> GetAllExceptAsync(List<Guid> ids) { return Task.FromResult(_persons.ExceptBy(ids, person => person.Id).ToList()); }
 
         public Task<Person?> GetByIdAsync(Guid id) { return Task.FromResult(_persons.SingleOrDefault(person => person.Id == id)); }
 

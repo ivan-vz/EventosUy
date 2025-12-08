@@ -4,17 +4,15 @@
     {
         public string Nickname { get; init; }
         public string Email { get; init; }
-        public string Name { get; init; }
-        public string Surname { get; init; }
+        public string FullName { get; init; }
         public DateOnly Birthday { get; init; }
         public DateTimeOffset Created { get; init; }
 
-        public DTPerson(string nickname, string email, string name, string surname, DateOnly birthday, DateTimeOffset created) 
+        public DTPerson(string nickname, string email, string fullName, DateOnly birthday, DateTimeOffset created) 
         {
             Nickname = nickname;
             Email = email;
-            Name = name;
-            Surname = surname;
+            FullName = fullName;
             Birthday = birthday;
             Created = created;
         }

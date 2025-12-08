@@ -6,7 +6,7 @@ namespace EventosUy.Domain.Interfaces
     public interface IInstitutionRepo
     {
         public Task<Institution?> GetByIdAsync(Guid id);
-        public Task<List<Guid>> GetAllAsync();
+        public Task<List<Institution>> GetAllAsync();
         public Task<bool> ExistsByNicknameAsync(string nickname);
         public Task<bool> ExistsByEmailAsync(Email email);
         public Task<bool> ExistsByUrlAsync(Url url);

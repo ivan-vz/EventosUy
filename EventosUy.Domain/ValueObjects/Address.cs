@@ -1,4 +1,6 @@
-﻿namespace EventosUy.Domain.ValueObjects
+﻿using EventosUy.Domain.Common;
+
+namespace EventosUy.Domain.ValueObjects
 {
     public record Address
     {
@@ -7,17 +9,27 @@
         public string Street { get; init; }
         public string Number { get; init; }
 
-        public Address(string country, string city, string street, string number) 
+        private Address(string country, string city, string street, string number) 
         {
-            if (string.IsNullOrWhiteSpace(country)) { throw new ArgumentException("Address Country can not be empty."); }
-            if (string.IsNullOrWhiteSpace(city)) { throw new ArgumentException("Address City can not be empty."); }
-            if (string.IsNullOrWhiteSpace(street)) { throw new ArgumentException("Address Street can not be empty."); }
-            if (string.IsNullOrWhiteSpace(number) && number.Length != 4) { throw new ArgumentException("Address Number can not be empty."); }
-
             Country = country;
             City = city;
             Street = street;
             Number = number;
+        }
+
+        public static Result<Address> Create(string country, string city, string street, string number) 
+        {
+            List<string> errors = [];
+            if (string.IsNullOrWhiteSpace(country)) { errors.Add("Address Country can not be empty."); }
+            if (string.IsNullOrWhiteSpace(city)) { errors.Add("Address City can not be empty."); }
+            if (string.IsNullOrWhiteSpace(street)) { errors.Add("Address Street can not be empty."); }
+            if (string.IsNullOrWhiteSpace(number) && number.Length != 4) { errors.Add("Address Number can not be empty."); }
+
+            if (errors.Any()) { return Result<Address>.Failure(errors); }
+
+            Address address = new Address(country, city, street, number);
+
+            return Result<Address>.Success(address);
         }
     }
 }

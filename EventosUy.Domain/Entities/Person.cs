@@ -1,4 +1,5 @@
-﻿using EventosUy.Domain.DTOs.DataTypes;
+﻿using EventosUy.Domain.Common;
+using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.ValueObjects;
 
@@ -6,17 +7,27 @@ namespace EventosUy.Domain.Entities
 {
     public class Person : User
     {
-        public string Surname { get; init; }
+        public Name Name { get; init; }
         public DateOnly Birthday { get; init; }
 
-        public Person(string surname, DateOnly birthday, string nickname, string password, string name, Email email) 
-            : base(nickname, password, name, email)
+        private Person(string nickname, Password password, Email email, Name name, DateOnly birthday) 
+            : base(nickname, password, email)
         {
-            Surname = surname;
+            Name = name;
             Birthday = birthday;
         }
 
-        public DTPerson GetDT() { return new DTPerson(Nickname, Email.Value, Name, Surname, Birthday, Created); }
+        public static Result<Person> Create(string nickname, Password password, Email email, Name name, DateOnly birthday) 
+        {
+            if (string.IsNullOrWhiteSpace(nickname)) { return Result<Person>.Failure("Nickname can not be empty."); }
+            if (birthday >= DateOnly.FromDateTime(DateTime.UtcNow)) { return Result<Person>.Failure("Invalid Birthday's date."); }
+
+            Person personInstance = new Person(nickname, password, email, name, birthday);
+
+            return Result<Person>.Success(personInstance);
+        }
+
+        public DTPerson GetDT() { return new DTPerson(Nickname, Email.Value, Name.FullName, Birthday, Created); }
 
         public ProfileCard GetCard() { return new ProfileCard(Id, Nickname, Email.Value); }
     }

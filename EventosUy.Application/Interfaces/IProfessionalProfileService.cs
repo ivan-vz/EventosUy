@@ -13,6 +13,7 @@ namespace EventosUy.Application.Interfaces
         public Task<Result<DTProfessionalProfile>> GetDTAsync(Guid personId);
         public Task<Result<List<ProfileCard>>> GetAllAsync();
         public Task<Result<List<ProfileCard>>> GetAllPendingAsync();
+        public Task<Result<List<ProfileCard>>> GetAllUnverifiedAsync();
         public Task<Result> ApproveAsync(Guid personId);
         public Task<Result> RejectAsync(Guid personId);
     }

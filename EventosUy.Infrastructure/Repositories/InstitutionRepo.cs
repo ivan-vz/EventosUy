@@ -25,7 +25,7 @@ namespace EventosUy.Infrastructure.Repositories
 
         public Task<bool> ExistsByUrlAsync(Url url) { return Task.FromResult(_institutions.Any(institution => institution.Url.Equals(url))); }
 
-        public Task<List<Guid>> GetAllAsync() { return Task.FromResult(_institutions.Select(institution => institution.Id).ToList()); }
+        public Task<List<Institution>> GetAllAsync() { return Task.FromResult(_institutions.ToList()); }
 
         public Task<Institution?> GetByIdAsync(Guid id) { return Task.FromResult(_institutions.SingleOrDefault(institution => institution.Id == id)); }
 
