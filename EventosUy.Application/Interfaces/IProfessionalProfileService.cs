@@ -8,7 +8,7 @@ namespace EventosUy.Application.Interfaces
 {
     public interface IProfessionalProfileService
     {
-        public Task<Result<Guid>> RequestVerificationAsync(Url linkTree, List<String> specialities, Guid personId);
+        public Task<Result<Guid>> RequestVerificationAsync(string linkTree, List<String> specialities, Guid personId);
         public Task<Result<ProfessionalProfile>> GetByIdAsync(Guid professionalId);
         public Task<Result<DTProfessionalProfile>> GetDTAsync(Guid personId);
         public Task<Result<List<ProfileCard>>> GetAllAsync();

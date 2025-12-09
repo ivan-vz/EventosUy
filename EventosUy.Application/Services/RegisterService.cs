@@ -6,7 +6,6 @@ using EventosUy.Domain.Entidades;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;
-using Microsoft.Win32;
 
 namespace EventosUy.Application.Services
 {
@@ -29,22 +28,25 @@ namespace EventosUy.Application.Services
 
         public async Task<Result<Guid>> CreateAsync(Guid personId, Guid editionId, Guid registerTypeId, string sponsorCode, float total, Participation participation)
         {
+            List<string> errors = [];
             Result<Person> personResult = await _personService.GetByIdAsync(personId);
-            if (!personResult.IsSuccess) { return Result<Guid>.Failure(personResult.Error!); }
+            if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
             Result<Edition> editionResult = await _editionService.GetByIdAsync(editionId);
-            if (!editionResult.IsSuccess) { return Result<Guid>.Failure(editionResult.Error!); }
+            if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
 
             Result<RegisterType> registerTypeResult = await _registerTypeService.GetByIdAsync(registerTypeId);
-            if (!registerTypeResult.IsSuccess) { return Result<Guid>.Failure(registerTypeResult.Error!); }
+            if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
 
             Result codeResult = await _sponsorshipService.ValidateCodeAsync(registerTypeId, sponsorCode);
-            if (!codeResult.IsSuccess) { return Result<Guid>.Failure(codeResult.Error!); }
+            if (!codeResult.IsSuccess) { errors.AddRange(codeResult.Errors); }
 
+            if (errors.Any()) { return Result<Guid>.Failure(errors); }
+            
             if (await _repo.ExistsAsync(personId, editionId)) { return Result<Guid>.Failure("Register already exist."); }
 
             Result<Register> registerResult = Register.Create(total, sponsorCode, personId, editionId, registerTypeId, participation);
-            if (!registerResult.IsSuccess) { return Result<Guid>.Failure(registerResult.Error!); }
+            if (!registerResult.IsSuccess) { return Result<Guid>.Failure(registerResult.Errors); }
 
             Register registerInstance = registerResult.Value!;
             await _repo.AddAsync(registerInstance);
@@ -57,14 +59,17 @@ namespace EventosUy.Application.Services
             if (editionId == Guid.Empty) { return Result<List<RegisterCardByEdition>>.Failure("Edition can not be empty."); }
             List<Register> registers = await _repo.GetAllByEditionAsync(editionId);
 
+            List<string> errors = [];
             List<RegisterCardByEdition> cards = [];
             foreach (Register register in registers) 
             {
                 Result<Person> personResult = await _personService.GetByIdAsync(register.Person);
-                if (!personResult.IsSuccess) { return Result<List<RegisterCardByEdition>>.Failure(personResult.Error!); }
+                if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
                 cards.Add(register.GetCardByEdition(personResult.Value!));
             }
+
+            if (errors.Any()) { return Result<List<RegisterCardByEdition>>.Failure(errors); }
 
             return Result<List<RegisterCardByEdition>>.Success(cards);
         }
@@ -74,14 +79,17 @@ namespace EventosUy.Application.Services
             if (personId == Guid.Empty) { return Result<List<RegisterCardByPerson>>.Failure("Person can not be empty."); }
             List<Register> registers = await _repo.GetAllByPersonAsync(personId);
 
+            List<string> errors = [];
             List<RegisterCardByPerson> cards = [];
             foreach (Register register in registers)
             {
                 Result<Edition> editionResult = await _editionService.GetByIdAsync(register.Edition);
-                if (!editionResult.IsSuccess) { return Result<List<RegisterCardByPerson>>.Failure(editionResult.Error!); }
+                if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
 
                 cards.Add(register.GetCardByPerson(editionResult.Value!));
             }
+
+            if (errors.Any()) { return Result<List<RegisterCardByPerson>>.Failure(errors); }
 
             return Result<List<RegisterCardByPerson>>.Success(cards);
         }
@@ -93,11 +101,14 @@ namespace EventosUy.Application.Services
 
             if (registerInstance is null) { return Result<DTRegister>.Failure("Register not Found."); }
 
+            List<string> errors = [];
             Result<Edition> editionResult = await _editionService.GetByIdAsync(registerInstance.Edition);
-            if (!editionResult.IsSuccess) { return Result<DTRegister>.Failure(editionResult.Error!); }
+            if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
 
             Result<RegisterType> registerTypeResult = await _registerTypeService.GetByIdAsync(registerInstance.RegisterType);
-            if (!registerTypeResult.IsSuccess) { return Result<DTRegister>.Failure(registerTypeResult.Error!); }
+            if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
+
+            if (errors.Any()) { return Result<DTRegister>.Failure(errors); }
 
             return Result<DTRegister>.Success(registerInstance.GetDT(editionResult.Value!, registerTypeResult.Value!));
         }

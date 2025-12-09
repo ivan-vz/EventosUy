@@ -20,11 +20,14 @@ namespace EventosUy.Application.Services
 
         public async Task<Result<Guid>> CreateAsync(string name, string descripcion, Guid institutionId)
         {
+            List<string> errors = [];
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(institutionId);
-            if (!institutionResult.IsSuccess) { return Result<Guid>.Failure(institutionResult.Error!); }
+            if (!institutionResult.IsSuccess) { errors.AddRange(institutionResult.Errors); }
 
             Result<JobTitle> jobTitleResult = JobTitle.Create(name, descripcion, institutionId);
-            if (!jobTitleResult.IsSuccess) { return Result<Guid>.Failure(jobTitleResult.Error!); }
+            if (!jobTitleResult.IsSuccess) { errors.AddRange(jobTitleResult.Errors); }
+
+            if (errors.Any()) { return Result<Guid>.Failure(errors); }
 
             JobTitle jobTitleInstance = jobTitleResult.Value!;
             await _repo.AddAsync(jobTitleInstance);
@@ -53,11 +56,11 @@ namespace EventosUy.Application.Services
         public async Task<Result<DTJobTitle>> GetDTAsync(Guid id)
         {
             Result<JobTitle> jobTitleResult = await GetByIdAsync(id);
-            if (!jobTitleResult.IsSuccess) { return Result<DTJobTitle>.Failure(jobTitleResult.Error!); }
+            if (!jobTitleResult.IsSuccess) { return Result<DTJobTitle>.Failure(jobTitleResult.Errors); }
 
             JobTitle jobTitleInstance = jobTitleResult.Value!;
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(jobTitleInstance.Institution);
-            if (!institutionResult.IsSuccess) { return Result<DTJobTitle>.Failure(institutionResult.Error!); }
+            if (!institutionResult.IsSuccess) { return Result<DTJobTitle>.Failure(institutionResult.Errors); }
 
             return Result<DTJobTitle>.Success(jobTitleInstance.GetDT(institutionResult.Value!));
         }

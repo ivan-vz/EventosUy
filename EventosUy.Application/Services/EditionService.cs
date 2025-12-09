@@ -21,19 +21,26 @@ namespace EventosUy.Application.Services
             _institutionService = institutionService;
         }
 
-        public async Task<Result<Guid>> CreateAsync(string name, string initials, Address address, DateOnly from, DateOnly to, Guid eventId, Guid institutionId)
+        public async Task<Result<Guid>> CreateAsync(string name, string initials, string country, string city, string street, string number, DateOnly from, DateOnly to, Guid eventId, Guid institutionId)
         {
+            List<string> errors = [];
+
             Result<Event> eventResult = await _eventService.GetByIdAsync(eventId);
-            if (!eventResult.IsSuccess) { return Result<Guid>.Failure(eventResult.Error!); }
+            if (!eventResult.IsSuccess) { errors.AddRange(eventResult.Errors); }
 
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(institutionId);
-            if (!institutionResult.IsSuccess) { return Result<Guid>.Failure(institutionResult.Error!); }
+            if (!institutionResult.IsSuccess) { errors.AddRange(institutionResult.Errors); }
 
-            if (await _repo.ExistsAsync(name)) { return Result<Guid>.Failure("Edition already exists."); }
+            if (await _repo.ExistsAsync(name)) { errors.Add("Edition already exists."); }
 
-            Result<Edition> editionResult = Edition.Create(name, initials, from, to, address, eventId, institutionId);
+            Result<Address> addressResult = Address.Create(country, city, street, number);
+            if (addressResult.IsFailure) { errors.AddRange(addressResult.Errors); }
 
-            if (!editionResult.IsSuccess) { return Result<Guid>.Failure(editionResult.Error!); }
+            if (errors.Any()) { return Result<Guid>.Failure(errors); } 
+
+            Result<Edition> editionResult = Edition.Create(name, initials, from, to, addressResult.Value!, eventId, institutionId);
+
+            if (!editionResult.IsSuccess) { return Result<Guid>.Failure(editionResult.Errors); }
 
             Edition editionInstance = editionResult.Value!;
             await _repo.AddAsync(editionInstance);
@@ -92,10 +99,10 @@ namespace EventosUy.Application.Services
             if (editionInstance is null) { return Result<DTEdition>.Failure("Edition not Found."); }
 
             Result<Event> eventResult = await _eventService.GetByIdAsync(editionInstance.Event);
-            if (!eventResult.IsSuccess) { return Result<DTEdition>.Failure(eventResult.Error!); }
+            if (!eventResult.IsSuccess) { return Result<DTEdition>.Failure(eventResult.Errors); }
 
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(editionInstance.Institution);
-            if (!institutionResult.IsSuccess) { return Result<DTEdition>.Failure(institutionResult.Error!); }
+            if (!institutionResult.IsSuccess) { return Result<DTEdition>.Failure(institutionResult.Errors); }
 
             return Result<DTEdition>.Success(editionInstance.GetDT(eventResult.Value!, institutionResult.Value!));
         }

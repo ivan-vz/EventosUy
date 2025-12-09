@@ -22,21 +22,25 @@ namespace EventosUy.Application.Services
 
         public async Task<Result<Guid>> CreateAsync(string name, string initials, string description, List<Guid> categories, Guid institutionId)
         {
+            List<string> errors = [];
             foreach (var id in categories) 
             {
                 Result<Category> categoryResult = await _categoryService.GetByIdAsync(id);
-                if (!categoryResult.IsSuccess) { return Result<Guid>.Failure(categoryResult.Error!); }
+                if (!categoryResult.IsSuccess) { errors.AddRange(categoryResult.Errors); }
             }
 
-            if (institutionId == Guid.Empty) { return Result<Guid>.Failure("Institution can not be empty."); }
+            if (institutionId == Guid.Empty) {errors.Add("Institution can not be empty."); }
+
+            if (errors.Any()) { return Result<Guid>.Failure(errors); }
+
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(institutionId);
-            if (!institutionResult.IsSuccess) { return Result<Guid>.Failure(institutionResult.Error!); }
+            if (!institutionResult.IsSuccess) { return Result<Guid>.Failure(institutionResult.Errors); }
 
             if (await _repo.ExistsAsync(name)) { return Result<Guid>.Failure("Event already exist."); }
 
             Result<Event> eventResult = Event.Create(name, initials, description, institutionId);
 
-            if (!eventResult.IsSuccess) { return Result<Guid>.Failure(eventResult.Error!); }
+            if (!eventResult.IsSuccess) { return Result<Guid>.Failure(eventResult.Errors); }
             Event eventInstance = eventResult.Value!;
             eventInstance.AddCategories(categories);
 
@@ -80,7 +84,7 @@ namespace EventosUy.Application.Services
             if (eventInstance is null) { return Result<DTEvent>.Failure("Event not Found."); }
 
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(eventInstance.Institution);
-            if (!institutionResult.IsSuccess) { return Result<DTEvent>.Failure(institutionResult.Error!); }
+            if (!institutionResult.IsSuccess) { return Result<DTEvent>.Failure(institutionResult.Errors); }
 
             return Result<DTEvent>.Success(eventInstance.GetDT(institutionResult.Value!));
         }

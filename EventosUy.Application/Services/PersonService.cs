@@ -19,17 +19,22 @@ namespace EventosUy.Application.Services
 
         public async Task<Result<Guid>> CreateAsync(string nickname, string password, string email, string firstName, string? lastName, string firstSurname, string lastSurname, DateOnly birthday)
         {
+            List<string> errors = [];
             Result<Password> passwordResult = Password.Create(password);
-            if (passwordResult.IsFailure) { return Result<Guid>.Failure(passwordResult.Errors); }
+            if (passwordResult.IsFailure) { errors.AddRange(passwordResult.Errors); }
             
             Result<Email> emailResult = Email.Create(email);
-            if (emailResult.IsFailure) { return Result<Guid>.Failure(emailResult.Errors); }
+            if (emailResult.IsFailure) { errors.AddRange(emailResult.Errors); }
 
             Result<Name> nameResult = Name.Create(firstSurname, lastSurname, firstName, lastName);
-            if (nameResult.IsFailure) { return Result<Guid>.Failure(nameResult.Errors); }
+            if (nameResult.IsFailure) { errors.AddRange(nameResult.Errors); }
 
-            if (await _repo.ExistsByEmailAsync(emailResult.Value!)) { return Result<Guid>.Failure("Email already in use.");  }
-            if (await _repo.ExistsByNicknameAsync(nickname)) { return Result<Guid>.Failure("Nickname already in use."); }
+            if (errors.Any()) { return Result<Guid>.Failure(errors); }
+
+            if (await _repo.ExistsByEmailAsync(emailResult.Value!)) { errors.Add("Email already in use.");  }
+            if (await _repo.ExistsByNicknameAsync(nickname)) { errors.Add("Nickname already in use."); }
+            
+            if (errors.Any()) { return Result<Guid>.Failure(errors); }
 
             Result<Person> personResult = Person.Create(nickname, passwordResult.Value!, emailResult.Value!, nameResult.Value!, birthday);
             if (personResult.IsFailure) { return Result<Guid>.Failure(personResult.Errors); }

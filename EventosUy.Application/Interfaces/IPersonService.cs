@@ -2,7 +2,6 @@
 using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
-using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Application.Interfaces
 {

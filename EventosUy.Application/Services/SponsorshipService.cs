@@ -5,7 +5,6 @@ using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;
-using System.Xml.Linq;
 
 namespace EventosUy.Application.Services
 {
@@ -26,19 +25,22 @@ namespace EventosUy.Application.Services
 
         public async Task<Result<Guid>> CreateAsync(string name, SponsorshipTier tier, float amount, int free, string code, DateOnly expiration, Guid editionId, Guid institutionId, Guid registerTypeId)
         {
+            List<string> errors = [];
             Result<Edition> editionResult = await _editionService.GetByIdAsync(editionId);
-            if (!editionResult.IsSuccess) { return Result<Guid>.Failure(editionResult.Error!); }
+            if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
 
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(institutionId);
-            if (!institutionResult.IsSuccess) { return Result<Guid>.Failure(institutionResult.Error!); }
+            if (!institutionResult.IsSuccess) { errors.AddRange(institutionResult.Errors); }
 
             Result<RegisterType> registerTypeResult = await _registerTypeService.GetByIdAsync(registerTypeId);
-            if (!registerTypeResult.IsSuccess) { return Result<Guid>.Failure(registerTypeResult.Error!); }
+            if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
+
+            if (errors.Any()) { return Result<Guid>.Failure(errors); }
 
             if (await _repo.ExistsAsync(editionId, institutionId)) { return Result<Guid>.Failure("Sponsorship already exist."); }
 
             Result<Sponsorship> sponsorResult = Sponsorship.Create(name, amount, free, code, tier, institutionResult.Value!, editionResult.Value!, registerTypeResult.Value!, expiration);
-            if (!sponsorResult.IsSuccess) { return Result<Guid>.Failure(sponsorResult.Error!); }
+            if (!sponsorResult.IsSuccess) { return Result<Guid>.Failure(sponsorResult.Errors); }
 
             Sponsorship sponsorInstance = sponsorResult.Value!;
             await _repo.AddAsync(sponsorInstance);
@@ -70,11 +72,14 @@ namespace EventosUy.Application.Services
             Sponsorship? sponsorInstance = await _repo.GetByIdAsync(id);
             if (sponsorInstance is null) { return Result<DTSponsorship>.Failure("Sponsorship not Found."); }
 
+            List<string> errors = [];
             Result<Edition> editionResult = await _editionService.GetByIdAsync(sponsorInstance.Edition);
-            if (!editionResult.IsSuccess) { return Result<DTSponsorship>.Failure(editionResult.Error!); }
+            if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
 
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(sponsorInstance.Institution);
-            if (!institutionResult.IsSuccess) { return Result<DTSponsorship>.Failure(institutionResult.Error!); }
+            if (!institutionResult.IsSuccess) { errors.AddRange(institutionResult.Errors); }
+
+            if (errors.Any()) { return Result<DTSponsorship>.Failure(errors); }
 
             return Result<DTSponsorship>.Success(sponsorInstance.GetDT(editionResult.Value!, institutionResult.Value!));
         }

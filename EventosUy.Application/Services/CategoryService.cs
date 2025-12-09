@@ -21,7 +21,7 @@ namespace EventosUy.Application.Services
 
             Result<Category> categoryResult = Category.Create(name, description);
 
-            if (!categoryResult.IsSuccess) { return Result<Guid>.Failure(categoryResult.Error!); }
+            if (!categoryResult.IsSuccess) { return Result<Guid>.Failure(categoryResult.Errors); }
 
             Category categoryInstance = categoryResult.Value!;
             await _repo.AddAsync(categoryInstance);

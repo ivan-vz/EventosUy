@@ -22,13 +22,16 @@ namespace EventosUy.Application.Services
 
         public async Task<Result<Guid>> CreateAsync(string name, string description, float price, int quota, Guid eventiId)
         {
+            List<string> errors = [];
             Result<Event> eventResult = await _eventService.GetByIdAsync(eventiId);
-            if (!eventResult.IsSuccess) { return Result<Guid>.Failure(eventResult.Error!); }
+            if (!eventResult.IsSuccess) { errors.AddRange(eventResult.Errors); }
 
-            if (await _repo.ExistsAsync(name)) { return Result<Guid>.Failure("Register Type already exist."); }
+            if (await _repo.ExistsAsync(name)) { errors.Add("Register Type already exist."); }
+
+            if (errors.Any()) { return Result<Guid>.Failure(errors); }
 
             Result<RegisterType> registerTypeResult = RegisterType.Create(name, description, price, quota, eventiId);
-            if (!registerTypeResult.IsSuccess) { return Result<Guid>.Failure(registerTypeResult.Error!); }
+            if (!registerTypeResult.IsSuccess) { return Result<Guid>.Failure(registerTypeResult.Errors); }
 
             RegisterType registerTypeInstance = registerTypeResult.Value!;
             await _repo.AddAsync(registerTypeInstance);
@@ -57,12 +60,15 @@ namespace EventosUy.Application.Services
 
         public async Task<Result<DTRegisterType>> GetDTAsync(Guid id)
         {
+            List<string> errors = [];
             Result<RegisterType> registerTypeResult = await GetByIdAsync(id);
-            if (!registerTypeResult.IsSuccess) { return Result<DTRegisterType>.Failure(registerTypeResult.Error!); }
+            if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
             RegisterType registerTypeInstance = registerTypeResult.Value!;
 
             Result<Edition> editionResult = await _editionService.GetByIdAsync(registerTypeInstance.Edition);
-            if (!editionResult.IsSuccess) { return Result<DTRegisterType>.Failure(editionResult.Error!); }
+            if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
+
+            if (errors.Any()) { return Result<DTRegisterType>.Failure(errors); }
 
             return Result<DTRegisterType>.Success(registerTypeInstance.GetDT(editionResult.Value!));
         }

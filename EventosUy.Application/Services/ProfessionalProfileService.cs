@@ -5,7 +5,6 @@ using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 using EventosUy.Domain.ValueObjects;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EventosUy.Application.Services
 {
@@ -21,13 +20,19 @@ namespace EventosUy.Application.Services
             _personService = personService;
         }
 
-        public async Task<Result<Guid>> RequestVerificationAsync(Url linkTree, List<string> specialities, Guid personId)
+        public async Task<Result<Guid>> RequestVerificationAsync(string linkTree, List<string> specialities, Guid personId)
         {
-            Result<Person> personResult = await _personService.GetByIdAsync(personId);
-            if (!personResult.IsSuccess) { return Result<Guid>.Failure(personResult.Errors!); }
+            List<string> errors = [];
+            Result<Url> urlResult = Url.Create(linkTree);
+            if (urlResult.IsFailure) { errors.AddRange(urlResult.Errors); }
 
-            Result<ProfessionalProfile> professionalResult = ProfessionalProfile.Create(personId, linkTree, specialities);
-            if (!professionalResult.IsSuccess) { return Result<Guid>.Failure(professionalResult.Errors!); }
+            Result<Person> personResult = await _personService.GetByIdAsync(personId);
+            if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
+
+            if (errors.Any()) { return Result<Guid>.Failure(errors); }
+
+            Result<ProfessionalProfile> professionalResult = ProfessionalProfile.Create(personId, urlResult.Value!, specialities);
+            if (!professionalResult.IsSuccess) { return Result<Guid>.Failure(professionalResult.Errors); }
 
             await _repo.AddAsync(professionalResult.Value!);
 
@@ -37,7 +42,7 @@ namespace EventosUy.Application.Services
         public async Task<Result> ApproveAsync(Guid personId)
         {
             Result<ProfessionalProfile> professionalResult = await GetByIdAsync(personId);
-            if (!professionalResult.IsSuccess) { return Result.Failure(professionalResult.Errors!); }
+            if (!professionalResult.IsSuccess) { return Result.Failure(professionalResult.Errors); }
 
             professionalResult.Value!.Approve();
 
@@ -53,7 +58,7 @@ namespace EventosUy.Application.Services
             foreach (ProfessionalProfile professional in professionals)
             {
                 Result<Person> personResult = await _personService.GetByIdAsync(professional.Id);
-                if (!personResult.IsSuccess) { errors.Add(personResult.Errors.ToString()!); }
+                if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
                 cards.Add(professional.GetCard(personResult.Value!));
             }
@@ -72,7 +77,7 @@ namespace EventosUy.Application.Services
             foreach (ProfessionalProfile professional in professionals) 
             {
                 Result<Person> personResult = await _personService.GetByIdAsync(professional.Id);
-                if (!personResult.IsSuccess) { errors.Add(personResult.Errors.ToString()!); }
+                if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
                 cards.Add(professional.GetCard(personResult.Value!));
             }
@@ -88,7 +93,7 @@ namespace EventosUy.Application.Services
             List<Guid> verifiedIds = professionals.Select(p => p.Id).ToList();
 
             Result<List<ProfileCard>> personsResult = await _personService.GetAllExceptAsync(verifiedIds);
-            if (personsResult.IsFailure) { return Result<List<ProfileCard>>.Failure(personsResult.Errors!); }
+            if (personsResult.IsFailure) { return Result<List<ProfileCard>>.Failure(personsResult.Errors); }
 
             return Result<List<ProfileCard>>.Success(personsResult.Value!);
         }
@@ -114,7 +119,7 @@ namespace EventosUy.Application.Services
         public async Task<Result> RejectAsync(Guid personId)
         {
             Result<ProfessionalProfile> professionalResult = await GetByIdAsync(personId);
-            if (!professionalResult.IsSuccess) { return Result.Failure(professionalResult.Errors!); }
+            if (!professionalResult.IsSuccess) { return Result.Failure(professionalResult.Errors); }
 
             professionalResult.Value!.Reject();
 

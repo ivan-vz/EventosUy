@@ -26,19 +26,23 @@ namespace EventosUy.Application.Services
 
         public async Task<Result<Guid>> CreateAsync(DateOnly from, DateOnly to, Guid institutionId, Guid professionalId, Guid jobTitleId)
         {
+            List<string> errors = [];
+
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(institutionId);
-            if (!institutionResult.IsSuccess) { return Result<Guid>.Failure(institutionResult.Error!); }
+            if (!institutionResult.IsSuccess) { errors.AddRange(institutionResult.Errors); }
 
             Result<ProfessionalProfile> professionalResult = await _professionalProfileService.GetByIdAsync(professionalId);
-            if (!professionalResult.IsSuccess) { return Result<Guid>.Failure(professionalResult.Error!); }
+            if (!professionalResult.IsSuccess) { errors.AddRange(professionalResult.Errors); }
             
             Result<JobTitle> jobTitleResult = await _jobTitleService.GetByIdAsync(jobTitleId);
-            if (!jobTitleResult.IsSuccess) { return Result<Guid>.Failure(jobTitleResult.Error!); }
+            if (!jobTitleResult.IsSuccess) { errors.AddRange(jobTitleResult.Errors); }
+
+            if (errors.Any()) { return Result<Guid>.Failure(errors); }
 
             if (await _repo.ExistsAsync(institutionId, professionalId, jobTitleId)) { return Result<Guid>.Failure("Employment already exist."); }
 
             Result<Employment> employmentResult = Employment.Create(from, to, jobTitleId, professionalId, institutionId);
-            if (!employmentResult.IsSuccess) { return Result<Guid>.Failure(employmentResult.Error!); }
+            if (!employmentResult.IsSuccess) { return Result<Guid>.Failure(employmentResult.Errors); }
 
             Employment employmentInstance = employmentResult.Value!;
             await _repo.AddAsync(employmentInstance);
@@ -51,17 +55,20 @@ namespace EventosUy.Application.Services
             if (institutionId == Guid.Empty) { return Result<List<EmploymentCardByInstitution>>.Failure("Institution can not be empty."); }
             List<Employment> employees = await _repo.GetAllByInstitutionAsync(institutionId);
 
+            List<string> errors = [];
             List<EmploymentCardByInstitution> cards = [];
             foreach (Employment employee in employees)
             {
                 Result<Person> personResult = await _personService.GetByIdAsync(employee.ProfessionalProfile); //Profesional profile tiene el mismo id que la persona a la que representa
-                if (!personResult.IsSuccess) { return Result<List<EmploymentCardByInstitution>>.Failure(personResult.Error!); }
+                if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
                 Result<JobTitle> jobTitleResult = await _jobTitleService.GetByIdAsync(employee.JobTitle);
-                if (!jobTitleResult.IsSuccess) { return Result<List<EmploymentCardByInstitution>>.Failure(jobTitleResult.Error!); }
+                if (!jobTitleResult.IsSuccess) { errors.AddRange(jobTitleResult.Errors); }
 
                 cards.Add(employee.GetEmploymentCardByInstitution(personResult.Value!, jobTitleResult.Value!));
             }
+
+            if (errors.Any()) { return Result<List<EmploymentCardByInstitution>>.Failure(errors); }
 
             return Result<List<EmploymentCardByInstitution>>.Success(cards);
         }
@@ -71,17 +78,20 @@ namespace EventosUy.Application.Services
             if (personId == Guid.Empty) { return Result<List<EmploymentCardByPerson>>.Failure("Person can not be empty."); }
             List<Employment> employees = await _repo.GetAllByProfessionalAsync(personId);
 
+            List<string> errors = [];
             List<EmploymentCardByPerson> cards = [];
             foreach (Employment employee in employees) 
             {
                 Result<Institution> institutionResult = await _institutionService.GetByIdAsync(employee.Institution);
-                if (!institutionResult.IsSuccess) { return Result<List<EmploymentCardByPerson>>.Failure(institutionResult.Error!); }
+                if (!institutionResult.IsSuccess) { errors.AddRange(institutionResult.Errors); }
 
                 Result<JobTitle> jobTitleResult = await _jobTitleService.GetByIdAsync(employee.JobTitle);
-                if (!jobTitleResult.IsSuccess) { return Result<List<EmploymentCardByPerson>>.Failure(jobTitleResult.Error!); }
+                if (!jobTitleResult.IsSuccess) { errors.AddRange(jobTitleResult.Errors); }
 
                 cards.Add(employee.GetEmploymentCardByPerson(institutionResult.Value!, jobTitleResult.Value!));
             }
+
+            if (errors.Any()) { return Result<List<EmploymentCardByPerson>>.Failure(errors); }
 
             return Result<List<EmploymentCardByPerson>>.Success(cards);
         }
@@ -92,11 +102,14 @@ namespace EventosUy.Application.Services
             Employment? employmentInstance = await _repo.GetByIdAsync(id);
             if (employmentInstance is null) { return Result<DTEmployment>.Failure("Employment not Found."); }
 
+            List<string> errors = [];
             Result<Institution> institutionResult = await _institutionService.GetByIdAsync(employmentInstance.Institution);
-            if (!institutionResult.IsSuccess) { return Result<DTEmployment>.Failure(institutionResult.Error!); }
+            if (!institutionResult.IsSuccess) { errors.AddRange(institutionResult.Errors); }
 
             Result<JobTitle> jobTitleResult = await _jobTitleService.GetByIdAsync(employmentInstance.JobTitle);
-            if (!jobTitleResult.IsSuccess) { return Result<DTEmployment>.Failure(jobTitleResult.Error!); }
+            if (!jobTitleResult.IsSuccess) { errors.AddRange(jobTitleResult.Errors); }
+
+            if (errors.Any()) { return Result<DTEmployment>.Failure(errors); }
 
             return Result<DTEmployment>.Success(employmentInstance.GetDT(institutionResult.Value!, jobTitleResult.Value!));
         }

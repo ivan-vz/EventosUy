@@ -1,6 +1,5 @@
 ﻿using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.Records;
-using EventosUy.Domain.ValueObjects;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.DTOs.DataTypes;
 
@@ -8,7 +7,7 @@ namespace EventosUy.Application.Interfaces
 {
     public interface IEditionService
     {
-        public Task<Result<Guid>> CreateAsync(string name, string initials, Address address, DateOnly from, DateOnly to, Guid eventId, Guid institutionId);
+        public Task<Result<Guid>> CreateAsync(string name, string initials, string country, string city, string street, string number, DateOnly from, DateOnly to, Guid eventId, Guid institutionId);
         public Task<Result> ApproveAsync(Guid id);
         public Task<Result> RejectAsync(Guid id);
         public Task<Result<Edition>> GetByIdAsync(Guid id);
