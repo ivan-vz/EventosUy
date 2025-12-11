@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36705.20 d17.14
+VisualStudioVersion = 17.14.36705.20
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventosUy.Domain", "EventosUy.Domain\EventosUy.Domain.csproj", "{3477DF3E-1B52-40E1-A5A3-86B8D6E93E55}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventosUy.Infrastructure", "EventosUy.Infrastructure\EventosUy.Infrastructure.csproj", "{1D31F6A8-C9A6-4850-8398-E899FC67B511}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventosUy.API", "EventosUy.API\EventosUy.API.csproj", "{C9382E31-DFC8-4315-A959-9075432973E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventosUy.Tests", "EventosUy.Tests\EventosUy.Tests.csproj", "{4DA00048-EC75-43A7-BFF5-DA1D17B3A12B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{C9382E31-DFC8-4315-A959-9075432973E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C9382E31-DFC8-4315-A959-9075432973E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C9382E31-DFC8-4315-A959-9075432973E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DA00048-EC75-43A7-BFF5-DA1D17B3A12B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DA00048-EC75-43A7-BFF5-DA1D17B3A12B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DA00048-EC75-43A7-BFF5-DA1D17B3A12B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DA00048-EC75-43A7-BFF5-DA1D17B3A12B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -14,4 +14,8 @@
     <ProjectReference Include="..\EventosUy.Domain\EventosUy.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+	  <InternalsVisibleTo Include="EventosUy.Tests" />
+  </ItemGroup>
+
 </Project>
