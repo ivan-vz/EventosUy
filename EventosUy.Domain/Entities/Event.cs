@@ -25,13 +25,18 @@ namespace EventosUy.Domain.Entities
             Created = DateTimeOffset.UtcNow;
             Active = true;
             Institution = institution;
+            Categories = new HashSet<Guid>();
         }
 
         public static Result<Event> Create(string name, string initials, string description, Guid institution) 
         {
-            if (string.IsNullOrWhiteSpace(name)) { return Result<Event>.Failure("Name can not be empty."); }
-            if (string.IsNullOrWhiteSpace(initials)) { return Result<Event>.Failure("Initials can not be empty."); }
-            if (string.IsNullOrWhiteSpace(description)) { return Result<Event>.Failure("Description can not be empty."); }
+            List<string> errors = [];
+            if (string.IsNullOrWhiteSpace(name)) { errors.Add("Name cannot be empty."); }
+            if (string.IsNullOrWhiteSpace(initials)) { errors.Add("Initials cannot be empty."); }
+            if (string.IsNullOrWhiteSpace(description)) { errors.Add("Description cannot be empty."); }
+            if (institution == Guid.Empty) { errors.Add("Institution cannot be empty."); }
+
+            if (errors.Any()) { return Result<Event>.Failure(errors); }
 
             Event eventInstance = new Event(name, initials, description, institution);
 

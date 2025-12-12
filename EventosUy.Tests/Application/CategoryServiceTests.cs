@@ -3,7 +3,7 @@ using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 using Moq;
 
-namespace EventosUy.Tests.Services
+namespace EventosUy.Tests.Application
 {
     public class CategoryServiceTests
     {
