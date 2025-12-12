@@ -23,8 +23,11 @@ namespace EventosUy.Domain.Entities
 
         public static Result<Category> Create(string name, string description) 
         {
-            if (string.IsNullOrWhiteSpace(name)) { return Result<Category>.Failure("Name can not be empty."); }
-            if (string.IsNullOrWhiteSpace(description)) { return Result<Category>.Failure("Description can not be empty."); }
+            List<string> errors = [];
+            if (string.IsNullOrWhiteSpace(name)) { errors.Add("Name can not be empty."); }
+            if (string.IsNullOrWhiteSpace(description)) { errors.Add("Description can not be empty."); }
+
+            if (errors.Any()) { return Result<Category>.Failure(errors); }
 
             Category category = new Category(name, description);
 
