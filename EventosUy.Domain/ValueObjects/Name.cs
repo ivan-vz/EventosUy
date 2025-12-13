@@ -23,16 +23,16 @@ namespace EventosUy.Domain.ValueObjects
         public static Result<Name> Create(string firstSurname, string lastSurname, string firstName, string? lastName = null) 
         {
             List<String> errors = [];
-            if (string.IsNullOrWhiteSpace(firstSurname)) { errors.Add("First surname can not be empty."); }
-            if (string.IsNullOrWhiteSpace(lastSurname)) { errors.Add("Last surname can not be empty."); }
-            if (string.IsNullOrWhiteSpace(firstName)) { errors.Add("First name can not be empty."); }
+            if (string.IsNullOrWhiteSpace(firstSurname)) { errors.Add("First surname cannot be empty."); }
+            if (string.IsNullOrWhiteSpace(lastSurname)) { errors.Add("Last surname cannot be empty."); }
+            if (string.IsNullOrWhiteSpace(firstName)) { errors.Add("First name cannot be empty."); }
 
             if (errors.Any()) { return Result<Name>.Failure(errors); }
 
-            if (firstSurname.Any(c => !char.IsLetter(c))) { errors.Add("First surname can not have anythings else than letters."); }
-            if (lastSurname.Any(c => !char.IsLetter(c))) { errors.Add("Last surname can not have anythings else than letters."); }
-            if (firstName.Any(c => !char.IsLetter(c))) { errors.Add("First name can not have anythings else than letters."); }
-            if (!string.IsNullOrEmpty(lastName) && lastName.Any(c => !char.IsLetter(c))) { errors.Add("Last surname can not have anythings else than letters."); }
+            if (firstSurname.Any(c => !char.IsLetter(c))) { errors.Add("First surname cannot have anythings else than letters."); }
+            if (lastSurname.Any(c => !char.IsLetter(c))) { errors.Add("Last surname cannot have anythings else than letters."); }
+            if (firstName.Any(c => !char.IsLetter(c))) { errors.Add("First name cannot have anythings else than letters."); }
+            if (lastName is not null && lastName.Any(c => !char.IsLetter(c))) { errors.Add("Last name cannot have anythings else than letters."); }
 
             if (errors.Any()) { return Result<Name>.Failure(errors); }
 

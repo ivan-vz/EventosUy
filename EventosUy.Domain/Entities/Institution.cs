@@ -35,7 +35,7 @@ namespace EventosUy.Domain.Entities
             return Result<Institution>.Success(institutionInstance);
         }
 
-        public DTInsitution GetDT() { return new DTInsitution(Nickname, Email.Value, Name, Description, Url.Value, Created); }
+        public DTInsitution GetDT() { return new DTInsitution(Nickname, Email.Value, Name, Description, Url.Value, Address.FullAddress, Created); }
 
         public ProfileCard GetCard() { return new ProfileCard(Id, Nickname, Email.Value); }
     }

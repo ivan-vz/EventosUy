@@ -8,6 +8,7 @@ namespace EventosUy.Domain.ValueObjects
         public string City { get; init; }
         public string Street { get; init; }
         public string Number { get; init; }
+        public string FullAddress { get; init; }
 
         private Address(string country, string city, string street, string number) 
         {
@@ -15,6 +16,7 @@ namespace EventosUy.Domain.ValueObjects
             City = city;
             Street = street;
             Number = number;
+            FullAddress = $"{country}, {city}, {Street}, {Number}";
         }
 
         public static Result<Address> Create(string country, string city, string street, string number) 
