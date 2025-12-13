@@ -3,7 +3,7 @@ using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Tests.Domain
 {
-    public class InstitutionTest
+    public class InstitutionTests
     {
 
         [Fact]
@@ -27,6 +27,7 @@ namespace EventosUy.Tests.Domain
             Assert.Equal("name", result.Value.Name);
             Assert.Equal("description", result.Value.Description);
             Assert.True(result.Value.Password.Verify("PassWord1234"));
+            Assert.Equal("institution@gmail.com", result.Value.Email.Value);
             Assert.Equal("https://inst.com", result.Value.Url.Value);
             Assert.Equal("country", result.Value.Address.Country);
             Assert.Equal("city", result.Value.Address.City);

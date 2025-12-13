@@ -19,8 +19,11 @@ namespace EventosUy.Domain.Entities
 
         public static Result<Person> Create(string nickname, Password password, Email email, Name name, DateOnly birthday) 
         {
-            if (string.IsNullOrWhiteSpace(nickname)) { return Result<Person>.Failure("Nickname can not be empty."); }
-            if (birthday >= DateOnly.FromDateTime(DateTime.UtcNow)) { return Result<Person>.Failure("Invalid Birthday's date."); }
+            List<string> errors = [];
+            if (string.IsNullOrWhiteSpace(nickname)) { errors.Add("Nickname can not be empty."); }
+            if (birthday >= DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("Invalid Birthday's date."); }
+
+            if (errors.Any()) { return Result<Person>.Failure(errors); }
 
             Person personInstance = new Person(nickname, password, email, name, birthday);
 
