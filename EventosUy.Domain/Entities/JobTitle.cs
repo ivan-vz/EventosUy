@@ -15,6 +15,7 @@ namespace EventosUy.Domain.Entities
 
         private JobTitle(string name, string description, Guid institutionId) 
         {
+            Id = Guid.NewGuid();    
             Name = name;
             Description = description;
             Created = DateTimeOffset.UtcNow;
@@ -24,10 +25,12 @@ namespace EventosUy.Domain.Entities
 
         public static Result<JobTitle> Create(string name, string description, Guid institutionId) 
         {
-            if (string.IsNullOrEmpty(name)) { return Result<JobTitle>.Failure("Name can not be empty."); }
-            if (string.IsNullOrEmpty(description)) { return Result<JobTitle>.Failure("Description can not be empty."); }
+            List<string> errors = [];
+            if (string.IsNullOrWhiteSpace(name)) { errors.Add("Name can not be empty."); }
+            if (string.IsNullOrWhiteSpace(description)) { errors.Add("Description can not be empty."); }
+            if (institutionId == Guid.Empty) { errors.Add("Institution can not be empty."); }
 
-            if (institutionId == Guid.Empty) { return Result<JobTitle>.Failure("Institution can not be empty."); }
+            if (errors.Any()) { return Result<JobTitle>.Failure(errors); }
 
             JobTitle jobTitleInstance = new JobTitle(name, description, institutionId);
 
@@ -36,6 +39,6 @@ namespace EventosUy.Domain.Entities
 
         public DTJobTitle GetDT(Institution institutionInstance) { return new DTJobTitle(Name, Description, institutionInstance.Nickname, Created); }
 
-        public JobTitleCard GetJobTitleCard() { return new JobTitleCard(Id, Name); }
+        public JobTitleCard GetCard() { return new JobTitleCard(Id, Name); }
     }
 }

@@ -18,6 +18,7 @@ namespace EventosUy.Domain.Entities
 
         private Employment(DateOnly from, DateOnly to, Guid jobTitleId, Guid professionalId, Guid institutionId) 
         {
+            Id = Guid.NewGuid();
             Created = DateTimeOffset.UtcNow;
             From = from;
             To = to;
@@ -29,12 +30,15 @@ namespace EventosUy.Domain.Entities
 
         public static Result<Employment> Create(DateOnly from, DateOnly to, Guid jobTitleId, Guid professionalId, Guid institutionId) 
         {
-            if (from > to) { return Result<Employment>.Failure("Starting date can not be after ending's date"); }
-            if (from < DateOnly.FromDateTime(DateTime.UtcNow)) { return Result<Employment>.Failure("Starting date can not be before todays's date"); }
+            List<string> errors = [];
+            if (from > to) { errors.Add("Starting date cannot be after ending's date"); }
+            if (from < DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("Starting date cannot be before todays's date"); }
 
-            if (jobTitleId == Guid.Empty) { return Result<Employment>.Failure("JobTitle can not me empty."); }
-            if (professionalId == Guid.Empty) { return Result<Employment>.Failure("Professional profile can not me empty."); }
-            if (institutionId == Guid.Empty) { return Result<Employment>.Failure("Institution can not me empty."); }
+            if (jobTitleId == Guid.Empty) { errors.Add("JobTitle cannot me empty."); }
+            if (professionalId == Guid.Empty) { errors.Add("Professional profile cannot me empty."); }
+            if (institutionId == Guid.Empty) { errors.Add("Institution cannot me empty."); }
+
+            if (errors.Any()) { return Result<Employment>.Failure(errors); }
 
             Employment employmentInstance = new Employment(from, to, jobTitleId, professionalId, institutionId);
 
@@ -43,12 +47,12 @@ namespace EventosUy.Domain.Entities
 
         public DTEmployment GetDT(Institution institutionInstance, JobTitle jobTitleInstance) { return new DTEmployment(jobTitleInstance.Name, institutionInstance.Nickname, From, To, Created, State); }
 
-        public EmploymentCardByInstitution GetEmploymentCardByInstitution(Person personInstance, JobTitle jobTitleInstance) 
+        public EmploymentCardByInstitution GetCardByInstitution(Person personInstance, JobTitle jobTitleInstance) 
         { 
             return new EmploymentCardByInstitution(Id, jobTitleInstance.Name, personInstance.Nickname); 
         }
 
-        public EmploymentCardByPerson GetEmploymentCardByPerson(Institution institutionInstance, JobTitle jobTitleInstance) 
+        public EmploymentCardByPerson GetCardByPerson(Institution institutionInstance, JobTitle jobTitleInstance) 
         {
             return new EmploymentCardByPerson(Id, jobTitleInstance.Name, institutionInstance.Nickname);
         }

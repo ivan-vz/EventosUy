@@ -65,7 +65,7 @@ namespace EventosUy.Application.Services
                 Result<JobTitle> jobTitleResult = await _jobTitleService.GetByIdAsync(employee.JobTitle);
                 if (!jobTitleResult.IsSuccess) { errors.AddRange(jobTitleResult.Errors); }
 
-                cards.Add(employee.GetEmploymentCardByInstitution(personResult.Value!, jobTitleResult.Value!));
+                cards.Add(employee.GetCardByInstitution(personResult.Value!, jobTitleResult.Value!));
             }
 
             if (errors.Any()) { return Result<List<EmploymentCardByInstitution>>.Failure(errors); }
@@ -88,7 +88,7 @@ namespace EventosUy.Application.Services
                 Result<JobTitle> jobTitleResult = await _jobTitleService.GetByIdAsync(employee.JobTitle);
                 if (!jobTitleResult.IsSuccess) { errors.AddRange(jobTitleResult.Errors); }
 
-                cards.Add(employee.GetEmploymentCardByPerson(institutionResult.Value!, jobTitleResult.Value!));
+                cards.Add(employee.GetCardByPerson(institutionResult.Value!, jobTitleResult.Value!));
             }
 
             if (errors.Any()) { return Result<List<EmploymentCardByPerson>>.Failure(errors); }

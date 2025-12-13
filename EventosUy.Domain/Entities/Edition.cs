@@ -21,6 +21,7 @@ namespace EventosUy.Domain.Entities
 
         private Edition(string name, string initials, DateOnly from, DateOnly to, Address address, Guid eventId, Guid institutionId) 
         {
+            Id = Guid.NewGuid();
             Name = name;
             Initials = initials;
             From = from;
@@ -34,11 +35,14 @@ namespace EventosUy.Domain.Entities
 
         public static Result<Edition> Create(string name, string initials, DateOnly from, DateOnly to, Address address, Guid eventId, Guid institutionId) 
         {
-            if (String.IsNullOrWhiteSpace(name)) { return Result<Edition>.Failure("Name can not be empty."); }
-            if (String.IsNullOrWhiteSpace(initials)) { return Result<Edition>.Failure("Initials can not be empty."); }
+            List<string> errors = [];
+            if (String.IsNullOrWhiteSpace(name)) { errors.Add("Name cannot be empty."); }
+            if (String.IsNullOrWhiteSpace(initials)) { errors.Add("Initials cannot be empty."); }
 
-            if (from > to) { return Result<Edition>.Failure("The start of editing cannot be later than its completion."); }
-            if (from <= DateOnly.FromDateTime(DateTime.UtcNow)) { return Result<Edition>.Failure("The start date of the edition cannot be earlier than today's date."); }
+            if (from > to) { errors.Add("The start of editing cannot be later than its completion."); }
+            if (from <= DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("The start date of the edition cannot be earlier than today's date."); }
+
+            if (errors.Any()) { return Result<Edition>.Failure(errors); }
 
             Edition editionInstance = new Edition(name, initials, from, to, address, eventId, institutionId); 
 

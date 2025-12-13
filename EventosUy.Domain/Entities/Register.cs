@@ -20,6 +20,7 @@ namespace EventosUy.Domain.Entidades
 
         private Register(float total, string sponsorCode, Guid personId, Guid editionId, Guid registerTypeId, Participation participation) 
         {
+            Id = Guid.NewGuid();
             Created = DateTimeOffset.UtcNow;
             Total = total;
             SponsorCode = sponsorCode;

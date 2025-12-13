@@ -24,6 +24,7 @@ namespace EventosUy.Domain.Entities
 
         private Sponsorship(string name, float amount, int free, string code, SponsorshipTier tier, Guid institutionId, Guid editionId, Guid registerTypeId, DateOnly expired)
         {
+            Id = Guid.NewGuid();
             Name = name;
             Created = DateTimeOffset.UtcNow;
             Amount = amount;

@@ -39,7 +39,7 @@ namespace EventosUy.Application.Services
         {
             if (institutionId == Guid.Empty) { return Result<List<JobTitleCard>>.Failure("Institution can not be empty."); }
             List<JobTitle> jobTitles = await _repo.GetAllByInstitutionAsync(institutionId);
-            List<JobTitleCard> cards = jobTitles.Select(job => job.GetJobTitleCard()).ToList();
+            List<JobTitleCard> cards = jobTitles.Select(job => job.GetCard()).ToList();
             
             return Result<List<JobTitleCard>>.Success(cards);
         }
