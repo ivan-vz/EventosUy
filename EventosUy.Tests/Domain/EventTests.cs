@@ -49,15 +49,11 @@ namespace EventosUy.Tests.Domain
         public void GetDT_ReturnsCorrectData() 
         {
             // Arrange
-            var institutionInstance = Institution.Create(
-                "nickname", 
-                Password.Create("PassWord123").Value!, 
-                Email.Create("institution@gmail.com").Value!, 
-                "name", 
-                Url.Create("https://inst.com").Value!, 
-                Address.Create("country", "city", "street", "0124").Value!, 
-                "description"
-                ).Value!;
+            var password = Password.Create("PassWord1234").Value!;
+            var email = Email.Create("institution@gmail.com").Value!;
+            var url = Url.Create("https://inst.com").Value!;
+            var address = Address.Create("country", "city", "street", "0124").Value!;
+            var institutionInstance = Institution.Create("nickname", password, email, "name", url, address, "description").Value!;
 
             var eventInstance = Event.Create("event", "ev", "description", institutionInstance.Id).Value!;
 

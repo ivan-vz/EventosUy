@@ -9,16 +9,14 @@ namespace EventosUy.Tests.Domain
         [Fact]
         public void Create_WithValidInput_ReturnsSuccess()
         {
+            // Arrange
+            var password = Password.Create("PassWord1234").Value!;
+            var email = Email.Create("institution@gmail.com").Value!;
+            var url = Url.Create("https://inst.com").Value!;
+            var address = Address.Create("country", "city", "street", "0124").Value!;
+
             // Act
-            var result = Institution.Create(
-                "nickname",
-                Password.Create("PassWord1234").Value!,
-                Email.Create("institution@gmail.com").Value!,
-                "name",
-                Url.Create("https://inst.com").Value!,
-                Address.Create("country", "city", "street", "0124").Value!,
-                "description"
-                );
+            var result = Institution.Create("nickname", password, email, "name", url, address, "description");
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -27,12 +25,9 @@ namespace EventosUy.Tests.Domain
             Assert.Equal("name", result.Value.Name);
             Assert.Equal("description", result.Value.Description);
             Assert.True(result.Value.Password.Verify("PassWord1234"));
-            Assert.Equal("institution@gmail.com", result.Value.Email.Value);
-            Assert.Equal("https://inst.com", result.Value.Url.Value);
-            Assert.Equal("country", result.Value.Address.Country);
-            Assert.Equal("city", result.Value.Address.City);
-            Assert.Equal("street", result.Value.Address.Street);
-            Assert.Equal("0124", result.Value.Address.Number);
+            Assert.Equal(email, result.Value.Email);
+            Assert.Equal(url, result.Value.Url);
+            Assert.Equal(address, result.Value.Address);
         }
 
         [Theory]
@@ -40,16 +35,14 @@ namespace EventosUy.Tests.Domain
         [InlineData(" ", " ", " ")]
         public void Create_WithInvalidInput_ReturnsFailure(string nickname, string name, string description)
         {
+            // Arrange
+            var password = Password.Create("PassWord1234").Value!;
+            var email = Email.Create("institution@gmail.com").Value!;
+            var url = Url.Create("https://inst.com").Value!;
+            var address = Address.Create("country", "city", "street", "0124").Value!;
+
             // Act
-            var result = Institution.Create(
-                nickname,
-                Password.Create("PassWord123").Value!,
-                Email.Create("institution@gmail.com").Value!,
-                name,
-                Url.Create("https://inst.com").Value!,
-                Address.Create("country", "city", "street", "0124").Value!,
-                description
-                );
+            var result = Institution.Create(nickname, password, email, name, url, address, description);
 
             // Assert
             Assert.True(result.IsFailure);
@@ -64,15 +57,11 @@ namespace EventosUy.Tests.Domain
         public void GetDT_ReturnsCorrectData()
         {
             // Arrange
-            var institutionInstance = Institution.Create(
-                "nickname",
-                Password.Create("PassWord123").Value!,
-                Email.Create("institution@gmail.com").Value!,
-                "name",
-                Url.Create("https://inst.com").Value!,
-                Address.Create("country", "city", "street", "0124").Value!,
-                "description"
-                ).Value!;
+            var password = Password.Create("PassWord1234").Value!;
+            var email = Email.Create("institution@gmail.com").Value!;
+            var url = Url.Create("https://inst.com").Value!;
+            var address = Address.Create("country", "city", "street", "0124").Value!;
+            var institutionInstance = Institution.Create("nickname", password, email, "name", url, address, "description").Value!;
 
             // Act
             var dtInstitution = institutionInstance.GetDT();
@@ -91,15 +80,11 @@ namespace EventosUy.Tests.Domain
         public void GetCard_ReturnsCorrectData()
         {
             // Arrange
-            var institutionInstance = Institution.Create(
-                "nickname",
-                Password.Create("PassWord123").Value!,
-                Email.Create("institution@gmail.com").Value!,
-                "name",
-                Url.Create("https://inst.com").Value!,
-                Address.Create("country", "city", "street", "0124").Value!,
-                "description"
-                ).Value!;
+            var password = Password.Create("PassWord1234").Value!;
+            var email = Email.Create("institution@gmail.com").Value!;
+            var url = Url.Create("https://inst.com").Value!;
+            var address = Address.Create("country", "city", "street", "0124").Value!;
+            var institutionInstance = Institution.Create("nickname", password, email, "name", url, address, "description").Value!;
 
             // Act
             var card = institutionInstance.GetCard();
