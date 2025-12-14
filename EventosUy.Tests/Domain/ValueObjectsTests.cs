@@ -1,4 +1,5 @@
-﻿using EventosUy.Domain.ValueObjects;
+﻿using EventosUy.Domain.Enumerates;
+using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Tests.Domain
 {
@@ -150,6 +151,42 @@ namespace EventosUy.Tests.Domain
             {
                 Assert.Contains(expectedError, result.Errors);
             }
+        }
+
+        [Theory]
+        [InlineData(1_000, SponsorshipTier.BRONZE)]
+        [InlineData(10_000, SponsorshipTier.SILVER)]
+        [InlineData(100_000, SponsorshipTier.GOLD)]
+        [InlineData(1_000_000, SponsorshipTier.PLATINUM)]
+        public void SponsorLevel_Create_WithValidInput_RetrunsSuccess(decimal amount, SponsorshipTier tier) 
+        {
+            // Act
+            var result = SponsorLevel.Create(amount, tier);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.Equal(amount, result.Value.Amount);
+            Assert.Equal(tier, result.Value.Tier);
+        }
+
+        [Theory]
+        [InlineData(0, SponsorshipTier.BRONZE, "Amount must be at least 1.000 for BRONZE tier.")]
+        [InlineData(10_000, SponsorshipTier.BRONZE, "Amount 10.000 exceeds maximum for BRONZE tier. Please upgrade to the next tier.")]
+        [InlineData(0, SponsorshipTier.SILVER, "Amount must be at least 10.000 for SILVER tier.")]
+        [InlineData(100_000, SponsorshipTier.SILVER, "Amount 100.000 exceeds maximum for SILVER tier. Please upgrade to the next tier.")]
+        [InlineData(0, SponsorshipTier.GOLD, "Amount must be at least 100.000 for GOLD tier.")]
+        [InlineData(1_000_000, SponsorshipTier.GOLD, "Amount 1.000.000 exceeds maximum for GOLD tier. Please upgrade to the next tier.")]
+        [InlineData(0, SponsorshipTier.PLATINUM, "Amount must be at least 1.000.000 for PLATINUM tier.")]
+        public void SponsorLevel_Create_WithInvalidInput_RetrunsSuccess(decimal amount, SponsorshipTier tier, string expected)
+        {
+            // Act
+            var result = SponsorLevel.Create(amount, tier);
+
+            // Assert
+            Assert.True(result.IsFailure, $"Paso con 1M + {tier}");
+            Assert.NotEmpty(result.Errors);
+            Assert.Contains(expected, result.Errors);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace EventosUy.Application.Services
             _eventService = eventService;
         }
 
-        public async Task<Result<Guid>> CreateAsync(string name, string description, float price, int quota, Guid eventiId)
+        public async Task<Result<Guid>> CreateAsync(string name, string description, decimal price, int quota, Guid eventiId)
         {
             List<string> errors = [];
             Result<Event> eventResult = await _eventService.GetByIdAsync(eventiId);

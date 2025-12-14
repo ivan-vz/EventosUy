@@ -5,6 +5,7 @@ using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;
+using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Application.Services
 {
@@ -23,7 +24,7 @@ namespace EventosUy.Application.Services
             _registerTypeService = registerTypeService;
         }
 
-        public async Task<Result<Guid>> CreateAsync(string name, SponsorshipTier tier, float amount, int free, string code, DateOnly expiration, Guid editionId, Guid institutionId, Guid registerTypeId)
+        public async Task<Result<Guid>> CreateAsync(string name, SponsorshipTier tier, decimal amount, int free, string code, DateOnly expiration, Guid editionId, Guid institutionId, Guid registerTypeId)
         {
             List<string> errors = [];
             Result<Edition> editionResult = await _editionService.GetByIdAsync(editionId);
@@ -35,11 +36,14 @@ namespace EventosUy.Application.Services
             Result<RegisterType> registerTypeResult = await _registerTypeService.GetByIdAsync(registerTypeId);
             if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
 
+            Result<SponsorLevel> sponsorLevelResult = SponsorLevel.Create(amount, tier);
+            if (!sponsorLevelResult.IsSuccess) { errors.AddRange(sponsorLevelResult.Errors); }
+
             if (errors.Any()) { return Result<Guid>.Failure(errors); }
 
             if (await _repo.ExistsAsync(editionId, institutionId)) { return Result<Guid>.Failure("Sponsorship already exist."); }
 
-            Result<Sponsorship> sponsorResult = Sponsorship.Create(name, amount, free, code, tier, institutionResult.Value!, editionResult.Value!, registerTypeResult.Value!, expiration);
+            Result<Sponsorship> sponsorResult = Sponsorship.Create(name, free, code, sponsorLevelResult.Value!, institutionResult.Value!, editionResult.Value!, registerTypeResult.Value!, expiration);
             if (!sponsorResult.IsSuccess) { return Result<Guid>.Failure(sponsorResult.Errors); }
 
             Sponsorship sponsorInstance = sponsorResult.Value!;

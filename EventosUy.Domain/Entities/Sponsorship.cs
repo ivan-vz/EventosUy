@@ -3,7 +3,6 @@ using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.ValueObjects;
-using System.Runtime.InteropServices;
 
 namespace EventosUy.Domain.Entities
 {
@@ -43,6 +42,7 @@ namespace EventosUy.Domain.Entities
             ) 
         {
             List<string> errors = [];
+            if (level is null) { errors.Add("Sponsor level cannot be empty."); }
             if (institutionInstance is null) { errors.Add("Institution cannot be empty."); }
             if (editionInstance is null) { errors.Add("Edition cannot be empty."); }
             if (registerTypeInstance is null) { errors.Add("Register type cannot be empty."); }
@@ -52,11 +52,11 @@ namespace EventosUy.Domain.Entities
 
             if (free < 0) { errors.Add("Amount must be greater than or equal to 0."); }
             
-            if (expired <= DateOnly.FromDateTime(DateTime.UtcNow)) { return Result<Sponsorship>.Failure("Expiration date must be after today's date."); }
+            if (expired <= DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("Expiration date must be after today's date."); }
             
             if (errors.Any()) { return Result<Sponsorship>.Failure(errors); }
 
-            if (free * registerTypeInstance!.Price > 0.2 * level.Amount) { return Result<Sponsorship>.Failure("The value of free registrations may not exceed 20% of the institution's contribution."); }
+            if (free * registerTypeInstance!.Price > 0.2m * level!.Amount) { return Result<Sponsorship>.Failure("The value of free registrations may not exceed 20% of the institution's contribution."); }
 
             Sponsorship sponsorshipInstance = new Sponsorship(name, free, code, level, institutionInstance!.Id, editionInstance!.Id, registerTypeInstance!.Id, expired);
 

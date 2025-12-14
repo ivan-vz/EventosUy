@@ -2,5 +2,5 @@
 
 namespace EventosUy.Domain.DTOs.Records
 {
-    public record SponsorshipCard(Guid Id, string Name, DateOnly Until, SponsorshipTier Tier);
+    public record SponsorshipCard(Guid Id, string Name, DateOnly expiration, SponsorshipTier Tier);
 }

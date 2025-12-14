@@ -28,7 +28,7 @@ namespace EventosUy.Tests.Domain
         [Theory]
         [InlineData("", "", -1, -1)]
         [InlineData(" ", " ", -1, 0)]
-        public void Create_WithInvalidInput_ReturnsFailure(string name, string description, float price, int quota) 
+        public void Create_WithInvalidInput_ReturnsFailure(string name, string description, decimal price, int quota) 
         {
             // Arrange
             var editionId = Guid.NewGuid();
