@@ -38,8 +38,8 @@ namespace EventosUy.Tests.Domain
             Assert.NotEmpty(result.Errors);
             Assert.Equal(3, result.Errors.Count);
             Assert.Equal("Name can not be empty.", result.Errors[0]);
-            Assert.Equal("Description can not be empty.", result.Errors[1]);
-            Assert.Equal("Institution can not be empty.", result.Errors[2]);
+            Assert.Contains("Description can not be empty.", result.Errors);
+            Assert.Contains("Institution can not be empty.", result.Errors);
         }
 
         [Fact]

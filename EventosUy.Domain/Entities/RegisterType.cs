@@ -29,10 +29,13 @@ namespace EventosUy.Domain.Entities
 
         public static Result<RegisterType> Create(string name, string description, float price, int quota, Guid editionId) 
         {
-            if (string.IsNullOrWhiteSpace(name)) { return Result<RegisterType>.Failure("Name can not be empty."); }
-            if (string.IsNullOrWhiteSpace(description)) { return Result<RegisterType>.Failure("Description can not be empty."); }
-            if (price < 0) { return Result<RegisterType>.Failure("Price must be greater than or equal to 0."); }
-            if (quota <= 0) { return Result<RegisterType>.Failure("Quota must be greater than 0."); }
+            List<string> errors = [] ;
+            if (string.IsNullOrWhiteSpace(name)) { errors.Add("Name cannot be empty."); }
+            if (string.IsNullOrWhiteSpace(description)) { errors.Add("Description cannot be empty."); }
+            if (price < 0) { errors.Add("Price must be greater than or equal to 0."); }
+            if (quota <= 0) { errors.Add("Quota must be greater than 0."); }
+
+            if (errors.Any()) { return Result<RegisterType>.Failure(errors); }
 
             RegisterType registerTypeInstance = new RegisterType(name, description, price, quota, editionId);
 

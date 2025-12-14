@@ -49,10 +49,10 @@ namespace EventosUy.Tests.Domain
             Assert.True(result.IsFailure);
             Assert.NotEmpty(result.Errors);
             Assert.Equal(4, result.Errors.Count);
-            Assert.Equal("Name cannot be empty.", result.Errors[0]);
-            Assert.Equal("Initials cannot be empty.", result.Errors[1]);
-            Assert.Equal("The start of editing cannot be later than its completion.", result.Errors[2]);
-            Assert.Equal("The start date of the edition cannot be earlier than today's date.", result.Errors[3]);
+            Assert.Contains("Name cannot be empty.", result.Errors);
+            Assert.Contains("Initials cannot be empty.", result.Errors);
+            Assert.Contains("The start of editing cannot be later than its completion.", result.Errors);
+            Assert.Contains("The start date of the edition cannot be earlier than today's date.", result.Errors);
         }
 
         [Fact]

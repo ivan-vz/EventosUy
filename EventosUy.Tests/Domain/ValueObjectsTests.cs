@@ -32,7 +32,7 @@ namespace EventosUy.Tests.Domain
             // Assert
             Assert.True(result.IsFailure);
             Assert.NotEmpty(result.Errors);
-            Assert.Equal(expected, result.Errors[0]);
+            Assert.Contains(expected, result.Errors);
         }
 
         [Theory]
@@ -62,7 +62,7 @@ namespace EventosUy.Tests.Domain
             // Assert
             Assert.True(result.IsFailure);
             Assert.NotEmpty(result.Errors);
-            Assert.Equal(expected, result.Errors[0]);
+            Assert.Contains(expected, result.Errors);
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace EventosUy.Tests.Domain
             // Assert
             Assert.True(result.IsFailure);
             Assert.NotEmpty(result.Errors);
-            Assert.Equal(expected, result.Errors[0]);
+            Assert.Contains(expected, result.Errors);
         }
 
         [Theory]

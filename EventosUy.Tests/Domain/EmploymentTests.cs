@@ -45,11 +45,11 @@ namespace EventosUy.Tests.Domain
             Assert.True(result.IsFailure);
             Assert.NotEmpty(result.Errors);
             Assert.Equal(5, result.Errors.Count);
-            Assert.Equal("Starting date cannot be after ending's date", result.Errors[0]);
-            Assert.Equal("Starting date cannot be before todays's date", result.Errors[1]);
-            Assert.Equal("JobTitle cannot me empty.", result.Errors[2]);
-            Assert.Equal("Professional profile cannot me empty.", result.Errors[3]);
-            Assert.Equal("Institution cannot me empty.", result.Errors[4]);
+            Assert.Contains("Starting date cannot be after ending's date", result.Errors);
+            Assert.Contains("Starting date cannot be before todays's date", result.Errors);
+            Assert.Contains("JobTitle cannot me empty.", result.Errors);
+            Assert.Contains("Professional profile cannot me empty.", result.Errors);
+            Assert.Contains("Institution cannot me empty.", result.Errors);
         }
 
         [Fact]

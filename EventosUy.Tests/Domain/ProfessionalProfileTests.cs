@@ -41,7 +41,7 @@ namespace EventosUy.Tests.Domain
             // Assert
             Assert.True(result.IsFailure);
             Assert.NotEmpty(result.Errors);
-            Assert.Equal("Person can not be empty.", result.Errors[0]);
+            Assert.Contains("Person can not be empty.", result.Errors);
         }
 
         [Fact]

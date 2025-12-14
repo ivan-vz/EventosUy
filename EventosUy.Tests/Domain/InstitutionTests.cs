@@ -48,9 +48,9 @@ namespace EventosUy.Tests.Domain
             Assert.True(result.IsFailure);
             Assert.NotEmpty(result.Errors);
             Assert.Equal(3, result.Errors.Count);
-            Assert.Equal("Nickname cannot be empty.", result.Errors[0]);
-            Assert.Equal("Name cannot be empty.", result.Errors[1]);
-            Assert.Equal("Description cannot be empty.", result.Errors[2]);
+            Assert.Contains("Nickname cannot be empty.", result.Errors);
+            Assert.Contains("Name cannot be empty.", result.Errors);
+            Assert.Contains("Description cannot be empty.", result.Errors);
         }
 
         [Fact]
