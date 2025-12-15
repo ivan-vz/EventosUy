@@ -10,5 +10,6 @@ namespace EventosUy.Application.Interfaces
         public Task<Result<DTEmployment>> GetDTAsync(Guid id);
         public Task<Result<List<EmploymentCardByInstitution>>> GetAllByInstitutionAsync(Guid institutionId);
         public Task<Result<List<EmploymentCardByPerson>>> GetAllByPersonAsync(Guid personId);
+        public Task<Result> HasActiveContractAsync(Guid person, Guid institution);
     }
 }

@@ -9,6 +9,7 @@ namespace EventosUy.Domain.Interfaces
         public Task<List<Institution>> GetAllAsync();
         public Task<bool> ExistsByNicknameAsync(string nickname);
         public Task<bool> ExistsByEmailAsync(Email email);
+        public Task<bool> ExistsByAcronymAsync(string acronym);
         public Task<bool> ExistsByUrlAsync(Url url);
         public Task<bool> ExistsByAddressAsync(Address address);
         public Task AddAsync(Institution institution);

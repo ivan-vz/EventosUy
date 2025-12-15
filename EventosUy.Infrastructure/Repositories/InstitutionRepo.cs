@@ -17,6 +17,8 @@ namespace EventosUy.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
+        public Task<bool> ExistsByAcronymAsync(string acronym) { return Task.FromResult(_institutions.Any(institution => institution.Acronym.Equals(acronym))); }
+
         public Task<bool> ExistsByAddressAsync(Address address) { return Task.FromResult(_institutions.Any(institution => institution.Address.Equals(address))); }
 
         public Task<bool> ExistsByEmailAsync(Email email) { return Task.FromResult(_institutions.Any(institution => institution.Email.Equals(email))); }

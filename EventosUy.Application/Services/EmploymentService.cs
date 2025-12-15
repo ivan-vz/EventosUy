@@ -113,5 +113,16 @@ namespace EventosUy.Application.Services
 
             return Result<DTEmployment>.Success(employmentInstance.GetDT(institutionResult.Value!, jobTitleResult.Value!));
         }
+
+        public async Task<Result> HasActiveContractAsync(Guid person, Guid institution)
+        {
+            List<string> errors = [];
+            if (person == Guid.Empty) { errors.Add("Person can not be empty."); }
+            if (institution == Guid.Empty) { errors.Add("Institution can not be empty."); }
+
+            if (errors.Any()) { return Result.Failure(errors); }
+
+            return (await _repo.ValidateContractAsync(person, institution)) ? Result.Success() : Result.Failure("Person must work for sponsor's institution.");
+        }
     }
 }

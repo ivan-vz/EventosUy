@@ -1,6 +1,7 @@
 ﻿using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
+using System.Reflection.Emit;
 
 namespace EventosUy.Domain.Entities
 {
@@ -11,6 +12,7 @@ namespace EventosUy.Domain.Entities
         public string Description { get; private set; }
         public decimal Price { get; init; }
         public int Quota { get; init; }
+        public int Used { get; private set; }
         public bool Active { get; private set; }
         public DateTimeOffset Created { get; init; }
         public Guid Edition { get; init; }
@@ -22,6 +24,7 @@ namespace EventosUy.Domain.Entities
             Description = description;
             Price = price;
             Quota = quota;
+            Used = 0;
             Edition = editionId;
             Active = true;
             Created = DateTimeOffset.UtcNow;
@@ -45,5 +48,18 @@ namespace EventosUy.Domain.Entities
         public DTRegisterType GetDT(Edition editionInstance) { return new DTRegisterType(Name, editionInstance.Name, Description, Price, Quota, Created); }
 
         public RegisterTypeCard GetCard() { return new RegisterTypeCard(Id, Name, Active); }
+
+        public bool IsActive() { return Active; }
+
+        public Result UseSpot() 
+        {
+            if (Used >= Quota) { return Result.Failure("No available spots."); }
+
+            Used++;
+
+            if (Used == Quota) { Active = false; }
+
+            return Result.Success();
+        }
     }
 }

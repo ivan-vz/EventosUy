@@ -1,6 +1,5 @@
 ﻿using EventosUy.Domain.Common;
 using EventosUy.Domain.Enumerates;
-using System.Numerics;
 
 namespace EventosUy.Domain.ValueObjects
 {
@@ -8,6 +7,7 @@ namespace EventosUy.Domain.ValueObjects
     {
         public decimal Amount { get; }
         public SponsorshipTier Tier { get; }
+        public int FreeSpots { get; }
 
         private static readonly Dictionary<SponsorshipTier, (decimal min, decimal max)> tierRanges = new() {
             { SponsorshipTier.BRONZE, (min: 1_000m, max: 9_999.99m) },
@@ -16,13 +16,14 @@ namespace EventosUy.Domain.ValueObjects
             { SponsorshipTier.PLATINUM, (min: 1_000_000m, max: decimal.MaxValue) },
         };
 
-        private SponsorLevel(decimal amount, SponsorshipTier tier) 
+        private SponsorLevel(decimal amount, SponsorshipTier tier, int free) 
         {
             Amount = amount;
             Tier = tier;
+            FreeSpots = free;
         }
 
-        public static Result<SponsorLevel> Create(decimal amount, SponsorshipTier tier) 
+        public static Result<SponsorLevel> Create(decimal amount, SponsorshipTier tier, decimal registerTypePrice) 
         {
             List<string> errors = [];
             if (!tierRanges.TryGetValue(tier, out var ranges)) 
@@ -33,10 +34,13 @@ namespace EventosUy.Domain.ValueObjects
             
             if (amount < ranges.min) { errors.Add($"Amount must be at least {ranges.min:N0} for {tier} tier."); }
             if (amount > ranges.max) { errors.Add($"Amount {amount:N0} exceeds maximum for {tier} tier. Please upgrade to the next tier."); }
+            if (registerTypePrice < 0) { errors.Add("Register type price must be greater than or equal to 0."); }
 
             if (errors.Any()) { return Result<SponsorLevel>.Failure(errors); }
 
-            var instance = new SponsorLevel(amount, tier);
+            int free = (int)Math.Floor((0.2m * amount) / registerTypePrice);
+
+            var instance = new SponsorLevel(amount, tier, free);
 
             return Result<SponsorLevel>.Success(instance);
         }

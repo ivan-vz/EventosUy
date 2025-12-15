@@ -1,4 +1,5 @@
 ﻿using EventosUy.Domain.Entities;
+using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;
 
 namespace EventosUy.Infrastructure.Repositories
@@ -33,6 +34,11 @@ namespace EventosUy.Infrastructure.Repositories
         {
             int result = _employments.RemoveWhere(employment => employment.Id == id);
             return Task.FromResult(result > 0);
+        }
+
+        public Task<bool> ValidateContractAsync(Guid person, Guid institution)
+        {
+            return Task.FromResult(_employments.Any(employment => employment.State == EmploymentState.ACTIVE && employment.Institution == institution && employment.ProfessionalProfile == person));
         }
     }
 }

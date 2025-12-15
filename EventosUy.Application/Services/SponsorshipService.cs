@@ -24,7 +24,7 @@ namespace EventosUy.Application.Services
             _registerTypeService = registerTypeService;
         }
 
-        public async Task<Result<Guid>> CreateAsync(string name, SponsorshipTier tier, decimal amount, int free, string code, DateOnly expiration, Guid editionId, Guid institutionId, Guid registerTypeId)
+        public async Task<Result<Guid>> CreateAsync(string name, SponsorshipTier tier, decimal amount, DateOnly expiration, Guid editionId, Guid institutionId, Guid registerTypeId)
         {
             List<string> errors = [];
             Result<Edition> editionResult = await _editionService.GetByIdAsync(editionId);
@@ -36,14 +36,14 @@ namespace EventosUy.Application.Services
             Result<RegisterType> registerTypeResult = await _registerTypeService.GetByIdAsync(registerTypeId);
             if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
 
-            Result<SponsorLevel> sponsorLevelResult = SponsorLevel.Create(amount, tier);
+            Result<SponsorLevel> sponsorLevelResult = SponsorLevel.Create(amount, tier, registerTypeResult.Value!.Price);
             if (!sponsorLevelResult.IsSuccess) { errors.AddRange(sponsorLevelResult.Errors); }
 
             if (errors.Any()) { return Result<Guid>.Failure(errors); }
 
             if (await _repo.ExistsAsync(editionId, institutionId)) { return Result<Guid>.Failure("Sponsorship already exist."); }
 
-            Result<Sponsorship> sponsorResult = Sponsorship.Create(name, free, code, sponsorLevelResult.Value!, institutionResult.Value!, editionResult.Value!, registerTypeResult.Value!, expiration);
+            Result<Sponsorship> sponsorResult = Sponsorship.Create(name, sponsorLevelResult.Value!, institutionResult.Value!, editionResult.Value!, registerTypeResult.Value!, expiration);
             if (!sponsorResult.IsSuccess) { return Result<Guid>.Failure(sponsorResult.Errors); }
 
             Sponsorship sponsorInstance = sponsorResult.Value!;
@@ -70,6 +70,15 @@ namespace EventosUy.Application.Services
             return Result<List<SponsorshipCard>>.Success(cards);
         }
 
+        public async Task<Result<Sponsorship>> GetByCodeAsync(string code)
+        {
+            if (string.IsNullOrEmpty(code)) { return Result<Sponsorship>.Failure("Code cannot be empty."); }
+            Sponsorship? sponsorInstance = await _repo.GetByCodeAsync(code);
+            if (sponsorInstance is null) { return Result<Sponsorship>.Failure("Sponsorship not Found."); }
+
+            return Result<Sponsorship>.Success(sponsorInstance);
+        }
+
         public async Task<Result<DTSponsorship>> GetDTAsync(Guid id)
         {
             if (id == Guid.Empty) { return Result<DTSponsorship>.Failure("Sponsorship can not be empty."); }
@@ -86,16 +95,6 @@ namespace EventosUy.Application.Services
             if (errors.Any()) { return Result<DTSponsorship>.Failure(errors); }
 
             return Result<DTSponsorship>.Success(sponsorInstance.GetDT(editionResult.Value!, institutionResult.Value!));
-        }
-
-        public async Task<Result> ValidateCodeAsync(Guid registerTypeId, string sponsorCode) 
-        {
-            if (registerTypeId == Guid.Empty) { return Result.Failure("Register Type can not be empty."); }
-            if (string.IsNullOrWhiteSpace(sponsorCode)) { return Result.Failure("Sponsor Code can not be empty."); }
-
-            if (!(await _repo.ValidateCodeAsync(registerTypeId, sponsorCode))) { return Result.Failure("Invalid code."); }
-
-            return Result.Success();
         }
     }
 }

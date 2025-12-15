@@ -10,15 +10,15 @@ namespace EventosUy.Domain.Entidades
     {
         public Guid Id { get; init; }
         public DateTimeOffset Created { get; init; }
-        public float Total { get; init; }
-        public string SponsorCode { get; init; }
+        public decimal Total { get; init; }
+        public string? SponsorCode { get; init; }
         public Participation Participation { get; init; }
         public RegisterState State { get; private set; }
         public Guid Person { get; init; }
         public Guid Edition { get; init; }
         public Guid RegisterType { get; init; }
 
-        private Register(float total, string sponsorCode, Guid personId, Guid editionId, Guid registerTypeId, Participation participation) 
+        private Register(decimal total, string? sponsorCode, Guid personId, Guid editionId, Guid registerTypeId, Participation participation) 
         {
             Id = Guid.NewGuid();
             Created = DateTimeOffset.UtcNow;
@@ -31,13 +31,30 @@ namespace EventosUy.Domain.Entidades
             State = RegisterState.CONFIRMED;
         }
 
-        public static Result<Register> Create(float total, string sponsorCode, Guid personId, Guid editionId, Guid registerTypeId, Participation participation) 
+        public static Result<Register> Create(Guid personId, Guid editionId, RegisterType registerTypeInstance, Participation participation) 
         {
-            if (total < 0) { return Result<Register>.Failure("Total must be greater than or equal to 0."); }
-            if (participation == Participation.EMPLOYEE && total > 0) { return Result<Register>.Failure("Employees do not have to pay."); }
-            if (participation == Participation.GUEST && total > 0) { return Result<Register>.Failure("Guests do not have to pay."); }
+            List<string> errors = [];
+            if (participation != Participation.CLIENT) { errors.Add($"Invalid participation: {participation}."); }
+            if (!registerTypeInstance.IsActive()) { errors.Add($"Register type {registerTypeInstance.Name} is already full."); }
 
-            Register registerInstance = new Register(total, sponsorCode, personId, editionId, registerTypeId, participation);
+            if (errors.Any()) { return Result<Register>.Failure(errors); }
+
+            decimal total = (participation == Participation.CLIENT) ? registerTypeInstance.Price : 0;
+
+            Register registerInstance = new Register(total, null, personId, editionId, registerTypeInstance.Id, participation);
+
+            return Result<Register>.Success(registerInstance);
+        }
+
+        public static Result<Register> Create(string sponsorCode, Guid personId, Guid editionId, RegisterType registerTypeInstance, Participation participation)
+        {
+            List<string> errors = [];
+            if (participation == Participation.CLIENT) { errors.Add($"Invalid participation: {participation}."); }
+            if (!registerTypeInstance.IsActive()) { errors.Add($"Register type {registerTypeInstance.Name} is already full."); }
+
+            if (errors.Any()) { return Result<Register>.Failure(errors); }
+
+            Register registerInstance = new Register(0, sponsorCode, personId, editionId, registerTypeInstance.Id, participation);
 
             return Result<Register>.Success(registerInstance);
         }

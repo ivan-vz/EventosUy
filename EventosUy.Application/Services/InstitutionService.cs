@@ -14,7 +14,7 @@ namespace EventosUy.Application.Services
 
         public InstitutionService(IInstitutionRepo institutionRepo) { _repo = institutionRepo; }
 
-        public async Task<Result<Guid>> CreateAsync(string nickname, string password, string email, string name, string description, string url, string country, string city, string street, string number)
+        public async Task<Result<Guid>> CreateAsync(string nickname, string password, string email, string name, string acronym, string description, string url, string country, string city, string street, string number)
         {
             List<string> errors = [];
             Result<Password> passwordResult = Password.Create(password);
@@ -33,12 +33,13 @@ namespace EventosUy.Application.Services
 
             if (await _repo.ExistsByNicknameAsync(nickname)) { errors.Add("Nickname already in use."); }
             if (await _repo.ExistsByEmailAsync(emailResult.Value!)) { errors.Add("Email already in use."); }
+            if (await _repo.ExistsByAcronymAsync(acronym)) { errors.Add("Acronym already in use."); }
             if (await _repo.ExistsByUrlAsync(urlResult.Value!)) { errors.Add("Url already in use."); }
             if (await _repo.ExistsByAddressAsync(addressResult.Value!)) { errors.Add("Address already in use."); }
 
             if (errors.Any()) { return Result<Guid>.Failure(errors); }
 
-            Result<Institution> institutionResult = Institution.Create(nickname, passwordResult.Value!, emailResult.Value!, name, urlResult.Value!, addressResult.Value!, description);
+            Result<Institution> institutionResult = Institution.Create(nickname, acronym, passwordResult.Value!, emailResult.Value!, name, urlResult.Value!, addressResult.Value!, description);
             if (institutionResult.IsFailure) { return Result<Guid>.Failure(institutionResult.Errors); }
 
             Institution institutionInstance = institutionResult.Value!;

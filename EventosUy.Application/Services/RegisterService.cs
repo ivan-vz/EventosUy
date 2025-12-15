@@ -16,19 +16,29 @@ namespace EventosUy.Application.Services
         private readonly IEditionService _editionService;
         private readonly IRegisterTypeService _registerTypeService;
         private readonly ISponsorshipService _sponsorshipService;
+        private readonly IEmploymentService _employmentService;
 
-        public RegisterService(IRegisterRepo registerRepo, IPersonService personService, IEditionService editionService, IRegisterTypeService registerTypeService, ISponsorshipService sponsorshipService) 
+        public RegisterService(
+            IRegisterRepo registerRepo, 
+            IPersonService personService, 
+            IEditionService editionService, 
+            IRegisterTypeService registerTypeService, 
+            ISponsorshipService sponsorshipService,
+            IEmploymentService employmentService) 
         {
             _repo = registerRepo;
             _personService = personService;
             _editionService = editionService;
             _registerTypeService = registerTypeService;
             _sponsorshipService = sponsorshipService;
+            _employmentService = employmentService;
+
         }
 
-        public async Task<Result<Guid>> CreateAsync(Guid personId, Guid editionId, Guid registerTypeId, string sponsorCode, float total, Participation participation)
+        public async Task<Result<Guid>> CreateAsync(Guid personId, Guid editionId, Guid registerTypeId, Participation participation, string sponsorCode)
         {
             List<string> errors = [];
+
             Result<Person> personResult = await _personService.GetByIdAsync(personId);
             if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
@@ -38,18 +48,84 @@ namespace EventosUy.Application.Services
             Result<RegisterType> registerTypeResult = await _registerTypeService.GetByIdAsync(registerTypeId);
             if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
 
-            Result codeResult = await _sponsorshipService.ValidateCodeAsync(registerTypeId, sponsorCode);
-            if (!codeResult.IsSuccess) { errors.AddRange(codeResult.Errors); }
-
+            Result<Sponsorship> sponsorResult = await _sponsorshipService.GetByCodeAsync(sponsorCode);
+            if (!sponsorResult.IsSuccess) { errors.AddRange(sponsorResult.Errors); }
+            
             if (errors.Any()) { return Result<Guid>.Failure(errors); }
             
+            RegisterType registerTypeInstance = registerTypeResult.Value!;
+            Sponsorship sponsorshipInstance = sponsorResult.Value!;
+
+            if (!sponsorshipInstance.RegisterType.Equals(registerTypeId)) { errors.Add($"Sponsorship {sponsorshipInstance.Name} is not for register type {registerTypeInstance.Name}."); }
+
+            Result contractResult = await _employmentService.HasActiveContractAsync(personId, sponsorshipInstance.Institution);
+            if (contractResult.IsFailure) { errors.AddRange(contractResult.Errors); }
+
+            if (participation == Participation.CLIENT || participation == Participation.EMPLOYEE) { errors.Add("Clients and Employees cannot use a sponsor code."); }
+           
+            if (participation == Participation.GUEST) 
+            {
+                if (!registerTypeInstance.IsActive()) { errors.Add($"Register Type {registerTypeInstance.Name} is completed."); }
+
+                if (!sponsorshipInstance.IsActive()) { errors.Add($"Sponsorship {sponsorshipInstance.Name} is completed."); }
+            }
+
+            if (errors.Any()) { return Result<Guid>.Failure(errors); }
+
             if (await _repo.ExistsAsync(personId, editionId)) { return Result<Guid>.Failure("Register already exist."); }
 
-            Result<Register> registerResult = Register.Create(total, sponsorCode, personId, editionId, registerTypeId, participation);
+            Result<Register> registerResult = Register.Create(sponsorCode, personId, editionId, registerTypeInstance, participation);
             if (!registerResult.IsSuccess) { return Result<Guid>.Failure(registerResult.Errors); }
+
+            if (participation == Participation.GUEST) 
+            {
+                Result useSponsorResult = sponsorshipInstance.UseSpot();
+                if (useSponsorResult.IsFailure) { return Result<Guid>.Failure(useSponsorResult.Errors); }
+
+                Result useRegisterTypeResult = registerTypeInstance.UseSpot();
+                if (useRegisterTypeResult.IsFailure) { return Result<Guid>.Failure(useRegisterTypeResult.Errors); }
+            
+                //await _sponsorshipService.UpdateAsync(sponsorshipInstance);
+                //await _registerTypeService.UpdateAsync(registerTypeInstance);
+            }
 
             Register registerInstance = registerResult.Value!;
             await _repo.AddAsync(registerInstance);
+
+            return Result<Guid>.Success(registerInstance.Id);
+        }
+
+        public async Task<Result<Guid>> CreateAsync(Guid personId, Guid editionId, Guid registerTypeId, Participation participation)
+        {
+            List<string> errors = [];
+
+            Result<Person> personResult = await _personService.GetByIdAsync(personId);
+            if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
+
+            Result<Edition> editionResult = await _editionService.GetByIdAsync(editionId);
+            if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
+
+            Result<RegisterType> registerTypeResult = await _registerTypeService.GetByIdAsync(registerTypeId);
+            if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
+
+            if (errors.Any()) { return Result<Guid>.Failure(errors); }
+
+            RegisterType registerTypeInstance = registerTypeResult.Value!;
+            
+            if (await _repo.ExistsAsync(personId, editionId)) { return Result<Guid>.Failure("Register already exist."); }
+
+            if (!registerTypeInstance.IsActive()) { return Result<Guid>.Failure($"Register type '{registerTypeInstance.Name}' is full."); }
+
+            Result<Register> registerResult = Register.Create(personId, editionId, registerTypeInstance, participation);
+            if (!registerResult.IsSuccess) { return Result<Guid>.Failure(registerResult.Errors); }
+
+            Register registerInstance = registerResult.Value!;
+
+            Result useSpotResult = registerTypeInstance.UseSpot();
+            if (!useSpotResult.IsSuccess) { return Result<Guid>.Failure(useSpotResult.Errors); }
+
+            await _repo.AddAsync(registerInstance);
+            //await _registerTypeService.UpdateAsync(registerTypeInstance);
 
             return Result<Guid>.Success(registerInstance.Id);
         }

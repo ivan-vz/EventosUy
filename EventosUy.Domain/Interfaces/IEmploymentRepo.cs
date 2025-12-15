@@ -10,5 +10,6 @@ namespace EventosUy.Domain.Interfaces
         public Task<bool> ExistsAsync(Guid institutionId, Guid professionalId, Guid jobTitleId);
         public Task AddAsync(Employment employment);
         public Task<bool> RemoveAsync(Guid id);
+        public Task<bool> ValidateContractAsync(Guid person, Guid institution);
     }
 }
