@@ -33,15 +33,15 @@ namespace EventosUy.Domain.Entities
             if (acronym.Length < 2 || acronym.Length > 10) { errors.Add("Acronym cannot must have between 2 and 10 characters."); }
             if (acronym.Any(c => !char.IsLetter(c))) { errors.Add("Acronyms can only contain letters."); }
 
-            if (errors.Any()) { return Result<Institution>.Failure(errors); }
+            if (errors.Count != 0) { return Result<Institution>.Failure(errors); }
 
-            Institution institutionInstance = new Institution(acronym, description, address, url, nickname, password, name, email);
+            Institution institutionInstance = new(acronym, description, address, url, nickname, password, name, email);
 
             return Result<Institution>.Success(institutionInstance);
         }
 
-        public DTInsitution GetDT() { return new DTInsitution(Nickname, Email.Value, Name, Description, Url.Value, Address.FullAddress, Created); }
+        public DTInsitution GetDT() { return new(Nickname, Email.Value, Name, Description, Url.Value, Address.FullAddress, Created); }
 
-        public ProfileCard GetCard() { return new ProfileCard(Id, Nickname, Email.Value); }
+        public UserCard GetCard() { return new(Id, Nickname, Email.Value); }
     }
 }

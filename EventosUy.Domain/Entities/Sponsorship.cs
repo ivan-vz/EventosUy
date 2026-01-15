@@ -3,7 +3,6 @@ using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.ValueObjects;
-using System;
 
 namespace EventosUy.Domain.Entities
 {
@@ -11,29 +10,16 @@ namespace EventosUy.Domain.Entities
     {
         public Guid Id { get; init; }
         public string Name { get; init; }
-        public DateTimeOffset Created { get; init; }
         public SponsorLevel Level { get; init; }
-        public int Used { get; private set; }
-        public string Code { get; init; }
-        public SponsorshipState State { get; private set; }
-        public DateOnly Expired { get; private set; }
-        public Guid Institution { get; init; }
-        public Guid Edition { get; init; }
-        public Guid RegisterType { get; init; }
+        public DateTimeOffset Created { get; init; }
+        public Guid Voucher { get; init; }
 
-        private Sponsorship(string name, string code, SponsorLevel level, Guid institutionId, Guid editionId, Guid registerTypeId, DateOnly expired)
+        private Sponsorship(string name, string code, SponsorLevel level)
         {
             Id = Guid.NewGuid();
             Name = name;
             Created = DateTimeOffset.UtcNow;
-            Used = 0;
-            Code = code;
             Level = level;
-            Institution = institutionId;
-            Edition = editionId;
-            RegisterType = registerTypeId;
-            State = SponsorshipState.AVAILABLE;
-            Expired = expired;
         }
 
         public static Result<Sponsorship> Create(

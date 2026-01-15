@@ -11,6 +11,6 @@ namespace EventosUy.Application.Interfaces
         public Task<Result<Guid>> CreateAsync(Guid personId, Guid editionId, Guid registerTypeId, Participation participation);
         public Task<Result<DTRegister>> GetDTAsync(Guid id);
         public Task<Result<List<RegisterCardByEdition>>> GetAllByEditionAsync(Guid editionId);
-        public Task<Result<List<RegisterCardByPerson>>> GetAllByPersonAsync(Guid personId);
+        public Task<Result<List<RegisterCardByClient>>> GetAllByPersonAsync(Guid personId);
     }
 }

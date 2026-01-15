@@ -1,6 +1,6 @@
 ﻿namespace EventosUy.Domain.Enumerates
 {
-    public enum SponsorshipState
+    public enum VoucherState
     {
         AVAILABLE,
         COMPLETED,

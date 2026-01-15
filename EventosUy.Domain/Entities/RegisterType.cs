@@ -38,16 +38,16 @@ namespace EventosUy.Domain.Entities
             if (price < 0) { errors.Add("Price must be greater than or equal to 0."); }
             if (quota <= 0) { errors.Add("Quota must be greater than 0."); }
 
-            if (errors.Any()) { return Result<RegisterType>.Failure(errors); }
+            if (errors.Count != 0) { return Result<RegisterType>.Failure(errors); }
 
-            RegisterType registerTypeInstance = new RegisterType(name, description, price, quota, editionId);
+            RegisterType registerTypeInstance = new(name, description, price, quota, editionId);
 
             return Result<RegisterType>.Success(registerTypeInstance);
         }
 
-        public DTRegisterType GetDT(Edition editionInstance) { return new DTRegisterType(Name, editionInstance.Name, Description, Price, Quota, Created); }
+        public DTRegisterType GetDT(Edition editionInstance) { return new(Name, editionInstance.GetCard(), Description, Price, Quota, Created); }
 
-        public RegisterTypeCard GetCard() { return new RegisterTypeCard(Id, Name, Active); }
+        public RegisterTypeCard GetCard() { return new(Id, Name, Active); }
 
         public bool IsActive() { return Active; }
 

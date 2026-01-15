@@ -2,7 +2,6 @@
 using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
-using EventosUy.Domain.Enumerates;
 
 namespace EventosUy.Domain.Entidades
 {
@@ -12,13 +11,11 @@ namespace EventosUy.Domain.Entidades
         public DateTimeOffset Created { get; init; }
         public decimal Total { get; init; }
         public string? SponsorCode { get; init; }
-        public Participation Participation { get; init; }
-        public RegisterState State { get; private set; }
-        public Guid Person { get; init; }
+        public Guid Client { get; init; }
         public Guid Edition { get; init; }
         public Guid RegisterType { get; init; }
 
-        private Register(decimal total, string? sponsorCode, Guid personId, Guid editionId, Guid registerTypeId, Participation participation) 
+        private Register(decimal total, string? sponsorCode, Guid clientId, Guid editionId, Guid registerTypeId) 
         {
             Id = Guid.NewGuid();
             Created = DateTimeOffset.UtcNow;
@@ -64,8 +61,8 @@ namespace EventosUy.Domain.Entidades
             return new DTRegister(registerTypeInstance.Name, editionInstance.Name, Created, Total, SponsorCode, Participation, State); 
         }
 
-        public RegisterCardByEdition GetCardByEdition(Person personInstance) { return new RegisterCardByEdition(Id, personInstance.Nickname, Participation); }
+        public RegisterCardByEdition GetCardByEdition(Client personInstance) { return new RegisterCardByEdition(Id, personInstance.Nickname, Participation); }
 
-        public RegisterCardByPerson GetCardByPerson(Edition editionInstance) { return new RegisterCardByPerson(Id, editionInstance.Name, Participation); }
+        public RegisterCardByClient GetCardByPerson(Edition editionInstance) { return new RegisterCardByClient(Id, editionInstance.Name, Participation); }
     }
 }

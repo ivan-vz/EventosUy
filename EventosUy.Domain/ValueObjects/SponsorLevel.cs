@@ -36,11 +36,11 @@ namespace EventosUy.Domain.ValueObjects
             if (amount > ranges.max) { errors.Add($"Amount {amount:N0} exceeds maximum for {tier} tier. Please upgrade to the next tier."); }
             if (registerTypePrice < 0) { errors.Add("Register type price must be greater than or equal to 0."); }
 
-            if (errors.Any()) { return Result<SponsorLevel>.Failure(errors); }
+            if (errors.Count != 0) { return Result<SponsorLevel>.Failure(errors); }
 
             int free = (int)Math.Floor((0.2m * amount) / registerTypePrice);
 
-            var instance = new SponsorLevel(amount, tier, free);
+            SponsorLevel instance = new(amount, tier, free);
 
             return Result<SponsorLevel>.Success(instance);
         }

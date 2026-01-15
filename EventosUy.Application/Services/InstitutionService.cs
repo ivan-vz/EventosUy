@@ -46,12 +46,12 @@ namespace EventosUy.Application.Services
             return Result<Guid>.Success(institutionInstance.Id);
         }
 
-        public async Task<Result<List<ProfileCard>>> GetAllAsync()
+        public async Task<Result<List<UserCard>>> GetAllAsync()
         {
             List<Institution> institutions = await _repo.GetAllAsync();
-            List<ProfileCard> cards = institutions.Select(institution => institution.GetCard()).ToList();
+            List<UserCard> cards = institutions.Select(institution => institution.GetCard()).ToList();
 
-            return Result<List<ProfileCard>>.Success(cards);
+            return Result<List<UserCard>>.Success(cards);
         }
 
         public async Task<Result<Institution>> GetByIdAsync(Guid id)

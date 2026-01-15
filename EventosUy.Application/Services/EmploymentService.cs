@@ -59,7 +59,7 @@ namespace EventosUy.Application.Services
             List<EmploymentCardByInstitution> cards = [];
             foreach (Employment employee in employees)
             {
-                Result<Person> personResult = await _personService.GetByIdAsync(employee.ProfessionalProfile); //Profesional profile tiene el mismo id que la persona a la que representa
+                Result<Client> personResult = await _personService.GetByIdAsync(employee.ProfessionalProfile); //Profesional profile tiene el mismo id que la persona a la que representa
                 if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
                 Result<JobTitle> jobTitleResult = await _jobTitleService.GetByIdAsync(employee.JobTitle);

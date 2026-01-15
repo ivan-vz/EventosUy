@@ -36,47 +36,47 @@ namespace EventosUy.Application.Services
             
             if (errors.Any()) { return Result<Guid>.Failure(errors); }
 
-            Result<Person> personResult = Person.Create(nickname, passwordResult.Value!, emailResult.Value!, nameResult.Value!, birthday);
+            Result<Client> personResult = Client.Create(nickname, passwordResult.Value!, emailResult.Value!, nameResult.Value!, birthday);
             if (personResult.IsFailure) { return Result<Guid>.Failure(personResult.Errors); }
 
-            Person personInstance = personResult.Value!;
+            Client personInstance = personResult.Value!;
             await _repo.AddAsync(personInstance);
 
             return Result<Guid>.Success(personInstance.Id);
         }
 
-        public async Task<Result<List<ProfileCard>>> GetAllAsync()
+        public async Task<Result<List<UserCard>>> GetAllAsync()
         {
-            List<Person> persons = await _repo.GetAllAsync();
-            List<ProfileCard> cards = persons.Select(person => person.GetCard()).ToList();
+            List<Client> persons = await _repo.GetAllAsync();
+            List<UserCard> cards = persons.Select(person => person.GetCard()).ToList();
 
-            return Result<List<ProfileCard>>.Success(cards);
+            return Result<List<UserCard>>.Success(cards);
         }
 
-        public async Task<Result<List<ProfileCard>>> GetAllExceptAsync(List<Guid> ids)
+        public async Task<Result<List<UserCard>>> GetAllExceptAsync(List<Guid> ids)
         {
-            List<Person> persons = await _repo.GetAllExceptAsync(ids);
-            List<ProfileCard> cards = persons.Select(person => person.GetCard()).ToList();
+            List<Client> persons = await _repo.GetAllExceptAsync(ids);
+            List<UserCard> cards = persons.Select(person => person.GetCard()).ToList();
 
-            return Result<List<ProfileCard>>.Success(cards);
+            return Result<List<UserCard>>.Success(cards);
         }
 
-        public async Task<Result<Person>> GetByIdAsync(Guid personId)
+        public async Task<Result<Client>> GetByIdAsync(Guid personId)
         {
-            if (personId == Guid.Empty) { return Result<Person>.Failure("Person can not be empty."); }
-            Person? personInstance = await _repo.GetByIdAsync(personId);
-            if (personInstance is null) { return Result<Person>.Failure("Person not Found."); }
+            if (personId == Guid.Empty) { return Result<Client>.Failure("Person can not be empty."); }
+            Client? personInstance = await _repo.GetByIdAsync(personId);
+            if (personInstance is null) { return Result<Client>.Failure("Person not Found."); }
 
-            return Result<Person>.Success(personInstance);
+            return Result<Client>.Success(personInstance);
         }
 
-        public async Task<Result<DTPerson>> GetDT(Guid id)
+        public async Task<Result<DTClient>> GetDT(Guid id)
         {
-            if (id == Guid.Empty) { return Result<DTPerson>.Failure("Person can not be empty."); }
-            Person? personInstance = await _repo.GetByIdAsync(id);
-            if (personInstance is null) { return Result<DTPerson>.Failure("Person not Found."); }
+            if (id == Guid.Empty) { return Result<DTClient>.Failure("Person can not be empty."); }
+            Client? personInstance = await _repo.GetByIdAsync(id);
+            if (personInstance is null) { return Result<DTClient>.Failure("Person not Found."); }
 
-            return Result<DTPerson>.Success(personInstance.GetDT());
+            return Result<DTClient>.Success(personInstance.GetDT());
         }
     }
 }

@@ -39,7 +39,7 @@ namespace EventosUy.Application.Services
         {
             List<string> errors = [];
 
-            Result<Person> personResult = await _personService.GetByIdAsync(personId);
+            Result<Client> personResult = await _personService.GetByIdAsync(personId);
             if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
             Result<Edition> editionResult = await _editionService.GetByIdAsync(editionId);
@@ -99,7 +99,7 @@ namespace EventosUy.Application.Services
         {
             List<string> errors = [];
 
-            Result<Person> personResult = await _personService.GetByIdAsync(personId);
+            Result<Client> personResult = await _personService.GetByIdAsync(personId);
             if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
             Result<Edition> editionResult = await _editionService.GetByIdAsync(editionId);
@@ -139,7 +139,7 @@ namespace EventosUy.Application.Services
             List<RegisterCardByEdition> cards = [];
             foreach (Register register in registers) 
             {
-                Result<Person> personResult = await _personService.GetByIdAsync(register.Person);
+                Result<Client> personResult = await _personService.GetByIdAsync(register.Person);
                 if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
                 cards.Add(register.GetCardByEdition(personResult.Value!));
@@ -150,13 +150,13 @@ namespace EventosUy.Application.Services
             return Result<List<RegisterCardByEdition>>.Success(cards);
         }
 
-        public async Task<Result<List<RegisterCardByPerson>>> GetAllByPersonAsync(Guid personId)
+        public async Task<Result<List<RegisterCardByClient>>> GetAllByPersonAsync(Guid personId)
         {
-            if (personId == Guid.Empty) { return Result<List<RegisterCardByPerson>>.Failure("Person can not be empty."); }
+            if (personId == Guid.Empty) { return Result<List<RegisterCardByClient>>.Failure("Person can not be empty."); }
             List<Register> registers = await _repo.GetAllByPersonAsync(personId);
 
             List<string> errors = [];
-            List<RegisterCardByPerson> cards = [];
+            List<RegisterCardByClient> cards = [];
             foreach (Register register in registers)
             {
                 Result<Edition> editionResult = await _editionService.GetByIdAsync(register.Edition);
@@ -165,9 +165,9 @@ namespace EventosUy.Application.Services
                 cards.Add(register.GetCardByPerson(editionResult.Value!));
             }
 
-            if (errors.Any()) { return Result<List<RegisterCardByPerson>>.Failure(errors); }
+            if (errors.Any()) { return Result<List<RegisterCardByClient>>.Failure(errors); }
 
-            return Result<List<RegisterCardByPerson>>.Success(cards);
+            return Result<List<RegisterCardByClient>>.Success(cards);
         }
 
         public async Task<Result<DTRegister>> GetDTAsync(Guid id)

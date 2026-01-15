@@ -42,9 +42,9 @@ namespace EventosUy.Domain.Entities
             if (from > to) { errors.Add("The start of editing cannot be later than its completion."); }
             if (from <= DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("The start date of the edition cannot be earlier than today's date."); }
 
-            if (errors.Any()) { return Result<Edition>.Failure(errors); }
+            if (errors.Count != 0) { return Result<Edition>.Failure(errors); }
 
-            Edition editionInstance = new Edition(name, initials, from, to, address, eventId, institutionId); 
+            Edition editionInstance = new(name, initials, from, to, address, eventId, institutionId); 
 
             return Result<Edition>.Success(editionInstance);
         }
@@ -52,7 +52,11 @@ namespace EventosUy.Domain.Entities
         public void Approve() { State = EditionState.PUBLISHED; }
         public void Reject() { State = EditionState.CANCELLED; }
 
-        public DTEdition GetDT(Event eventInstance, Institution institutionInstance) { return new DTEdition(Name, Initials, From, To, Created, Address, eventInstance.Name, institutionInstance.Nickname); }
-        public ActivityCard GetCard() { return new ActivityCard(Id, Name, Initials); }
+        public DTEdition GetDT(Event eventInstance, Institution institutionInstance) 
+        { 
+            return new(Name, Initials, From, To, Created, Address.FullAddress, eventInstance.GetCard(), institutionInstance.GetCard()); 
+        }
+
+        public ActivityCard GetCard() { return new(Id, Name, Initials); }
     }
 }

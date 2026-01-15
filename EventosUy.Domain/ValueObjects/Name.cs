@@ -27,16 +27,16 @@ namespace EventosUy.Domain.ValueObjects
             if (string.IsNullOrWhiteSpace(lastSurname)) { errors.Add("Last surname cannot be empty."); }
             if (string.IsNullOrWhiteSpace(firstName)) { errors.Add("First name cannot be empty."); }
 
-            if (errors.Any()) { return Result<Name>.Failure(errors); }
+            if (errors.Count != 0) { return Result<Name>.Failure(errors); }
 
             if (firstSurname.Any(c => !char.IsLetter(c))) { errors.Add("First surname cannot have anythings else than letters."); }
             if (lastSurname.Any(c => !char.IsLetter(c))) { errors.Add("Last surname cannot have anythings else than letters."); }
             if (firstName.Any(c => !char.IsLetter(c))) { errors.Add("First name cannot have anythings else than letters."); }
             if (lastName is not null && lastName.Any(c => !char.IsLetter(c))) { errors.Add("Last name cannot have anythings else than letters."); }
 
-            if (errors.Any()) { return Result<Name>.Failure(errors); }
+            if (errors.Count != 0) { return Result<Name>.Failure(errors); }
 
-            Name name = new Name(firstSurname, lastSurname, firstName, lastName);
+            Name name = new(firstSurname, lastSurname, firstName, lastName);
 
             return Result<Name>.Success(name);
         }

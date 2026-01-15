@@ -26,7 +26,7 @@ namespace EventosUy.Application.Services
             Result<Url> urlResult = Url.Create(linkTree);
             if (urlResult.IsFailure) { errors.AddRange(urlResult.Errors); }
 
-            Result<Person> personResult = await _personService.GetByIdAsync(personId);
+            Result<Client> personResult = await _personService.GetByIdAsync(personId);
             if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
             if (errors.Any()) { return Result<Guid>.Failure(errors); }
@@ -49,53 +49,53 @@ namespace EventosUy.Application.Services
             return Result.Success();
         }
 
-        public async Task<Result<List<ProfileCard>>> GetAllAsync()
+        public async Task<Result<List<UserCard>>> GetAllAsync()
         {
             List<ProfessionalProfile> professionals = await _repo.GetAllVerifiedAsync();
 
-            List<ProfileCard> cards = [];
+            List<UserCard> cards = [];
             List<string> errors = [];
             foreach (ProfessionalProfile professional in professionals)
             {
-                Result<Person> personResult = await _personService.GetByIdAsync(professional.Id);
+                Result<Client> personResult = await _personService.GetByIdAsync(professional.Id);
                 if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
                 cards.Add(professional.GetCard(personResult.Value!));
             }
 
-            if (errors.Any()) { return Result<List<ProfileCard>>.Failure(errors); }
+            if (errors.Any()) { return Result<List<UserCard>>.Failure(errors); }
             
-            return Result<List<ProfileCard>>.Success(cards);
+            return Result<List<UserCard>>.Success(cards);
         }
 
-        public async Task<Result<List<ProfileCard>>> GetAllPendingAsync()
+        public async Task<Result<List<UserCard>>> GetAllPendingAsync()
         {
             List<ProfessionalProfile> professionals = await _repo.GetAllPendingAsync();
             
-            List<ProfileCard> cards = [];
+            List<UserCard> cards = [];
             List<string> errors = [];
             foreach (ProfessionalProfile professional in professionals) 
             {
-                Result<Person> personResult = await _personService.GetByIdAsync(professional.Id);
+                Result<Client> personResult = await _personService.GetByIdAsync(professional.Id);
                 if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
 
                 cards.Add(professional.GetCard(personResult.Value!));
             }
 
-            if (errors.Any()) { return Result<List<ProfileCard>>.Failure(errors); }
+            if (errors.Any()) { return Result<List<UserCard>>.Failure(errors); }
 
-            return Result<List<ProfileCard>>.Success(cards);
+            return Result<List<UserCard>>.Success(cards);
         }
 
-        public async Task<Result<List<ProfileCard>>> GetAllUnverifiedAsync()
+        public async Task<Result<List<UserCard>>> GetAllUnverifiedAsync()
         {
             List<ProfessionalProfile> professionals = await _repo.GetAllVerifiedAsync();
             List<Guid> verifiedIds = professionals.Select(p => p.Id).ToList();
 
-            Result<List<ProfileCard>> personsResult = await _personService.GetAllExceptAsync(verifiedIds);
-            if (personsResult.IsFailure) { return Result<List<ProfileCard>>.Failure(personsResult.Errors); }
+            Result<List<UserCard>> personsResult = await _personService.GetAllExceptAsync(verifiedIds);
+            if (personsResult.IsFailure) { return Result<List<UserCard>>.Failure(personsResult.Errors); }
 
-            return Result<List<ProfileCard>>.Success(personsResult.Value!);
+            return Result<List<UserCard>>.Success(personsResult.Value!);
         }
 
         public async Task<Result<ProfessionalProfile>> GetByIdAsync(Guid professionalId)

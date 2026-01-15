@@ -8,18 +8,20 @@ namespace EventosUy.Domain.ValueObjects
         public string City { get; init; }
         public string Street { get; init; }
         public string Number { get; init; }
+        public int? Floor { get; init; }
         public string FullAddress { get; init; }
 
-        private Address(string country, string city, string street, string number) 
+        private Address(string country, string city, string street, string number, int? floor) 
         {
             Country = country;
             City = city;
             Street = street;
             Number = number;
-            FullAddress = $"{country}, {city}, {Street}, {Number}";
+            Floor = floor;
+            FullAddress = $"{country}, {city}, {Street}, {Number}, {floor}";
         }
 
-        public static Result<Address> Create(string country, string city, string street, string number) 
+        public static Result<Address> Create(string country, string city, string street, string number, int? floor) 
         {
             List<string> errors = [];
             if (string.IsNullOrWhiteSpace(country)) { errors.Add("Address Country can not be empty."); }
@@ -27,9 +29,9 @@ namespace EventosUy.Domain.ValueObjects
             if (string.IsNullOrWhiteSpace(street)) { errors.Add("Address Street can not be empty."); }
             if (string.IsNullOrWhiteSpace(number) && number.Length != 4) { errors.Add("Address Number can not be empty."); }
 
-            if (errors.Any()) { return Result<Address>.Failure(errors); }
+            if (errors.Count != 0) { return Result<Address>.Failure(errors); }
 
-            Address address = new Address(country, city, street, number);
+            Address address = new(country, city, street, number, floor);
 
             return Result<Address>.Success(address);
         }

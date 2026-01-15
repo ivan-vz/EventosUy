@@ -1,7 +1,6 @@
 ﻿using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
-using System.Runtime.InteropServices;
 
 namespace EventosUy.Domain.Entities
 {
@@ -13,7 +12,7 @@ namespace EventosUy.Domain.Entities
         public string Description { get; private set; }
         public DateTimeOffset Created { get; init; }
         public bool Active { get; private set; }
-        public HashSet<Guid> Categories { get; private set; }
+        public HashSet<string> Categories { get; private set; }
         public Guid Institution { get; init; }
 
         private Event(string name, string initials, string description, Guid institution)
@@ -25,7 +24,7 @@ namespace EventosUy.Domain.Entities
             Created = DateTimeOffset.UtcNow;
             Active = true;
             Institution = institution;
-            Categories = new HashSet<Guid>();
+            Categories = [];
         }
 
         public static Result<Event> Create(string name, string initials, string description, Guid institution) 
@@ -36,24 +35,24 @@ namespace EventosUy.Domain.Entities
             if (string.IsNullOrWhiteSpace(description)) { errors.Add("Description cannot be empty."); }
             if (institution == Guid.Empty) { errors.Add("Institution cannot be empty."); }
 
-            if (errors.Any()) { return Result<Event>.Failure(errors); }
+            if (errors.Count != 0) { return Result<Event>.Failure(errors); }
 
-            Event eventInstance = new Event(name, initials, description, institution);
+            Event eventInstance = new(name, initials, description, institution);
 
             return Result<Event>.Success(eventInstance);
         }
 
-        public void AddCategories(IEnumerable<Guid> categories) {
-            foreach (var id in categories)
+        public void AddCategories(IEnumerable<string> categories) {
+            foreach (var cat in categories)
             {
-                Categories.Add(id);
+                Categories.Add(cat);
             }
         }
 
-        public HashSet<Guid> GetCategories() { return Categories; }
+        public IEnumerable<string> GetCategories() { return Categories; }
 
-        public DTEvent GetDT(Institution institutionInstance) { return new DTEvent(Name, Initials, Description, institutionInstance.Name, Created); }
+        public DTEvent GetDT(Institution institutionInstance) { return new(Name, Initials, Description, Created, Categories, institutionInstance.GetCard()); }
 
-        public ActivityCard GetCard() { return new ActivityCard(Id, Name, Initials); }
+        public ActivityCard GetCard() { return new(Id, Name, Initials); }
     }
 }

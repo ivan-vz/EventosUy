@@ -1,6 +1,4 @@
-﻿using EventosUy.Domain.Enumerates;
-
-namespace EventosUy.Domain.DTOs.Records
+﻿namespace EventosUy.Domain.DTOs.Records
 {
-    public record RegisterCardByEdition(Guid Id, string Person, Participation Participation);
+    public record RegisterCardByEdition(Guid Id, string Client, DateTimeOffset Created);
 }

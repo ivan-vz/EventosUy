@@ -3,7 +3,7 @@ using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Tests.Domain
 {
-    public class PersonTests
+    public class ClientTests
     {
         [Fact]
         public void Create_WithValidInput_ReturnsSuccess()
@@ -15,7 +15,7 @@ namespace EventosUy.Tests.Domain
             var birthday = new DateOnly(1985, 5, 12);
 
             // Act
-            var result = Person.Create("nickname", password, email, name, birthday);
+            var result = Client.Create("nickname", password, email, name, birthday);
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -43,7 +43,7 @@ namespace EventosUy.Tests.Domain
             var name = Name.Create("firstsurname", "lastsurname", "firstname", "lastname").Value!;
 
             // Act
-            var result = Person.Create(nickname, password, email, name, birthday);
+            var result = Client.Create(nickname, password, email, name, birthday);
 
             // Assert
             Assert.True(result.IsFailure);
@@ -61,7 +61,7 @@ namespace EventosUy.Tests.Domain
             var email = Email.Create("person@gmail.com").Value!;
             var name = Name.Create("firstsurname", "lastsurname", "firstname", "lastname").Value!;
             var birthday = new DateOnly(1985, 5, 12);
-            var personInstance = Person.Create("nickname", password, email, name, birthday).Value!;
+            var personInstance = Client.Create("nickname", password, email, name, birthday).Value!;
 
             // Act
             var dtPerson = personInstance.GetDT();
@@ -82,7 +82,7 @@ namespace EventosUy.Tests.Domain
             var email = Email.Create("person@gmail.com").Value!;
             var name = Name.Create("firstsurname", "lastsurname", "firstname", "lastname").Value!;
             var birthday = new DateOnly(1985, 5, 12);
-            var personInstance = Person.Create("nickname", password, email, name, birthday).Value!;
+            var personInstance = Client.Create("nickname", password, email, name, birthday).Value!;
 
             // Act
             var card = personInstance.GetCard();

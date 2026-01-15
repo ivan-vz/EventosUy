@@ -1,4 +1,5 @@
-﻿using EventosUy.Domain.ValueObjects;
+﻿using EventosUy.Domain.DTOs.Records;
+using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Domain.DTOs.DataTypes
 {
@@ -9,20 +10,20 @@ namespace EventosUy.Domain.DTOs.DataTypes
         public DateOnly From { get; init; }
         public DateOnly To { get; init; }
         public DateTimeOffset Created { get; init; }
-        public Address Address { get; init; }
-        public string Event { get; init; }
-        public string Institution { get; init; }
+        public string FullAddress { get; init; }
+        public ActivityCard Event { get; init; }
+        public UserCard Institution { get; init; }
 
-        public DTEdition(string name, string initials, DateOnly from, DateOnly to, DateTimeOffset created, Address address, string eventName, string institution)
+        public DTEdition(string name, string initials, DateOnly from, DateOnly to, DateTimeOffset created, string address, ActivityCard eventCard, UserCard institutioncard)
         {
             Name = name;
             Initials = initials;
             From = from;
             To = to;
             Created = created;
-            Address = address;
-            Event = eventName;
-            Institution = institution;
+            FullAddress = address;
+            Event = eventCard;
+            Institution = institutioncard;
         }
     }
 }

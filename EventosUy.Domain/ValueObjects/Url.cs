@@ -13,7 +13,7 @@ namespace EventosUy.Domain.ValueObjects
             if (string.IsNullOrWhiteSpace(value)) { return Result<Url>.Failure("URL can not be empty."); }
             if (!Uri.IsWellFormedUriString(value, UriKind.Absolute)) { return Result<Url>.Failure("URL is not formatted correctly."); }
 
-            Url url = new Url(value);
+            Url url = new(value);
 
             return Result<Url>.Success(url);
         }

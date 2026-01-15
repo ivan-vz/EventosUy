@@ -20,7 +20,7 @@ namespace EventosUy.Domain.ValueObjects
 
             if (!EmailRegex.IsMatch(value)) { return Result<Email>.Failure("Email is not formatted correctly."); }
           
-            Email email = new Email(value);
+            Email email = new(value);
 
             return Result<Email>.Success(email);
         }

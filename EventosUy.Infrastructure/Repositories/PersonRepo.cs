@@ -6,11 +6,11 @@ namespace EventosUy.Infrastructure.Repositories
 {
     internal class PersonRepo : IPersonRepo
     {
-        private readonly HashSet<Person> _persons;
+        private readonly HashSet<Client> _persons;
 
         public PersonRepo() { _persons = []; }
 
-        public Task AddAsync(Person person)
+        public Task AddAsync(Client person)
         {
             _persons.Add(person);
             return Task.CompletedTask;
@@ -20,11 +20,11 @@ namespace EventosUy.Infrastructure.Repositories
 
         public Task<bool> ExistsByNicknameAsync(string nickname) { return Task.FromResult(_persons.Any(person => person.Nickname.Equals(nickname, StringComparison.OrdinalIgnoreCase))); }
 
-        public Task<List<Person>> GetAllAsync() { return Task.FromResult(_persons.ToList()); }
+        public Task<List<Client>> GetAllAsync() { return Task.FromResult(_persons.ToList()); }
 
-        public Task<List<Person>> GetAllExceptAsync(List<Guid> ids) { return Task.FromResult(_persons.ExceptBy(ids, person => person.Id).ToList()); }
+        public Task<List<Client>> GetAllExceptAsync(List<Guid> ids) { return Task.FromResult(_persons.ExceptBy(ids, person => person.Id).ToList()); }
 
-        public Task<Person?> GetByIdAsync(Guid id) { return Task.FromResult(_persons.SingleOrDefault(person => person.Id == id)); }
+        public Task<Client?> GetByIdAsync(Guid id) { return Task.FromResult(_persons.SingleOrDefault(person => person.Id == id)); }
 
         public Task<bool> RemoveAsync(Guid id)
         {
