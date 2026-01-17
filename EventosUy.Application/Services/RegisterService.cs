@@ -2,7 +2,6 @@
 using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
-using EventosUy.Domain.Entidades;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;

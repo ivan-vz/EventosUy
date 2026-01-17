@@ -2,23 +2,13 @@
 
 namespace EventosUy.Domain.DTOs.DataTypes
 {
-    public class DTRegisterType
+    public class DTRegisterType(string name, ActivityCard edition, string description, decimal price, int quota, DateTimeOffset created)
     {
-        public string Name { get; init; }
-        public ActivityCard Edition { get; init; }
-        public string Description { get; init; }
-        public decimal Price { get; init; }
-        public int Quota { get; init; }
-        public DateTimeOffset Created { get; init; }
-
-        public DTRegisterType(string name, ActivityCard edition, string description, decimal price, int quota, DateTimeOffset created) 
-        {
-            Name = name;
-            Edition = edition;
-            Description = description;
-            Price = price;
-            Quota = quota;
-            Created = created;
-        }
+        public string Name { get; init; } = name;
+        public ActivityCard Edition { get; init; } = edition;
+        public string Description { get; init; } = description;
+        public decimal Price { get; init; } = price;
+        public int Quota { get; init; } = quota;
+        public DateTimeOffset Created { get; init; } = created;
     }
 }

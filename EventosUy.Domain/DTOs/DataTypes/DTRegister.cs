@@ -1,26 +1,14 @@
-﻿using EventosUy.Domain.Enumerates;
+﻿using EventosUy.Domain.DTOs.Records;
 
 namespace EventosUy.Domain.DTOs.DataTypes
 {
-    public class DTRegister
+    public class DTRegister(DateTimeOffset created, decimal total, RegisterTypeCard registerTypeCard, ActivityCard editionCard, UserCard clientCard, VoucherCard? voucherCard)
     {
-        public string RegisterType { get; init; }
-        public string Edition { get; init; }
-        public DateTimeOffset Created { get; init; }
-        public decimal Total { get; init; }
-        public string? Sponsor_code { get; init; }
-        public Participation Participation { get; init; }
-        public RegisterState State { get; init; }
-
-        public DTRegister(string registerType, string edition, DateTimeOffset created, decimal total, string? sponsor_code, Participation participation, RegisterState state) 
-        {
-            RegisterType = registerType;
-            Edition = edition;
-            Created = created;
-            Total = total;
-            Sponsor_code = sponsor_code;
-            Participation = participation;
-            State = state;
-        }
+        public decimal Total { get; init; } = total;
+        public DateTimeOffset Created { get; init; } = created;
+        public RegisterTypeCard RegisterType { get; init; } = registerTypeCard;
+        public ActivityCard Edition { get; init; } = editionCard;
+        public UserCard Client { get; init; } = clientCard;
+        public VoucherCard? Voucher { get; init; } = voucherCard;
     }
 }

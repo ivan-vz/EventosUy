@@ -18,8 +18,9 @@ namespace EventosUy.Domain.Entities
         public DateOnly Expired { get; init; }
         public VoucherState State { get; init; }
         public Guid Edition { get; init; }
+        public Guid RegisterType { get; init; }
 
-        private Voucher(string name, string code, int discount, int quota, bool automatic, DateOnly expired, Guid editionId) 
+        private Voucher(string name, string code, int discount, int quota, bool automatic, DateOnly expired, Guid editionId, Guid registerTypeId) 
         {
             Id = Guid.NewGuid();
             Name = name;
@@ -32,37 +33,38 @@ namespace EventosUy.Domain.Entities
             Expired = expired;
             State = VoucherState.AVAILABLE;
             Edition = editionId;
+            RegisterType = registerTypeId;
         }
 
-        public static Result<Voucher> Create(string name, int discount, int quota, bool automatic, DateOnly expired, Guid editionId) 
+        public static Result<Voucher> Create(string name, int discount, int quota, bool automatic, Edition edition, RegisterType registerType) 
         {
             List<string> errors = [];
-            if (string.IsNullOrEmpty(name)) { errors.Add("Name cannot be empty."); }
+     
             if (discount <= 0 || discount > 100) { errors.Add("Invalid discount."); }
             if (quota <= 0) { errors.Add("Quota must be greater than 0."); }
-            if (expired < DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("Invalid expiration date."); }
-            if (editionId == Guid.Empty) { errors.Add("Edition cannot be empty."); }
-
+            if (edition.To < DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("Invalid expiration date."); }
+            if (registerType.Edition != edition.Id) { errors.Add($"Register type {registerType.Name} is not available for Edition {edition.Name}"); }
+            
             if (errors.Count != 0) { return Result<Voucher>.Failure(errors); }
 
             string code = Guid.NewGuid().ToString("N")[0..8].ToUpper();
-            Voucher instance = new(name, code, discount, quota, automatic, expired, editionId);
+            Voucher instance = new(name, code, discount, quota, automatic, edition.To, edition.Id, registerType.Id);
 
             return Result<Voucher>.Success(instance);
         }
 
-        public static Result<Voucher> Create(string name, string code, int discount, int quota, bool automatic, DateOnly expired, Guid editionId)
+        public static Result<Voucher> Create(string name, string code, int discount, int quota, bool automatic, Edition edition, RegisterType registerType)
         {
             List<string> errors = [];
-            if (string.IsNullOrEmpty(name)) { errors.Add("Name cannot be empty."); }
-            if (string.IsNullOrWhiteSpace(code)) { errors.Add("Code cannot be empty."); }
+
             if (discount <= 0) { errors.Add("Invalid discount."); }
             if (quota <= 0) { errors.Add("Quota must be greater than 0."); }
-            if (editionId == Guid.Empty) { errors.Add("Edition cannot be empty."); }
-            if (expired < DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("Invalid expiration date."); }
+            if (edition.To < DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("Invalid expiration date."); }
+            if (registerType.Edition != edition.Id) { errors.Add($"Register type {registerType.Name} is not available for Edition {edition.Name}"); }
+
             if (errors.Count != 0) { return Result<Voucher>.Failure(errors); }
 
-            Voucher instance = new(name, code, discount, quota, automatic, expired, editionId);
+            Voucher instance = new(name, code, discount, quota, automatic, edition.To, edition.Id, registerType.Id);
 
             return Result<Voucher>.Success(instance);
         }

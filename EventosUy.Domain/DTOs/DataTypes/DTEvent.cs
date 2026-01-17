@@ -2,23 +2,13 @@
 
 namespace EventosUy.Domain.DTOs.DataTypes
 {
-    public class DTEvent
+    public class DTEvent(string name, string initials, string description, DateTimeOffset created, IEnumerable<string> categories, UserCard card)
     {
-        public string Name { get; init; }
-        public string Initials { get; init; }
-        public string Description { get; init; }
-        public DateTimeOffset Created { get; init; }
-        public IEnumerable<string> Categories { get; init; }
-        public UserCard Institution { get; init; }
-
-        public DTEvent(string name, string initials, string description, DateTimeOffset created, IEnumerable<string> categories, UserCard card) 
-        {
-            Name = name;
-            Initials = initials;
-            Description = description;
-            Created = created;
-            Categories = categories;
-            Institution = card;
-        }
+        public string Name { get; init; } = name;
+        public string Initials { get; init; } = initials;
+        public string Description { get; init; } = description;
+        public DateTimeOffset Created { get; init; } = created;
+        public IEnumerable<string> Categories { get; init; } = categories;
+        public UserCard Institution { get; init; } = card;
     }
 }

@@ -26,10 +26,7 @@ namespace EventosUy.Domain.Entities
         public static Result<Institution> Create(string nickname, string acronym, Password password, Email email, string name, Url url, Address address, string description) 
         {
             List<string> errors = [];
-            if (string.IsNullOrWhiteSpace(nickname)) { errors.Add("Nickname cannot be empty."); }
-            if (string.IsNullOrWhiteSpace(name)) { errors.Add("Name cannot be empty."); }
-            if (string.IsNullOrWhiteSpace(description)) { errors.Add("Description cannot be empty."); }
-            if (string.IsNullOrWhiteSpace(acronym)) { errors.Add("Acronym cannot be empty."); }
+            
             if (acronym.Length < 2 || acronym.Length > 10) { errors.Add("Acronym cannot must have between 2 and 10 characters."); }
             if (acronym.Any(c => !char.IsLetter(c))) { errors.Add("Acronyms can only contain letters."); }
 

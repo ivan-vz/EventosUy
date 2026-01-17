@@ -36,8 +36,6 @@ namespace EventosUy.Domain.Entities
         public static Result<Edition> Create(string name, string initials, DateOnly from, DateOnly to, Address address, Guid eventId, Guid institutionId) 
         {
             List<string> errors = [];
-            if (String.IsNullOrWhiteSpace(name)) { errors.Add("Name cannot be empty."); }
-            if (String.IsNullOrWhiteSpace(initials)) { errors.Add("Initials cannot be empty."); }
 
             if (from > to) { errors.Add("The start of editing cannot be later than its completion."); }
             if (from <= DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("The start date of the edition cannot be earlier than today's date."); }
@@ -49,7 +47,7 @@ namespace EventosUy.Domain.Entities
             return Result<Edition>.Success(editionInstance);
         }
 
-        public void Approve() { State = EditionState.PUBLISHED; }
+        public void Approve() { State = EditionState.ONGOING; }
         public void Reject() { State = EditionState.CANCELLED; }
 
         public DTEdition GetDT(Event eventInstance, Institution institutionInstance) 

@@ -3,23 +3,13 @@ using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Domain.Entities
 {
-    public abstract class User
+    public abstract class User(string nickname, Password password, Email email)
     {
-        public Guid Id { get; init; }
-        public string Nickname { get; private set; }
-        public Password Password { get; private set; }
-        public Email Email { get; private set; }
-        public DateTimeOffset Created { get; init; }
-        public UserState State { get; set; }
-
-        protected User(string nickname, Password password, Email email) 
-        {
-            Id = Guid.NewGuid();
-            Nickname = nickname;
-            Password = password;
-            Email = email;
-            Created = DateTimeOffset.UtcNow;
-            State = UserState.ACTIVE;
-        }
+        public Guid Id { get; init; } = Guid.NewGuid();
+        public string Nickname { get; private set; } = nickname;
+        public Password Password { get; private set; } = password;
+        public Email Email { get; private set; } = email;
+        public DateTimeOffset Created { get; init; } = DateTimeOffset.UtcNow;
+        public UserState State { get; set; } = UserState.ACTIVE;
     }
 }

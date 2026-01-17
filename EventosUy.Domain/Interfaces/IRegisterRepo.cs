@@ -1,4 +1,4 @@
-﻿using EventosUy.Domain.Entidades;
+﻿using EventosUy.Domain.Entities;
 
 namespace EventosUy.Domain.Interfaces
 {

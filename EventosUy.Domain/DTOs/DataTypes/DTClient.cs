@@ -1,22 +1,12 @@
 ﻿namespace EventosUy.Domain.DTOs.DataTypes
 {
-    public class DTClient
+    public class DTClient(string nickname, string email, string fullName, DateOnly birthday, DateTimeOffset created, string ci)
     {
-        public string Nickname { get; init; }
-        public string Email { get; init; }
-        public string FullName { get; init; }
-        public string Ci { get; init; }
-        public DateOnly Birthday { get; init; }
-        public DateTimeOffset Created { get; init; }
-
-        public DTClient(string nickname, string email, string fullName, DateOnly birthday, DateTimeOffset created, string ci) 
-        {
-            Nickname = nickname;
-            Email = email;
-            FullName = fullName;
-            Ci = ci;
-            Birthday = birthday;
-            Created = created;
-        }
+        public string Nickname { get; init; } = nickname;
+        public string Email { get; init; } = email;
+        public string FullName { get; init; } = fullName;
+        public string Ci { get; init; } = ci;
+        public DateOnly Birthday { get; init; } = birthday;
+        public DateTimeOffset Created { get; init; } = created;
     }
 }

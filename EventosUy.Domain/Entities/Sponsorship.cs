@@ -2,7 +2,6 @@
 using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Enumerates;
-using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Domain.Entities
 {
@@ -10,58 +9,72 @@ namespace EventosUy.Domain.Entities
     {
         public Guid Id { get; init; }
         public string Name { get; init; }
-        public SponsorLevel Level { get; init; }
+        public decimal Amount { get; init; }
+        public SponsorshipTier Tier { get; init; }
         public DateTimeOffset Created { get; init; }
-        public Guid Voucher { get; init; }
+        public Guid Edition { get; init; }
+        public Guid Institution { get; init; }
+        public Guid RegisterType { get; init; }
+        public Guid Voucher { get; private set; }
 
-        private Sponsorship(string name, string code, SponsorLevel level)
+        private Sponsorship(string name, decimal amount, SponsorshipTier tier, Guid editon, Guid institution, Guid registerType)
         {
             Id = Guid.NewGuid();
             Name = name;
+            Amount = amount;
+            Tier = tier;
             Created = DateTimeOffset.UtcNow;
-            Level = level;
+            Edition = editon;
+            Institution = institution;
+            RegisterType = registerType;
+            Voucher = Guid.Empty;
         }
 
+        private static readonly Dictionary<SponsorshipTier, (decimal min, decimal max)> tierRanges = new() {
+            { SponsorshipTier.BRONZE, (min: 1_000m, max: 9_999.99m) },
+            { SponsorshipTier.SILVER, (min: 10_000m, max: 99_999.99m) },
+            { SponsorshipTier.GOLD, (min: 100_000m, max: 999_999.99m) },
+            { SponsorshipTier.PLATINUM, (min: 1_000_000m, max: decimal.MaxValue) },
+        };
+
         public static Result<Sponsorship> Create(
-            string name, SponsorLevel level, Institution institutionInstance, Edition editionInstance, RegisterType registerTypeInstance, DateOnly expired
+            string name, decimal amount, SponsorshipTier tier, Institution institution, Edition edition, RegisterType registerType
             ) 
         {
             List<string> errors = [];
-            if (level is null) { errors.Add("Sponsor level cannot be empty."); }
-            if (institutionInstance is null) { errors.Add("Institution cannot be empty."); }
-            if (editionInstance is null) { errors.Add("Edition cannot be empty."); }
-            if (registerTypeInstance is null) { errors.Add("Register type cannot be empty."); }
+            if (!tierRanges.TryGetValue(tier, out var ranges))
+            {
+                errors.Add($"Tier {tier} not Found.");
+                return Result<Sponsorship>.Failure(errors);
+            }
 
-            if (string.IsNullOrWhiteSpace(name)) { errors.Add("Name cannot be empty."); }
-            
-            if (expired <= DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("Expiration date must be after today's date."); }
-            
-            if (errors.Any()) { return Result<Sponsorship>.Failure(errors); }
+            if (amount < ranges.min) { errors.Add($"Amount must be at least {ranges.min:N0} for {tier} tier."); }
+            if (amount > ranges.max) { errors.Add($"Amount {amount:N0} exceeds maximum for {tier} tier. Please upgrade to the next tier."); }
+            if (registerType.Price < 0) { errors.Add("Register type price must be greater than or equal to 0."); }
 
-            var code = $"#{institutionInstance!.Acronym}_{editionInstance!.Initials}_{editionInstance!.From.Year}";
+            if (errors.Count != 0) { return Result<Sponsorship>.Failure(errors); }
 
-            Sponsorship sponsorshipInstance = new Sponsorship(name, code, level!, institutionInstance!.Id, editionInstance!.Id, registerTypeInstance!.Id, expired);
+            Sponsorship sponsorshipInstance = new(name, amount, tier, edition.Id, institution.Id, registerType.Id);
+
+            // TODO: De esto se encarga SponsorshipService
+            //int free = (int)Math.Floor((0.2m * amount) / registerTypePrice);
 
             return Result<Sponsorship>.Success(sponsorshipInstance);
         }
 
-        public DTSponsorship GetDT(Edition editionInstance, Institution institutionInstance) 
-        { 
-            return new DTSponsorship(Name, Created, Expired, Level.Amount, Level.FreeSpots, Code, Level.Tier, editionInstance.Name, institutionInstance.Nickname); 
+        public DTSponsorship GetDT(Edition edition, Institution institution, Voucher voucher)
+        {
+            return new(Name, Amount, Tier, Created, edition.GetCard(), institution.GetCard(), voucher.GetCard()); 
         }
 
-        public SponsorshipCard GetCard() { return new SponsorshipCard(Id, Name, Expired, Level.Tier); }
+        public SponsorshipCard GetCard() { return new(Id, Name, Tier); }
 
-        public bool IsActive() { return State == SponsorshipState.AVAILABLE; }
-
-        public Result UseSpot() 
+        public Result AssignVoucher(Guid voucher) 
         {
-            if (Used >= Level.FreeSpots) { return Result.Failure("No avalable sponsor spots."); }
+            if (Voucher != Guid.Empty) { return Result.Failure("Voucher already assigned."); }
 
-            Used++;
+            Voucher = voucher;
 
-            if (Used == Level.FreeSpots) { State = SponsorshipState.COMPLETED; }
-            
             return Result.Success();
         }
     }

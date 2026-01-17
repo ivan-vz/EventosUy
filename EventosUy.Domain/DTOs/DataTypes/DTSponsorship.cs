@@ -1,30 +1,16 @@
-﻿using EventosUy.Domain.Enumerates;
+﻿using EventosUy.Domain.DTOs.Records;
+using EventosUy.Domain.Enumerates;
 
 namespace EventosUy.Domain.DTOs.DataTypes
 {
-    public class DTSponsorship
+    public class DTSponsorship(string name, decimal amount, SponsorshipTier tier, DateTimeOffset created, ActivityCard editionCard, UserCard institutionCard, VoucherCard voucherCard)
     {
-        public string Name { get; init; }
-        public DateTimeOffset Created { get; init; }
-        public DateOnly Expired { get; init; }
-        public decimal Amount { get; init; }
-        public int Free { get; init; }
-        public string Code { get; init; }
-        public SponsorshipTier Tier { get; init; }
-        public string Edition { get; init; }
-        public string Institution { get; init; }
-
-        public DTSponsorship(string name, DateTimeOffset created, DateOnly expired, decimal amount, int free, string code, SponsorshipTier tier, string edition, string institution) 
-        {
-            Name = name;
-            Created = created;
-            Expired = expired;
-            Amount = amount;
-            Free = free;
-            Code = code;
-            Tier = tier;
-            Edition = edition;
-            Institution = institution;
-        }
+        public string Name { get; init; } = name;
+        public decimal Amount { get; init; } = amount;
+        public SponsorshipTier Tier { get; init; } = tier;
+        public DateTimeOffset Created { get; init; } = created;
+        public ActivityCard Edition { get; init; } = editionCard;
+        public UserCard Institution { get; init; } = institutionCard;
+        public VoucherCard Voucher { get; init; } = voucherCard;
     }
 }

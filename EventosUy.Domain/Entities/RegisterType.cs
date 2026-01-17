@@ -1,7 +1,6 @@
 ﻿using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
-using System.Reflection.Emit;
 
 namespace EventosUy.Domain.Entities
 {
@@ -33,8 +32,7 @@ namespace EventosUy.Domain.Entities
         public static Result<RegisterType> Create(string name, string description, decimal price, int quota, Guid editionId) 
         {
             List<string> errors = [] ;
-            if (string.IsNullOrWhiteSpace(name)) { errors.Add("Name cannot be empty."); }
-            if (string.IsNullOrWhiteSpace(description)) { errors.Add("Description cannot be empty."); }
+            
             if (price < 0) { errors.Add("Price must be greater than or equal to 0."); }
             if (quota <= 0) { errors.Add("Quota must be greater than 0."); }
 
@@ -48,8 +46,6 @@ namespace EventosUy.Domain.Entities
         public DTRegisterType GetDT(Edition editionInstance) { return new(Name, editionInstance.GetCard(), Description, Price, Quota, Created); }
 
         public RegisterTypeCard GetCard() { return new(Id, Name, Active); }
-
-        public bool IsActive() { return Active; }
 
         public Result UseSpot() 
         {

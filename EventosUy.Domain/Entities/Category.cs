@@ -19,10 +19,7 @@ namespace EventosUy.Domain.Entities
 
         public static Result<Category> Create(string name, string description) 
         {
-            if (string.IsNullOrWhiteSpace(name)) { return Result<Category>.Failure("Name can not be empty."); }
-
             Category categoryInstance = new(name);
-
             return Result<Category>.Success(categoryInstance);
         }
     }

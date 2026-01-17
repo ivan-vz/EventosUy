@@ -29,16 +29,7 @@ namespace EventosUy.Domain.Entities
 
         public static Result<Event> Create(string name, string initials, string description, Guid institution) 
         {
-            List<string> errors = [];
-            if (string.IsNullOrWhiteSpace(name)) { errors.Add("Name cannot be empty."); }
-            if (string.IsNullOrWhiteSpace(initials)) { errors.Add("Initials cannot be empty."); }
-            if (string.IsNullOrWhiteSpace(description)) { errors.Add("Description cannot be empty."); }
-            if (institution == Guid.Empty) { errors.Add("Institution cannot be empty."); }
-
-            if (errors.Count != 0) { return Result<Event>.Failure(errors); }
-
             Event eventInstance = new(name, initials, description, institution);
-
             return Result<Event>.Success(eventInstance);
         }
 

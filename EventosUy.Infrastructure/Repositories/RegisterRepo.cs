@@ -1,5 +1,4 @@
-﻿using EventosUy.Domain.Entidades;
-using EventosUy.Domain.Entities;
+﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 
 namespace EventosUy.Infrastructure.Repositories

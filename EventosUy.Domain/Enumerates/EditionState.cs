@@ -3,7 +3,6 @@
     public enum EditionState
     {
         PENDING,
-        PUBLISHED,
         ONGOING,
         ENDED,
         CANCELLED

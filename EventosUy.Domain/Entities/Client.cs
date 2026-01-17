@@ -21,11 +21,7 @@ namespace EventosUy.Domain.Entities
 
         public static Result<Client> Create(string nickname, Password password, Email email, Name name, DateOnly birthday, Ci ci) 
         {
-            List<string> errors = [];
-            if (string.IsNullOrWhiteSpace(nickname)) { errors.Add("Nickname can not be empty."); }
-            if (birthday >= DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("Invalid Birthday's date."); }
-
-            if (errors.Count != 0) { return Result<Client>.Failure(errors); }
+            if (birthday >= DateOnly.FromDateTime(DateTime.UtcNow)) { return Result<Client>.Failure("Invalid Birthday's date."); }
 
             Client clientInstance = new(nickname, password, email, name, birthday, ci);
 
