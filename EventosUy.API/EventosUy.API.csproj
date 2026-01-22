@@ -7,13 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EventosUy.Application\EventosUy.Application.csproj" />
-    <ProjectReference Include="..\EventosUy.Domain\EventosUy.Domain.csproj" />
-    <ProjectReference Include="..\EventosUy.Infrastructure\EventosUy.Infrastructure.csproj" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\EventosUy.Application\EventosUy.Application.csproj" />
+    <ProjectReference Include="..\EventosUy.Domain\EventosUy.Domain.csproj" />
+    <ProjectReference Include="..\EventosUy.Infrastructure\EventosUy.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
-﻿using EventosUy.Domain.Common;
-using EventosUy.Domain.DTOs.DataTypes;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Enumerates;

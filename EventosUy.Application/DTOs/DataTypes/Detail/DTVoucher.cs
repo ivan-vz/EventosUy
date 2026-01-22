@@ -2,7 +2,7 @@
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Enumerates;
 
-namespace EventosUy.Domain.DTOs.DataTypes
+namespace EventosUy.Application.DTOs.DataTypes.Detail
 {
     public class DTVoucher(string name, int discount, int quota, int used, DateTimeOffset created, DateOnly expired, VoucherState state, Edition edition)
     {

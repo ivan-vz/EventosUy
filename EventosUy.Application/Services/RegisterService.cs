@@ -1,6 +1,6 @@
-﻿using EventosUy.Application.Interfaces;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.Interfaces;
 using EventosUy.Domain.Common;
-using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Enumerates;
@@ -11,7 +11,7 @@ namespace EventosUy.Application.Services
     internal class RegisterService : IRegisterService
     {
         private readonly IRegisterRepo _repo;
-        private readonly IPersonService _personService;
+        private readonly IClientService _personService;
         private readonly IEditionService _editionService;
         private readonly IRegisterTypeService _registerTypeService;
         private readonly ISponsorshipService _sponsorshipService;
@@ -19,7 +19,7 @@ namespace EventosUy.Application.Services
 
         public RegisterService(
             IRegisterRepo registerRepo, 
-            IPersonService personService, 
+            IClientService personService, 
             IEditionService editionService, 
             IRegisterTypeService registerTypeService, 
             ISponsorshipService sponsorshipService,

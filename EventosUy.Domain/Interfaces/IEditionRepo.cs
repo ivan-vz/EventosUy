@@ -9,7 +9,8 @@ namespace EventosUy.Domain.Interfaces
         public Task<List<Edition>> GetAllByInstitutionAsync(Guid institutionId);
         public Task<List<Edition>> GetAllByEventAsync(Guid eventId);
         public Task<List<Edition>> GetAllPendingByEventAsync(Guid eventId);
-        public Task<bool> ExistsAsync(string name);
+        public Task<bool> ExistsByNameAsync(string name);
+        public Task<bool> ExistsByInitialsAsync(string initials);
         public Task AddAsync(Edition edition);
         public Task<bool> RemoveAsync(Guid id);
     }

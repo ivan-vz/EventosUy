@@ -1,5 +1,11 @@
+using EventosUy.API.Validators;
 using EventosUy.Application;
+using EventosUy.Application.DTOs.DataTypes.Insert;
+using EventosUy.Application.DTOs.DataTypes.Update;
+using EventosUy.Application.Interfaces;
+using EventosUy.Application.Services;
 using EventosUy.Infrastructure;
+using FluentValidation;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +19,16 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add( new JsonStringEnumConverter() );
 });
+
+// Services
+builder.Services.AddScoped<IInstitutionService, InstitutionService>();
+builder.Services.AddScoped<IClientService, ClientService>();
+
+// Validators
+builder.Services.AddScoped<IValidator<DTInsertClient>, ClientInsertValidator>();
+builder.Services.AddScoped<IValidator<DTUpdateClient>, ClientUpdateValidator>();
+builder.Services.AddScoped<IValidator<DTInsertInstitution>, InstitutionInsertValidator>();
+builder.Services.AddScoped<IValidator<DTUpdateInstitution>, InstitutionUpdateValidator>();
 
 var app = builder.Build();
 

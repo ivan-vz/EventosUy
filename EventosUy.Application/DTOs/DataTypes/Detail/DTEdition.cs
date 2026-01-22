@@ -1,7 +1,7 @@
 ﻿using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.ValueObjects;
 
-namespace EventosUy.Domain.DTOs.DataTypes
+namespace EventosUy.Application.DTOs.DataTypes.Detail
 {
     public class DTEdition(string name, string initials, DateOnly from, DateOnly to, DateTimeOffset created, string address, ActivityCard eventCard, UserCard institutioncard)
     {

@@ -1,6 +1,6 @@
-﻿using EventosUy.Application.Interfaces;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.Interfaces;
 using EventosUy.Domain.Common;
-using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
@@ -8,11 +8,11 @@ using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Application.Services
 {
-    internal class PersonService : IPersonService
+    public class ClientService : IClientService
     {
         private readonly IPersonRepo _repo;
 
-        public PersonService(IPersonRepo personRepo) 
+        public ClientService(IPersonRepo personRepo) 
         {
             _repo = personRepo;
         }
@@ -45,29 +45,32 @@ namespace EventosUy.Application.Services
             return Result<Guid>.Success(personInstance.Id);
         }
 
-        public async Task<Result<List<UserCard>>> GetAllAsync()
+        public async Task<IEnumerable<UserCard>> GetAllAsync()
         {
             List<Client> persons = await _repo.GetAllAsync();
             List<UserCard> cards = persons.Select(person => person.GetCard()).ToList();
 
-            return Result<List<UserCard>>.Success(cards);
+            return cards;
         }
 
-        public async Task<Result<List<UserCard>>> GetAllExceptAsync(List<Guid> ids)
+        public async Task<DTClient?> GetByIdAsync(Guid personId)
         {
-            List<Client> persons = await _repo.GetAllExceptAsync(ids);
-            List<UserCard> cards = persons.Select(person => person.GetCard()).ToList();
+            Client? clientInstance = await _repo.GetByIdAsync(personId);
 
-            return Result<List<UserCard>>.Success(cards);
-        }
+            if (clientInstance is null) { return null; }
+            
+            var dt = new DTClient
+            (
+                clientInstance.Id,
+                clientInstance.Nickname,
+                clientInstance.Email.Value,
+                clientInstance.Name.FullName,
+                clientInstance.Birthday,
+                clientInstance.Created,
+                clientInstance.CI.GetFormatted()
+            );
 
-        public async Task<Result<Client>> GetByIdAsync(Guid personId)
-        {
-            if (personId == Guid.Empty) { return Result<Client>.Failure("Person can not be empty."); }
-            Client? personInstance = await _repo.GetByIdAsync(personId);
-            if (personInstance is null) { return Result<Client>.Failure("Person not Found."); }
-
-            return Result<Client>.Success(personInstance);
+            return dt;
         }
 
         public async Task<Result<DTClient>> GetDT(Guid id)

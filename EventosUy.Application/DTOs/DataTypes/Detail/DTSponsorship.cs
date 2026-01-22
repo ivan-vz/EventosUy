@@ -1,7 +1,7 @@
 ﻿using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Enumerates;
 
-namespace EventosUy.Domain.DTOs.DataTypes
+namespace EventosUy.Application.DTOs.DataTypes.Detail
 {
     public class DTSponsorship(string name, decimal amount, SponsorshipTier tier, DateTimeOffset created, ActivityCard editionCard, UserCard institutionCard, VoucherCard voucherCard)
     {

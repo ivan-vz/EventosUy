@@ -1,6 +1,6 @@
 ﻿using EventosUy.Domain.DTOs.Records;
 
-namespace EventosUy.Domain.DTOs.DataTypes
+namespace EventosUy.Application.DTOs.DataTypes.Detail
 {
     public class DTRegister(DateTimeOffset created, decimal total, RegisterTypeCard registerTypeCard, ActivityCard editionCard, UserCard clientCard, VoucherCard? voucherCard)
     {

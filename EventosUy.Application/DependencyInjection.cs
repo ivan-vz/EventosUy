@@ -14,7 +14,7 @@ namespace EventosUy.Application
             services.AddScoped<IEventService, EventService>();
             services.AddScoped<IInstitutionService, InstitutionService>();
             services.AddScoped<IJobTitleService, JobTitleService>();
-            services.AddScoped<IPersonService, PersonService>();
+            services.AddScoped<IClientService, ClientService>();
             services.AddScoped<IProfessionalProfileService, ProfessionalProfileService>();
             services.AddScoped<IRegisterService, RegisterService>();
             services.AddScoped<IRegisterTypeService, RegisterTypeService>();

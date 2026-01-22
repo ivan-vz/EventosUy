@@ -11,8 +11,13 @@ namespace EventosUy.Infrastructure.Repositories
         public EditionRepo() { _editions = []; }
 
         public Task AddAsync(Edition edition) { return Task.FromResult(_editions.Add(edition)); }
-        
-        public Task<bool> ExistsAsync(string name) { return Task.FromResult(_editions.Any(edition => edition.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); }
+
+        public Task<bool> ExistsByInitialsAsync(string initials) 
+        { 
+            return Task.FromResult(_editions.Any(edition => edition.Initials.Equals(initials, StringComparison.OrdinalIgnoreCase))); 
+        }
+
+        public Task<bool> ExistsByNameAsync(string name) { return Task.FromResult(_editions.Any(edition => edition.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); }
 
         public Task<List<Edition>> GetAllAsync() { return Task.FromResult( _editions.ToList() ); }
 

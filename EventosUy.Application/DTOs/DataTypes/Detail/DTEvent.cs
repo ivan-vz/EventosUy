@@ -1,6 +1,6 @@
 ﻿using EventosUy.Domain.DTOs.Records;
 
-namespace EventosUy.Domain.DTOs.DataTypes
+namespace EventosUy.Application.DTOs.DataTypes.Detail
 {
     public class DTEvent(string name, string initials, string description, DateTimeOffset created, IEnumerable<string> categories, UserCard card)
     {

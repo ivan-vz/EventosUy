@@ -1,6 +1,6 @@
-﻿using EventosUy.Application.Interfaces;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.Interfaces;
 using EventosUy.Domain.Common;
-using EventosUy.Domain.DTOs.DataTypes;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
@@ -8,7 +8,7 @@ using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Application.Services
 {
-    internal class InstitutionService : IInstitutionService
+    public class InstitutionService : IInstitutionService
     {
         private readonly IInstitutionRepo _repo;
 
@@ -46,31 +46,42 @@ namespace EventosUy.Application.Services
             return Result<Guid>.Success(institutionInstance.Id);
         }
 
-        public async Task<Result<List<UserCard>>> GetAllAsync()
+        public async Task<IEnumerable<UserCard>> GetAllAsync()
         {
             List<Institution> institutions = await _repo.GetAllAsync();
             List<UserCard> cards = institutions.Select(institution => institution.GetCard()).ToList();
 
-            return Result<List<UserCard>>.Success(cards);
+            return cards;
         }
 
-        public async Task<Result<Institution>> GetByIdAsync(Guid id)
+        public async Task<DTInstitution?> GetByIdAsync(Guid id)
         {
-            if (id == Guid.Empty) { return Result<Institution>.Failure("Institution can not be empty."); }
             Institution? institutionInstance = await _repo.GetByIdAsync(id);
 
-            if (institutionInstance is null) { return Result<Institution>.Failure("Institution not Found."); }
+            if (institutionInstance is null) { return null; }
+            
+            var dt = new DTInstitution
+                (
+                    institutionInstance.Nickname,
+                    institutionInstance.Email.Value,
+                    institutionInstance.Name,
+                    institutionInstance.Acronym,
+                    institutionInstance.Url.Value,
+                    institutionInstance.Description,
+                    institutionInstance.Address.FullAddress,
+                    institutionInstance.Created
+                );
 
-            return Result<Institution>.Success(institutionInstance);
+            return dt;
         }
 
-        public async Task<Result<DTInsitution>> GetDTAsync(Guid id)
+        public async Task<Result<DTInstitution>> GetDTAsync(Guid id)
         {
             Result<Institution> institutionResult = await GetByIdAsync(id);
-            if (institutionResult.IsFailure) { return Result<DTInsitution>.Failure(institutionResult.Errors); }
+            if (institutionResult.IsFailure) { return Result<DTInstitution>.Failure(institutionResult.Errors); }
 
             Institution institutionInstance = institutionResult.Value!;
-            return Result<DTInsitution>.Success(institutionInstance.GetDT());
+            return Result<DTInstitution>.Success(institutionInstance.GetDT());
         }
     }
 }
