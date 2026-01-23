@@ -1,13 +1,16 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.DTOs.DataTypes.Insert;
+using EventosUy.Application.DTOs.DataTypes.Update;
 using EventosUy.Application.Interfaces;
 using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
+using FluentValidation.Results;
 
 namespace EventosUy.Application.Services
 {
-    internal class EventService : IEventService
+    public class EventService : IEventService
     {
         private readonly IEventRepo _repo;
         private readonly ICategoryService _categoryService;
@@ -20,51 +23,114 @@ namespace EventosUy.Application.Services
             _institutionService = institutionService;
         }
 
-        public async Task<Result<Guid>> CreateAsync(string name, string initials, string description, List<Guid> categories, Guid institutionId)
+        public async Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> CreateAsync(DTInsertEvent dtInsert)
         {
-            List<string> errors = [];
-            foreach (var id in categories) 
+            var validationResult = new ValidationResult();
+
+            if (await _repo.ExistsByNameAsync(dtInsert.Name)) 
             {
-                Result<Category> categoryResult = await _categoryService.GetByIdAsync(id);
-                if (!categoryResult.IsSuccess) { errors.AddRange(categoryResult.Errors); }
+                validationResult.Errors.Add
+                     (
+                         new ValidationFailure("Name", "Name already in use.")
+                     );
             }
 
-            if (institutionId == Guid.Empty) {errors.Add("Institution can not be empty."); }
+            if (await _repo.ExistsByInitialsAsync(dtInsert.Initials))
+            {
+                validationResult.Errors.Add
+                     (
+                         new ValidationFailure("Initials", "Initials already in use.")
+                     );
+            }
+            
+            var categories = dtInsert.Categories.ToHashSet();
+            if (!await _categoryService.ExistsAsync(categories)) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Category", "Category Not Found.")
+                    );
+            }
 
-            if (errors.Any()) { return Result<Guid>.Failure(errors); }
+            UserCard? userCard = await _institutionService.GetCardByIdAsync(dtInsert.Institution);
+            if (userCard is null) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Institution", "Institution Not Found.")
+                    );
+            }
 
-            Result<Institution> institutionResult = await _institutionService.GetByIdAsync(institutionId);
-            if (!institutionResult.IsSuccess) { return Result<Guid>.Failure(institutionResult.Errors); }
+            if (!validationResult.IsValid) { return (null, validationResult); }
 
-            if (await _repo.ExistsAsync(name)) { return Result<Guid>.Failure("Event already exist."); }
-
-            Result<Event> eventResult = Event.Create(name, initials, description, institutionId);
-
-            if (!eventResult.IsSuccess) { return Result<Guid>.Failure(eventResult.Errors); }
-            Event eventInstance = eventResult.Value!;
-            eventInstance.AddCategories(categories);
+            var eventInstance = new Event(
+                name: dtInsert.Name, 
+                initials: dtInsert.Initials, 
+                description: dtInsert.Description, 
+                institution: dtInsert.Institution,
+                categories: categories
+                );
 
             await _repo.AddAsync(eventInstance);
 
-            return Result<Guid>.Success(eventInstance.Id);
+            var dt = new DTEvent(
+                    id: eventInstance.Id, 
+                    name: eventInstance.Name,
+                    initials: eventInstance.Initials,
+                    description: eventInstance.Description,
+                    created: eventInstance.Created,
+                    categories: eventInstance.Categories,
+                    card: userCard!
+                );
+
+            return (dt, validationResult);
         }
 
-        public async Task<Result<List<ActivityCard>>> GetAllAsync()
+        public async Task<IEnumerable<ActivityCard>> GetAllAsync()
         {
             List<Event> events = await _repo.GetAllAsync();
-            List<ActivityCard> cards = events.Select(eventInstance => eventInstance.GetCard()).ToList();
+            List<ActivityCard> cards = [.. events.Select(eventInstance => new ActivityCard(eventInstance.Id, eventInstance.Name, eventInstance.Initials) )];
 
-            return Result<List<ActivityCard>>.Success(cards);
+            return cards;
         }
 
-        public async Task<Result<Event>> GetByIdAsync(Guid id)
+        public async Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> GetByIdAsync(Guid id)
         {
-            if (id == Guid.Empty) { return Result<Event>.Failure("Event can not be empty."); }
             Event? eventInstance = await _repo.GetByIdAsync(id);
 
-            if (eventInstance is null) { return Result<Event>.Failure("Event not Found."); }
+            var validationResult = new ValidationResult();
 
-            return Result<Event>.Success(eventInstance);
+            if (eventInstance is null) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Event", "Event not Found.")
+                    );
+                return (null, validationResult); 
+            }
+
+            UserCard? institutionCard = await _institutionService.GetCardByIdAsync(eventInstance.Institution);
+
+            if (institutionCard is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Institution", "Institution not Found.")
+                    );
+                return (null, validationResult);
+            }
+            
+            var dt = new DTEvent(
+                    id: eventInstance.Id,
+                    name: eventInstance.Name,
+                    initials: eventInstance.Initials,
+                    description: eventInstance.Description,
+                    created: eventInstance.Created,
+                    categories: eventInstance.Categories,
+                    card: institutionCard
+                );
+
+            return (dt, validationResult);
         }
 
         public async Task<Result<List<ActivityCard>>> GetByInstitutionAsync(Guid institutionId)
@@ -76,17 +142,90 @@ namespace EventosUy.Application.Services
             return Result<List<ActivityCard>>.Success(cards);
         }
 
-        public async Task<Result<DTEvent>> GetDTAsync(Guid id)
+        public async Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> UpdateAsync(DTUpdateEvent dtUpdate)
         {
-            if (id == Guid.Empty) { return Result<DTEvent>.Failure("Event can not be empty."); }
+            var eventInstance = await _repo.GetByIdAsync(dtUpdate.Id);
+
+            var validationResult = new ValidationResult();
+
+            if (eventInstance is null) 
+            {
+                validationResult.Errors.Add
+                     (
+                         new ValidationFailure("Id", "Event not found.")
+                     );
+
+                return (null, validationResult);
+            }
+
+            if (eventInstance.Name != dtUpdate.Name &&  await _repo.ExistsByNameAsync(dtUpdate.Name))
+            {
+                validationResult.Errors.Add
+                     (
+                         new ValidationFailure("Name", "Name already in use.")
+                     );
+            }
+
+            if (eventInstance.Initials != dtUpdate.Initials && await _repo.ExistsByInitialsAsync(dtUpdate.Initials))
+            {
+                validationResult.Errors.Add
+                     (
+                         new ValidationFailure("Initials", "Initials already in use.")
+                     );
+            }
+
+            var categories = dtUpdate.Categories.ToHashSet();
+            if (!await _categoryService.ExistsAsync(categories))
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Category", "Category Not Found.")
+                    );
+            }
+
+            if (!validationResult.IsValid) { return (null, validationResult); }
+            
+            eventInstance.Name = dtUpdate.Name;
+            eventInstance.Initials = dtUpdate.Initials;
+            eventInstance.Description = dtUpdate.Description;
+            eventInstance.Categories = categories;
+
+            UserCard? institutionCard = await _institutionService.GetCardByIdAsync(eventInstance.Institution);
+            
+            var dt = new DTEvent(
+                    id: eventInstance.Id,
+                    name: eventInstance.Name,
+                    initials: eventInstance.Initials,
+                    description: eventInstance.Description,
+                    created: eventInstance.Created,
+                    categories: eventInstance.Categories,
+                    card: institutionCard!
+                );
+
+            return (dt, validationResult);
+        }
+
+        public async Task<DTEvent?> DeleteAsync(Guid id)
+        {
             Event? eventInstance = await _repo.GetByIdAsync(id);
 
-            if (eventInstance is null) { return Result<DTEvent>.Failure("Event not Found."); }
+            if (eventInstance is null) { return null; }
 
-            Result<Institution> institutionResult = await _institutionService.GetByIdAsync(eventInstance.Institution);
-            if (!institutionResult.IsSuccess) { return Result<DTEvent>.Failure(institutionResult.Errors); }
+            eventInstance.Active = false;
 
-            return Result<DTEvent>.Success(eventInstance.GetDT(institutionResult.Value!));
+            UserCard? institutionCard = await _institutionService.GetCardByIdAsync(eventInstance.Institution);
+
+            var dt = new DTEvent(
+                    id: eventInstance.Id,
+                    name: eventInstance.Name,
+                    initials: eventInstance.Initials,
+                    description: eventInstance.Description,
+                    created: eventInstance.Created,
+                    categories: eventInstance.Categories,
+                    card: institutionCard!
+                );
+
+            return dt;
         }
     }
 }

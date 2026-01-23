@@ -6,7 +6,7 @@ using EventosUy.Domain.Interfaces;
 
 namespace EventosUy.Application.Services
 {
-    internal class CategoryService : ICategoryService
+    public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepo _repo;
 
@@ -27,6 +27,21 @@ namespace EventosUy.Application.Services
             await _repo.AddAsync(categoryInstance);
 
             return Result<Guid>.Success(categoryInstance.Id);
+        }
+
+        public async Task<bool> ExistsAsync(string name) { return await _repo.ExistsAsync(name); }
+
+        public async Task<bool> ExistsAsync(IEnumerable<string> names)
+        {
+            foreach (string name in names) 
+            {
+                if (!await _repo.ExistsAsync(name)) 
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public async Task<Result<List<CategoryCard>>> GetAllAsync()

@@ -128,6 +128,17 @@ namespace EventosUy.Application.Services
             return dt;
         }
 
+        public async Task<UserCard?> GetCardByIdAsync(Guid id)
+        {
+            Institution? institution = await _repo.GetByIdAsync(id);
+
+            if (institution is null) { return null; }
+
+            var card = new UserCard(institution.Id, institution.Nickname, institution.Email);
+
+            return card;
+        }
+
         public async Task<(DTInstitution? Institution, ValidationResult ValidationResult)> UpdateAsync(DTUpdateInstitution dtUpdate)
         {
             var institution = await _repo.GetByIdAsync(dtUpdate.Id);

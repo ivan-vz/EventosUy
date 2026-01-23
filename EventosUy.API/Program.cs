@@ -23,12 +23,16 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 // Services
 builder.Services.AddScoped<IInstitutionService, InstitutionService>();
 builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 // Validators
 builder.Services.AddScoped<IValidator<DTInsertClient>, ClientInsertValidator>();
 builder.Services.AddScoped<IValidator<DTUpdateClient>, ClientUpdateValidator>();
 builder.Services.AddScoped<IValidator<DTInsertInstitution>, InstitutionInsertValidator>();
 builder.Services.AddScoped<IValidator<DTUpdateInstitution>, InstitutionUpdateValidator>();
+builder.Services.AddScoped<IValidator<DTInsertEvent>, EventInsertValidator>();
+builder.Services.AddScoped<IValidator<DTUpdateEvent>, EventUpdateValidator>();
 
 var app = builder.Build();
 

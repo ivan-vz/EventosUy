@@ -66,7 +66,7 @@ namespace EventosUy.API.Controllers
         // CREATE
 
         [HttpPost("client")]
-        public async Task<ActionResult<DTClient>> AddClient(DTInsertClient dtInsert) 
+        public async Task<ActionResult<DTClient>> CreateClient(DTInsertClient dtInsert) 
         {
             var validationResult = await _clientInsertValidator.ValidateAsync(dtInsert);
 
@@ -80,7 +80,7 @@ namespace EventosUy.API.Controllers
         }
 
         [HttpPost("institution")]
-        public async Task<ActionResult<DTInstitution>> AddInstitution(DTInsertInstitution dtInsert)
+        public async Task<ActionResult<DTInstitution>> CreateInstitution(DTInsertInstitution dtInsert)
         {
             var validationResult = await _institutionInsertValidator.ValidateAsync(dtInsert);
 
