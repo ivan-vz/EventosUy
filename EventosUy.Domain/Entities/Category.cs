@@ -1,26 +1,10 @@
-﻿using EventosUy.Domain.Common;
-
-namespace EventosUy.Domain.Entities
+﻿namespace EventosUy.Domain.Entities
 {
-    public class Category
+    public class Category(string name)
     {
-        public Guid Id { get; init; }
-        public string Name { get; init; }
-        public DateTimeOffset Created { get; init; }
-        public bool Active { get; private set; }
-
-        private Category(string name) 
-        {
-            Id = Guid.NewGuid();
-            Name = name;
-            Created = DateTimeOffset.UtcNow;
-            Active = true;
-        }
-
-        public static Result<Category> Create(string name, string description) 
-        {
-            Category categoryInstance = new(name);
-            return Result<Category>.Success(categoryInstance);
-        }
+        public Guid Id { get; init; } = Guid.NewGuid();
+        public string Name { get; init; } = name;
+        public DateTimeOffset Created { get; init; } = DateTimeOffset.UtcNow;
+        public bool Active { get; set; } = true;
     }
 }

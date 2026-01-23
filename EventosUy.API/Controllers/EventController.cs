@@ -74,7 +74,7 @@ namespace EventosUy.API.Controllers
 
         // DELETE
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id) 
         {
             var dt = await _eventService.DeleteAsync(id);

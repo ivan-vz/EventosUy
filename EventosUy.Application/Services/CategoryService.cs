@@ -1,8 +1,10 @@
-﻿using EventosUy.Application.Interfaces;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.Interfaces;
 using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
+using FluentValidation.Results;
 
 namespace EventosUy.Application.Services
 {
@@ -15,18 +17,30 @@ namespace EventosUy.Application.Services
             _repo = categoryRepo;
         }
 
-        public async Task<Result<Guid>> CreateAsync(string name, string description)
+        public async Task<(DTCategory?, ValidationResult)> CreateAsync(string name)
         {
-            if (await _repo.ExistsAsync(name)) { return Result<Guid>.Failure("Category already exist.");  }
+            var validationResult = new ValidationResult();
 
-            Result<Category> categoryResult = Category.Create(name, description);
+            if (await _repo.ExistsAsync(name))
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    validationResult.Errors.Add
+                        (
+                            new ValidationFailure("Name", "Name is already in use.")
+                        );
+                }
 
-            if (!categoryResult.IsSuccess) { return Result<Guid>.Failure(categoryResult.Errors); }
+                if (!validationResult.IsValid) { return (null, validationResult); }
+            }
 
-            Category categoryInstance = categoryResult.Value!;
-            await _repo.AddAsync(categoryInstance);
+            var category = new Category(name: name);
 
-            return Result<Guid>.Success(categoryInstance.Id);
+            await _repo.AddAsync(category);
+
+            var dt = new DTCategory(id: category.Id, name: category.Name, created: category.Created);
+
+            return (dt, validationResult);
         }
 
         public async Task<bool> ExistsAsync(string name) { return await _repo.ExistsAsync(name); }
@@ -44,22 +58,46 @@ namespace EventosUy.Application.Services
             return true;
         }
 
-        public async Task<Result<List<CategoryCard>>> GetAllAsync()
+        public async Task<IEnumerable<string>> GetAllAsync()
         {
             List<Category> categories = await _repo.GetAllAsync();
-            List<CategoryCard> cards = categories.Select(category => category.GetCard()).ToList();
+            List<string> names = [.. categories.Select(category => category.Name) ];
 
-            return Result<List<CategoryCard>>.Success(cards);
+            return names;
         }
 
-        public async Task<Result<Category>> GetByIdAsync(Guid id)
+        public async Task<(DTCategory?, ValidationResult)> GetByIdAsync(Guid id)
         {
-            if (id == Guid.Empty) { return Result<Category>.Failure("Category can not be empty."); }
-            Category? categoryInstance = await _repo.GetByIdAsync(id);
+            var validationResult = new ValidationResult();
 
-            if (categoryInstance is null) { return Result<Category>.Failure("Category not Found."); }
+            Category? category = await _repo.GetByIdAsync(id);
 
-            return Result<Category>.Success(categoryInstance);
+            if (category is null) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Id", "Category not found.")
+                    );
+
+                return (null, validationResult);
+            }
+
+            var dt = new DTCategory(id: category.Id, name: category.Name, created: category.Created);
+
+            return (dt, validationResult);
+        }
+
+        public async Task<DTCategory?> DeleteAsync(Guid id)
+        {
+            Category? category = await _repo.GetByIdAsync(id);
+
+            if (category is null) { return null; }
+
+            category.Active = false;
+
+            var dt = new DTCategory(id: category.Id, name: category.Name, created: category.Created);
+
+            return dt;
         }
     }
 }
