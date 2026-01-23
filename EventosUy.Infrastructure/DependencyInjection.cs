@@ -15,7 +15,7 @@ namespace EventosUy.Infrastructure
             services.AddSingleton<IEventRepo, EventRepo>();
             services.AddSingleton<IInstitutionRepo, InstitutionRepo>();
             services.AddSingleton<IJobTitleRepo, JobTitleRepo>();
-            services.AddSingleton<IPersonRepo, PersonRepo>();
+            services.AddSingleton<IClientRepo, ClientRepo>();
             services.AddSingleton<IProfessionalProfileRepo, ProfessionalProfileRepo>();
             services.AddSingleton<IRegisterRepo, RegisterRepo>();
             services.AddSingleton<IRegisterTypeRepo, RegisterTypeRepo>();

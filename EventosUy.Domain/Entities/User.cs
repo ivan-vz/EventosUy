@@ -1,15 +1,12 @@
-﻿using EventosUy.Domain.Enumerates;
-using EventosUy.Domain.ValueObjects;
-
-namespace EventosUy.Domain.Entities
+﻿namespace EventosUy.Domain.Entities
 {
-    public abstract class User(string nickname, Password password, Email email)
+    public abstract class User(string nickname, string password, string email)
     {
         public Guid Id { get; init; } = Guid.NewGuid();
-        public string Nickname { get; private set; } = nickname;
-        public Password Password { get; private set; } = password;
-        public Email Email { get; private set; } = email;
+        public string Nickname { get; set; } = nickname;
+        public string Password { get; set; } = password;
+        public string Email { get; set; } = email;
         public DateTimeOffset Created { get; init; } = DateTimeOffset.UtcNow;
-        public UserState State { get; set; } = UserState.ACTIVE;
+        public bool Active { get; set; } = true;
     }
 }

@@ -1,44 +1,28 @@
-﻿using EventosUy.Domain.Common;
-using EventosUy.Domain.DTOs.DataTypes;
-using EventosUy.Domain.DTOs.Records;
-using EventosUy.Domain.ValueObjects;
-
-namespace EventosUy.Domain.Entities
+﻿namespace EventosUy.Domain.Entities
 {
-    public class Institution : User
+    public class Institution(
+        string nickname, 
+        string password, 
+        string acronym, 
+        string email,
+        string name, 
+        string description,
+        string url, 
+        string country,
+        string city,
+        string street,
+        string number,
+        int floor
+        ) : User(nickname, password, email)
     {
-        public string Name { get; private set; }
-        public string Acronym { get; private set; }
-        public string Description { get; private set; }
-        public Address Address { get; private set; }
-        public Url Url { get; private set; }
-
-        private Institution(string acronym, string description, Address address, Url url, string nickname, Password password, string name, Email email) 
-            : base(nickname, password, email)
-        {
-            Name = name;
-            Acronym = acronym;
-            Description = description;
-            Address = address;
-            Url = url;
-        }
-
-        public static Result<Institution> Create(string nickname, string acronym, Password password, Email email, string name, Url url, Address address, string description) 
-        {
-            List<string> errors = [];
-            
-            if (acronym.Length < 2 || acronym.Length > 10) { errors.Add("Acronym cannot must have between 2 and 10 characters."); }
-            if (acronym.Any(c => !char.IsLetter(c))) { errors.Add("Acronyms can only contain letters."); }
-
-            if (errors.Count != 0) { return Result<Institution>.Failure(errors); }
-
-            Institution institutionInstance = new(acronym, description, address, url, nickname, password, name, email);
-
-            return Result<Institution>.Success(institutionInstance);
-        }
-
-        public DTInsitution GetDT() { return new(Nickname, Email.Value, Name, Description, Url.Value, Address.FullAddress, Created); }
-
-        public UserCard GetCard() { return new(Id, Nickname, Email.Value); }
+        public string Name { get; init; } = name;
+        public string Acronym { get; init; } = acronym;
+        public string Description { get; set; } = description;
+        public string Url { get; set; } = url;
+        public string Country { get; init; } = country;
+        public string City { get; init; } = city;
+        public string Street { get; init; } = street;
+        public string Number { get; init; } = number;
+        public int Floor { get; init; } = floor;
     }
 }

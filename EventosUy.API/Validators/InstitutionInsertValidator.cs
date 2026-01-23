@@ -10,7 +10,10 @@ namespace EventosUy.API.Validators
             RuleFor(x => x.Nickname).NotEmpty();
             RuleFor(x => x.Email).EmailAddress();
             RuleFor(x => x.Name).NotEmpty();
-            RuleFor(x => x.Acronym).NotEmpty();
+            RuleFor(x => x.Acronym).NotEmpty()
+                .MinimumLength(2)
+                .MaximumLength(10)
+                .Must(value => value.All(c => char.IsLetter(c)));
             RuleFor(x => x.Description).NotEmpty();
             RuleFor(x => x.Url).NotEmpty()
                 .Must(value => Uri.IsWellFormedUriString(value, UriKind.Absolute)).WithMessage("URL is not formatted correctly.");

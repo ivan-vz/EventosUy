@@ -1,14 +1,17 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
-using EventosUy.Domain.Common;
+using EventosUy.Application.DTOs.DataTypes.Insert;
+using EventosUy.Application.DTOs.DataTypes.Update;
 using EventosUy.Domain.DTOs.Records;
+using FluentValidation.Results;
 
 namespace EventosUy.Application.Interfaces
 {
     public interface IClientService
     {
-        public Task<Result<Guid>> CreateAsync(string nickname, string password, string email, string firstName, string? lastName, string firstSurname, string lastSurname, DateOnly birthday);
+        public Task<(DTClient? Client, ValidationResult ValidationResult)> CreateAsync(DTInsertClient dtInsert);
         public Task<DTClient?> GetByIdAsync(Guid personId);
         public Task<IEnumerable<UserCard>> GetAllAsync();
-        public Task<Result<DTClient>> GetDT(Guid id);
+        public Task<(DTClient? Client, ValidationResult ValidationResult)> UpdateAsync(DTUpdateClient dtUpdate);
+        public Task<DTClient?> DeleteAsync(Guid id);
     }
 }

@@ -1,35 +1,22 @@
-﻿using EventosUy.Domain.Common;
-using EventosUy.Domain.DTOs.DataTypes;
-using EventosUy.Domain.DTOs.Records;
-using EventosUy.Domain.ValueObjects;
-
-namespace EventosUy.Domain.Entities
+﻿namespace EventosUy.Domain.Entities
 {
-    public class Client : User
+    public class Client(
+        string nickname,
+        string password,
+        string email,
+        string firstName,
+        string? lastName,
+        string firstSurname,
+        string lastSurname,
+        DateOnly birthday,
+        string ci
+            ) : User(nickname, password, email)
     {
-        public Name Name { get; init; }
-        public DateOnly Birthday { get; init; }
-        public Ci CI { get; init; }
-
-        private Client(string nickname, Password password, Email email, Name name, DateOnly birthday, Ci ci) 
-            : base(nickname, password, email)
-        {
-            Name = name;
-            Birthday = birthday;
-            CI = ci;
-        }
-
-        public static Result<Client> Create(string nickname, Password password, Email email, Name name, DateOnly birthday, Ci ci) 
-        {
-            if (birthday >= DateOnly.FromDateTime(DateTime.UtcNow)) { return Result<Client>.Failure("Invalid Birthday's date."); }
-
-            Client clientInstance = new(nickname, password, email, name, birthday, ci);
-
-            return Result<Client>.Success(clientInstance);
-        }
-
-        public DTClient GetDT() { return new(Nickname, Email.Value, Name.FullName, Birthday, Created, CI.GetFormatted()); }
-
-        public UserCard GetCard() { return new(Id, Nickname, Email.Value); }
+        public string FirstName { get; init; } = firstName;
+        public string? LastName { get; init; } = lastName;
+        public string FirstSurname { get; init; } = firstSurname;
+        public string LastSurname { get; init; } = lastSurname;
+        public DateOnly Birthday { get; init; } = birthday;
+        public string Ci { get; init; } = ci;
     }
 }

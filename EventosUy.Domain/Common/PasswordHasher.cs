@@ -2,7 +2,7 @@
 
 namespace EventosUy.Domain.Common
 {
-    internal static class PasswordHasher
+    public static class PasswordHasher
     {
         private static readonly PasswordHasher<object> _hasher = new();
 

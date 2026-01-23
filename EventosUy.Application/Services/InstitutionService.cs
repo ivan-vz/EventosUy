@@ -1,87 +1,227 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.DTOs.DataTypes.Insert;
+using EventosUy.Application.DTOs.DataTypes.Update;
 using EventosUy.Application.Interfaces;
 using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
-using EventosUy.Domain.ValueObjects;
+using FluentValidation.Results;
 
 namespace EventosUy.Application.Services
 {
-    public class InstitutionService : IInstitutionService
+    public class InstitutionService(IInstitutionRepo institutionRepo) : IInstitutionService
     {
-        private readonly IInstitutionRepo _repo;
+        private readonly IInstitutionRepo _repo = institutionRepo;
 
-        public InstitutionService(IInstitutionRepo institutionRepo) { _repo = institutionRepo; }
-
-        public async Task<Result<Guid>> CreateAsync(string nickname, string password, string email, string name, string acronym, string description, string url, string country, string city, string street, string number)
+        public async Task<(DTInstitution? Institution, ValidationResult ValidationResult)> CreateAsync(DTInsertInstitution dtInsert)
         {
-            List<string> errors = [];
-            Result<Password> passwordResult = Password.Create(password);
-            if (passwordResult.IsFailure) { errors.AddRange(passwordResult.Errors); }
+            var validationResult = new ValidationResult();
 
-            Result<Email> emailResult = Email.Create(email);
-            if (emailResult.IsFailure) { errors.AddRange(emailResult.Errors); }
+            if (await _repo.ExistsByNicknameAsync(dtInsert.Nickname)) 
+            { 
+                 validationResult.Errors.Add(
+                    new ValidationFailure("Nickname", "Nickname already in use.")
+                 ); 
+            }
+            if (await _repo.ExistsByEmailAsync(dtInsert.Email)) 
+            {
+                 validationResult.Errors.Add(
+                    new ValidationFailure("Email", "Email already in use.")
+                 );
+            }
 
-            Result<Url> urlResult = Url.Create(url);
-            if (urlResult.IsFailure) { errors.AddRange(urlResult.Errors); }
+            if (await _repo.ExistsByAcronymAsync(dtInsert.Acronym)) 
+            {
+                 validationResult.Errors.Add(
+                    new ValidationFailure("Acronym", "Acronym already in use.")
+                 );
+            }
 
-            Result<Address> addressResult = Address.Create(country, city, street, number);
-            if (addressResult.IsFailure) { errors.AddRange(addressResult.Errors); }
+            if (await _repo.ExistsByUrlAsync(dtInsert.Url)) 
+            { 
+                 validationResult.Errors.Add(
+                    new ValidationFailure("Url", "Url already in use.")
+                 ); 
+            }
 
-            if (errors.Any()) { return Result<Guid>.Failure(errors); }
+            if (await _repo.ExistsByAddressAsync(dtInsert.Country, dtInsert.City, dtInsert.Street, dtInsert.Number, dtInsert.Floor))
+            {
+                validationResult.Errors.Add(
+                    new ValidationFailure("Address", "Address already in use.")
+                 );
+            }
 
-            if (await _repo.ExistsByNicknameAsync(nickname)) { errors.Add("Nickname already in use."); }
-            if (await _repo.ExistsByEmailAsync(emailResult.Value!)) { errors.Add("Email already in use."); }
-            if (await _repo.ExistsByAcronymAsync(acronym)) { errors.Add("Acronym already in use."); }
-            if (await _repo.ExistsByUrlAsync(urlResult.Value!)) { errors.Add("Url already in use."); }
-            if (await _repo.ExistsByAddressAsync(addressResult.Value!)) { errors.Add("Address already in use."); }
+            if (!validationResult.IsValid) { return (null, validationResult); }
 
-            if (errors.Any()) { return Result<Guid>.Failure(errors); }
+            var hash = PasswordHasher.Hash(dtInsert.Password);
 
-            Result<Institution> institutionResult = Institution.Create(nickname, acronym, passwordResult.Value!, emailResult.Value!, name, urlResult.Value!, addressResult.Value!, description);
-            if (institutionResult.IsFailure) { return Result<Guid>.Failure(institutionResult.Errors); }
+            var institution = new Institution
+                (
+                    nickname: dtInsert.Nickname,
+                    password: hash,
+                    acronym: dtInsert.Acronym,
+                    email: dtInsert.Email,
+                    name: dtInsert.Name,
+                    description: dtInsert.Description,
+                    url: dtInsert.Url,
+                    country: dtInsert.Country,
+                    city: dtInsert.City,
+                    street: dtInsert.Street,
+                    number: dtInsert.Number,
+                    floor: dtInsert.Floor
+                );
 
-            Institution institutionInstance = institutionResult.Value!;
-            return Result<Guid>.Success(institutionInstance.Id);
+            await _repo.AddAsync(institution);
+
+            var dtInstitution = new DTInstitution
+                (
+                    id: institution.Id,
+                    nickname: institution.Nickname,
+                    email: institution.Email,
+                    name: institution.Name,
+                    acronym: institution.Acronym,
+                    description: institution.Description,
+                    url: institution.Url,
+                    country: institution.Country,
+                    city: institution.City,
+                    street: institution.Street,
+                    number: institution.Number,
+                    floor: institution.Floor,
+                    created: institution.Created
+                );
+
+            return (dtInstitution, validationResult);
         }
 
         public async Task<IEnumerable<UserCard>> GetAllAsync()
         {
             List<Institution> institutions = await _repo.GetAllAsync();
-            List<UserCard> cards = institutions.Select(institution => institution.GetCard()).ToList();
+            List<UserCard> cards = [.. institutions.Select(institution => new UserCard(institution.Id, institution.Nickname, institution.Email))];
 
             return cards;
         }
 
         public async Task<DTInstitution?> GetByIdAsync(Guid id)
         {
-            Institution? institutionInstance = await _repo.GetByIdAsync(id);
+            Institution? institution = await _repo.GetByIdAsync(id);
 
-            if (institutionInstance is null) { return null; }
+            if (institution is null) { return null; }
             
             var dt = new DTInstitution
                 (
-                    institutionInstance.Nickname,
-                    institutionInstance.Email.Value,
-                    institutionInstance.Name,
-                    institutionInstance.Acronym,
-                    institutionInstance.Url.Value,
-                    institutionInstance.Description,
-                    institutionInstance.Address.FullAddress,
-                    institutionInstance.Created
+                    id: institution.Id,
+                    nickname: institution.Nickname,
+                    email: institution.Email,
+                    name: institution.Name,
+                    acronym: institution.Acronym,
+                    description: institution.Description,
+                    url: institution.Url,
+                    country: institution.Country,
+                    city: institution.City,
+                    street: institution.Street,
+                    number: institution.Number,
+                    floor: institution.Floor,
+                    created: institution.Created
                 );
 
             return dt;
         }
 
-        public async Task<Result<DTInstitution>> GetDTAsync(Guid id)
+        public async Task<(DTInstitution? Institution, ValidationResult ValidationResult)> UpdateAsync(DTUpdateInstitution dtUpdate)
         {
-            Result<Institution> institutionResult = await GetByIdAsync(id);
-            if (institutionResult.IsFailure) { return Result<DTInstitution>.Failure(institutionResult.Errors); }
+            var institution = await _repo.GetByIdAsync(dtUpdate.Id);
 
-            Institution institutionInstance = institutionResult.Value!;
-            return Result<DTInstitution>.Success(institutionInstance.GetDT());
+            var validationResult = new ValidationResult();
+
+            if (institution == null) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("id", "Institution not found.")
+                    );
+
+                return (null, validationResult);
+            }
+
+            if (institution.Nickname != dtUpdate.Nickname && await _repo.ExistsByNicknameAsync(dtUpdate.Nickname))
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Nickname", "Nickname is already in use.")
+                    );
+            }
+
+            if (institution.Email != dtUpdate.Email && await _repo.ExistsByEmailAsync(dtUpdate.Email))
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Email", "Email is already in use.")
+                    );
+            }
+
+            if (institution.Url != dtUpdate.Url && await _repo.ExistsByUrlAsync(dtUpdate.Url))
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Url", "Url is already in use.")
+                    );
+            }
+
+            if (!validationResult.IsValid) { return (null, validationResult); }
+
+            institution.Nickname = dtUpdate.Nickname;
+            institution.Email = dtUpdate.Email;
+            institution.Description = dtUpdate.Description;
+            institution.Url = dtUpdate.Url;
+            if (!PasswordHasher.Verify(dtUpdate.Password, institution.Password)) { institution.Password = PasswordHasher.Hash(dtUpdate.Password); }
+
+            var dt = new DTInstitution
+                (
+                    id: institution.Id,
+                    nickname: institution.Nickname,
+                    email: institution.Email,
+                    name: institution.Name,
+                    acronym: institution.Acronym,
+                    description: institution.Description,
+                    url: institution.Url,
+                    country: institution.Country,
+                    city: institution.City,
+                    street: institution.Street,
+                    number: institution.Number,
+                    floor: institution.Floor,
+                    created: institution.Created
+                );
+
+            return (dt, validationResult);
+        }
+
+        public async Task<DTInstitution?> DeleteAsync(Guid id)
+        {
+            var institution = await _repo.GetByIdAsync(id);
+
+            if (institution == null) { return null; }
+
+            institution.Active = false;
+
+            var dt = new DTInstitution
+                (
+                    id: institution.Id,
+                    nickname: institution.Nickname,
+                    email: institution.Email,
+                    name: institution.Name,
+                    acronym: institution.Acronym,
+                    description: institution.Description,
+                    url: institution.Url,
+                    country: institution.Country,
+                    city: institution.City,
+                    street: institution.Street,
+                    number: institution.Number,
+                    floor: institution.Floor,
+                    created: institution.Created
+                );
+
+            return dt;
         }
     }
 }

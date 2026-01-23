@@ -1,5 +1,4 @@
 ﻿using EventosUy.Domain.Entities;
-using EventosUy.Domain.ValueObjects;
 
 namespace EventosUy.Domain.Interfaces
 {
@@ -8,10 +7,10 @@ namespace EventosUy.Domain.Interfaces
         public Task<Institution?> GetByIdAsync(Guid id);
         public Task<List<Institution>> GetAllAsync();
         public Task<bool> ExistsByNicknameAsync(string nickname);
-        public Task<bool> ExistsByEmailAsync(Email email);
+        public Task<bool> ExistsByEmailAsync(string email);
         public Task<bool> ExistsByAcronymAsync(string acronym);
-        public Task<bool> ExistsByUrlAsync(Url url);
-        public Task<bool> ExistsByAddressAsync(Address address);
+        public Task<bool> ExistsByUrlAsync(string url);
+        public Task<bool> ExistsByAddressAsync(string country, string city, string street, string number, int floor);
         public Task AddAsync(Institution institution);
         public Task<bool> RemoveAsync(Guid id);
     }

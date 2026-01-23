@@ -72,9 +72,11 @@ namespace EventosUy.API.Controllers
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 
-            var dt = await _clientService.CreateAsync(dtInsert);
+            var (dt, validation) = await _clientService.CreateAsync(dtInsert);
 
-            return Ok(dt);
+            if (!validation.IsValid) { return BadRequest(validation.Errors); }
+
+            return CreatedAtAction(nameof(GetClientById), new { id = dt!.Id }, dt);
         }
 
         [HttpPost("institution")]
@@ -84,9 +86,11 @@ namespace EventosUy.API.Controllers
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 
-            var dt = await _institutionService.CreateAsync(dtInsert);
+            var (dt, validation) = await _institutionService.CreateAsync(dtInsert);
 
-            return Ok(dt);
+            if (!validation.IsValid) { return BadRequest(validation.Errors); }
+
+            return CreatedAtAction(nameof(GetInstitutionById), new { id = dt!.Id }, dt);
         }
 
         // UPDATE
@@ -98,7 +102,9 @@ namespace EventosUy.API.Controllers
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 
-            var dt = await _clientService.UpdateAsync(dtUpdate);
+            var (dt, validation) = await _clientService.UpdateAsync(dtUpdate);
+
+            if (!validation.IsValid) { return BadRequest(validation.Errors); }
 
             return Ok(dt);
         }
@@ -110,16 +116,27 @@ namespace EventosUy.API.Controllers
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 
-            var dt = await _institutionService.UpdateAsync(dtUpdate);
+            var (dt, validation) = await _institutionService.UpdateAsync(dtUpdate);
+
+            if (!validation.IsValid) { return BadRequest(validation.Errors); }
 
             return Ok(dt);
         }
 
         // DELETE
+
         [HttpDelete("client{id}")]
-        public async Task<ActionResult<DTClient>> DeleteClient(int id) 
+        public async Task<ActionResult<DTClient>> DeleteClient(Guid id) 
         {
             var dt = await _clientService.DeleteAsync(id);
+
+            return dt == null ? NotFound() : Ok(dt);
+        }
+
+        [HttpDelete("institution{id}")]
+        public async Task<ActionResult<DTInstitution>> DeleteInstitution(Guid id)
+        {
+            var dt = await _institutionService.DeleteAsync(id);
 
             return dt == null ? NotFound() : Ok(dt);
         }

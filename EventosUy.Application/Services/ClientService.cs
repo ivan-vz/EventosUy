@@ -1,85 +1,179 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.DTOs.DataTypes.Insert;
+using EventosUy.Application.DTOs.DataTypes.Update;
 using EventosUy.Application.Interfaces;
 using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
-using EventosUy.Domain.ValueObjects;
+using FluentValidation.Results;
 
 namespace EventosUy.Application.Services
 {
-    public class ClientService : IClientService
+    public class ClientService(IClientRepo clientRepo) : IClientService
     {
-        private readonly IPersonRepo _repo;
+        private readonly IClientRepo _repo = clientRepo;
 
-        public ClientService(IPersonRepo personRepo) 
+        public async Task<(DTClient? Client, ValidationResult ValidationResult)> CreateAsync(DTInsertClient dtInsert)
         {
-            _repo = personRepo;
-        }
+            var validationResult = new ValidationResult();
 
-        public async Task<Result<Guid>> CreateAsync(string nickname, string password, string email, string firstName, string? lastName, string firstSurname, string lastSurname, DateOnly birthday)
-        {
-            List<string> errors = [];
-            Result<Password> passwordResult = Password.Create(password);
-            if (passwordResult.IsFailure) { errors.AddRange(passwordResult.Errors); }
+            if (await _repo.ExistsByEmailAsync(dtInsert.Email)) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Email", "Emails already in use.")
+                    );
+            }
+
+            if (await _repo.ExistsByNicknameAsync(dtInsert.Nickname))
+            {
+                validationResult.Errors.Add(
+                    new ValidationFailure("Nickname", "Nickname already in use.")
+                );
+            }
+
+            if (!validationResult.IsValid) { return (null, validationResult); }
+
+            var hash = PasswordHasher.Hash(dtInsert.Password);
+
+            var client = new Client(
+                nickname: dtInsert.Nickname,
+                password: hash,
+                email: dtInsert.Email,
+                firstName: dtInsert.FirstName,
+                lastName: dtInsert.LastName,
+                firstSurname: dtInsert.FirstSurname,
+                lastSurname: dtInsert.LastSurname,
+                birthday: dtInsert.Birthday,
+                ci: dtInsert.Ci
+            );
             
-            Result<Email> emailResult = Email.Create(email);
-            if (emailResult.IsFailure) { errors.AddRange(emailResult.Errors); }
+            await _repo.AddAsync(client);
 
-            Result<Name> nameResult = Name.Create(firstSurname, lastSurname, firstName, lastName);
-            if (nameResult.IsFailure) { errors.AddRange(nameResult.Errors); }
+            var dtClient = new DTClient(
+                id: client.Id,
+                nickname: client.Nickname,
+                email: client.Email,
+                firstName: client.FirstName,
+                lastName: client.LastName,
+                firstSurname: client.FirstSurname,
+                lastSurname: client.LastSurname,
+                birthday: client.Birthday,
+                created: client.Created,
+                ci: client.Ci
+            );
 
-            if (errors.Any()) { return Result<Guid>.Failure(errors); }
-
-            if (await _repo.ExistsByEmailAsync(emailResult.Value!)) { errors.Add("Email already in use.");  }
-            if (await _repo.ExistsByNicknameAsync(nickname)) { errors.Add("Nickname already in use."); }
-            
-            if (errors.Any()) { return Result<Guid>.Failure(errors); }
-
-            Result<Client> personResult = Client.Create(nickname, passwordResult.Value!, emailResult.Value!, nameResult.Value!, birthday);
-            if (personResult.IsFailure) { return Result<Guid>.Failure(personResult.Errors); }
-
-            Client personInstance = personResult.Value!;
-            await _repo.AddAsync(personInstance);
-
-            return Result<Guid>.Success(personInstance.Id);
+            return (dtClient, validationResult);
         }
 
         public async Task<IEnumerable<UserCard>> GetAllAsync()
         {
-            List<Client> persons = await _repo.GetAllAsync();
-            List<UserCard> cards = persons.Select(person => person.GetCard()).ToList();
+            List<Client> clients = await _repo.GetAllAsync();
+            List<UserCard> cards = [.. clients.Select(client => new UserCard(client.Id, client.Nickname, client.Email) )];
 
             return cards;
         }
 
         public async Task<DTClient?> GetByIdAsync(Guid personId)
         {
-            Client? clientInstance = await _repo.GetByIdAsync(personId);
+            Client? client = await _repo.GetByIdAsync(personId);
 
-            if (clientInstance is null) { return null; }
+            if (client is null) { return null; }
             
-            var dt = new DTClient
-            (
-                clientInstance.Id,
-                clientInstance.Nickname,
-                clientInstance.Email.Value,
-                clientInstance.Name.FullName,
-                clientInstance.Birthday,
-                clientInstance.Created,
-                clientInstance.CI.GetFormatted()
+            var dt = new DTClient(
+                id: client.Id,
+                nickname: client.Nickname,
+                email: client.Email,
+                firstName: client.FirstName,
+                lastName: client.LastName,
+                firstSurname: client.FirstSurname,
+                lastSurname: client.LastSurname,
+                birthday: client.Birthday,
+                created: client.Created,
+                ci: client.Ci
             );
 
             return dt;
         }
 
-        public async Task<Result<DTClient>> GetDT(Guid id)
+        public async Task<(DTClient? Client, ValidationResult ValidationResult)> UpdateAsync(DTUpdateClient dtUpdate)
         {
-            if (id == Guid.Empty) { return Result<DTClient>.Failure("Person can not be empty."); }
-            Client? personInstance = await _repo.GetByIdAsync(id);
-            if (personInstance is null) { return Result<DTClient>.Failure("Person not Found."); }
+            var client = await _repo.GetByIdAsync(dtUpdate.Id);
 
-            return Result<DTClient>.Success(personInstance.GetDT());
+            var validationResult = new ValidationResult();
+            
+            if (client == null) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Id", "Client not found.")
+                    );
+                
+                return (null, validationResult);
+            }
+
+            if ( client.Nickname != dtUpdate.Nickname && await _repo.ExistsByNicknameAsync(dtUpdate.Nickname) )
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Nickname", "Nickname is already in use.")
+                    );
+            }
+
+            if (client.Email != dtUpdate.Email && await _repo.ExistsByEmailAsync(dtUpdate.Email) )
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Email", "Email is already in use.")
+                    );
+            }
+
+            if (!validationResult.IsValid) { return (null, validationResult); }
+
+            client.Nickname = dtUpdate.Nickname;
+            client.Email = dtUpdate.Email;
+
+            if (!PasswordHasher.Verify(dtUpdate.Password, client.Password)) { client.Password = PasswordHasher.Hash(dtUpdate.Password); }
+
+            var dt = new DTClient(
+                id: client.Id,
+                nickname: client.Nickname,
+                email: client.Email,
+                firstName: client.FirstName,
+                lastName: client.LastName,
+                firstSurname: client.FirstSurname,
+                lastSurname: client.LastSurname,
+                birthday: client.Birthday,
+                created: client.Created,
+                ci: client.Ci
+            );
+
+            return (dt, validationResult);
+        }
+
+        public async Task<DTClient?> DeleteAsync(Guid id)
+        {
+            var client = await _repo.GetByIdAsync(id);
+
+            if (client == null) { return null; }
+
+            client.Active = false;
+
+            var dt = new DTClient(
+                id: client.Id,
+                nickname: client.Nickname,
+                email: client.Email,
+                firstName: client.FirstName,
+                lastName: client.LastName,
+                firstSurname: client.FirstSurname,
+                lastSurname: client.LastSurname,
+                birthday: client.Birthday,
+                created: client.Created,
+                ci: client.Ci
+            );
+
+            return dt;
         }
     }
 }
