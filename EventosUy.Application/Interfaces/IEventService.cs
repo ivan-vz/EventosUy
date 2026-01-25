@@ -11,6 +11,7 @@ namespace EventosUy.Application.Interfaces
     {
         public Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> CreateAsync(DTInsertEvent dtInsert);
         public Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> GetByIdAsync(Guid id);
+        public Task<ActivityCard?> GetCardByIdAsync(Guid id);
         public Task<Result<List<ActivityCard>>> GetByInstitutionAsync(Guid institutionId);
         public Task<IEnumerable<ActivityCard>> GetAllAsync();
         public Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> UpdateAsync(DTUpdateEvent dtUpdate);

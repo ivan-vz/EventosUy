@@ -1,0 +1,23 @@
+﻿using EventosUy.Application.DTOs.DataTypes.Update;
+using FluentValidation;
+
+namespace EventosUy.API.Validators
+{
+    public class EditionUpdateValidator : AbstractValidator<DTUpdateEdition>
+    {
+        public EditionUpdateValidator() 
+        {
+            RuleFor(x => x.Id).NotEmpty();
+            RuleFor(x => x.Name).NotEmpty();
+            RuleFor(x => x.Initials).NotEmpty();
+            RuleFor(x => x.From).NotEmpty().Must(date => date > DateOnly.FromDateTime(DateTime.UtcNow));
+            RuleFor(x => x.To).NotEmpty().Must(date => date > DateOnly.FromDateTime(DateTime.UtcNow));
+            RuleFor(x => x.To).GreaterThanOrEqualTo(x => x.From);
+            RuleFor(x => x.Country).NotEmpty();
+            RuleFor(x => x.City).NotEmpty();
+            RuleFor(x => x.Street).NotEmpty();
+            RuleFor(x => x.Number).NotEmpty();
+            RuleFor(x => x.Floor).NotEmpty();
+        }
+    }
+}

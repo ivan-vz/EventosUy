@@ -7,7 +7,7 @@ namespace EventosUy.API.Validators
     {
         public EventUpdateValidator()
         {
-            RuleFor(x => x.Id).NotNull().Must(id => id != Guid.Empty);
+            RuleFor(x => x.Id).NotEmpty();
             RuleFor(x => x.Name).NotEmpty();
             RuleFor(x => x.Initials).NotEmpty();
             RuleFor(x => x.Description).NotEmpty();

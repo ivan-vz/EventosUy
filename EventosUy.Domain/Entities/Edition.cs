@@ -1,60 +1,34 @@
-﻿using EventosUy.Domain.Common;
-using EventosUy.Domain.DTOs.DataTypes;
-using EventosUy.Domain.DTOs.Records;
-using EventosUy.Domain.Enumerates;
-using EventosUy.Domain.ValueObjects;
+﻿using EventosUy.Domain.Enumerates;
 
 namespace EventosUy.Domain.Entities
 {
-    public class Edition
+    public class Edition(
+        string name, 
+        string initials, 
+        DateOnly from, 
+        DateOnly to,
+        string country,
+        string city,
+        string street,
+        string number,
+        int floor,
+        Guid eventId, 
+        Guid institutionId
+        )
     {
-        public Guid Id { get; init; }
-        public string Name { get; init; }
-        public string Initials { get; init; }
-        public DateOnly From { get; private set; }
-        public DateOnly To { get; private set; }
-        public DateTimeOffset Created { get; init; }
-        public Address Address { get; private set; }
-        public EditionState State { get; private set; }
-        public Guid Event { get; init; }
-        public Guid Institution { get; init; }
-
-        private Edition(string name, string initials, DateOnly from, DateOnly to, Address address, Guid eventId, Guid institutionId) 
-        {
-            Id = Guid.NewGuid();
-            Name = name;
-            Initials = initials;
-            From = from;
-            To = to;
-            Created = DateTimeOffset.UtcNow;
-            Address = address;
-            State = EditionState.PENDING;
-            Event = eventId;
-            Institution = institutionId;
-        }
-
-        public static Result<Edition> Create(string name, string initials, DateOnly from, DateOnly to, Address address, Guid eventId, Guid institutionId) 
-        {
-            List<string> errors = [];
-
-            if (from > to) { errors.Add("The start of editing cannot be later than its completion."); }
-            if (from <= DateOnly.FromDateTime(DateTime.UtcNow)) { errors.Add("The start date of the edition cannot be earlier than today's date."); }
-
-            if (errors.Count != 0) { return Result<Edition>.Failure(errors); }
-
-            Edition editionInstance = new(name, initials, from, to, address, eventId, institutionId); 
-
-            return Result<Edition>.Success(editionInstance);
-        }
-
-        public void Approve() { State = EditionState.ONGOING; }
-        public void Reject() { State = EditionState.CANCELLED; }
-
-        public DTEdition GetDT(Event eventInstance, Institution institutionInstance) 
-        { 
-            return new(Name, Initials, From, To, Created, Address.FullAddress, eventInstance.GetCard(), institutionInstance.GetCard()); 
-        }
-
-        public ActivityCard GetCard() { return new(Id, Name, Initials); }
+        public Guid Id { get; init; } = Guid.NewGuid();
+        public string Name { get; set; } = name;
+        public string Initials { get; set; } = initials;
+        public DateOnly From { get; set; } = from;
+        public DateOnly To { get; set; } = to;
+        public DateTimeOffset Created { get; init; } = DateTimeOffset.UtcNow;
+        public string Country { get; set; } = country;
+        public string City { get; set; } = city;
+        public string Street { get; set; } = street;
+        public string Number { get; set; } = number;
+        public int Floor { get; set; } = floor;
+        public EditionState State { get; set; } = EditionState.PENDING;
+        public Guid Event { get; init; } = eventId;
+        public Guid Institution { get; init; } = institutionId;
     }
 }

@@ -11,6 +11,7 @@ namespace EventosUy.Domain.Interfaces
         public Task<List<Edition>> GetAllPendingByEventAsync(Guid eventId);
         public Task<bool> ExistsByNameAsync(string name);
         public Task<bool> ExistsByInitialsAsync(string initials);
+        public Task<bool> ExistsEventAt(string country, string city, string street, string number, int floor, DateOnly from);
         public Task AddAsync(Edition edition);
         public Task<bool> RemoveAsync(Guid id);
     }

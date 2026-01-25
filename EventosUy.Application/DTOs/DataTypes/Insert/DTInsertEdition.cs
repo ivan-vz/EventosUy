@@ -1,35 +1,31 @@
 ﻿using EventosUy.Domain.DTOs.Records;
 
-namespace EventosUy.Application.DTOs.DataTypes.Detail
+namespace EventosUy.Application.DTOs.DataTypes.Insert
 {
-    public class DTEdition(
-        Guid id, 
-        string name, 
-        string initials, 
-        DateOnly from, 
-        DateOnly to, 
-        DateTimeOffset created,
+    public class DTInsertEdition(
+        string name,
+        string initials,
+        DateOnly from,
+        DateOnly to,
         string country,
         string city,
         string street,
         string number,
         int floor,
-        ActivityCard eventCard, 
-        UserCard institutionCard
+        Guid eventId,
+        Guid institutionId
         )
     {
-        public Guid Id { get; init; } = id;
         public string Name { get; init; } = name;
         public string Initials { get; init; } = initials;
         public DateOnly From { get; init; } = from;
         public DateOnly To { get; init; } = to;
-        public DateTimeOffset Created { get; init; } = created;
         public string Country { get; init; } = country;
         public string City { get; init; } = city;
         public string Street { get; init; } = street;
         public string Number { get; init; } = number;
         public int Floor { get; init; } = floor;
-        public ActivityCard Event { get; init; } = eventCard;
-        public UserCard Institution { get; init; } = institutionCard;
+        public Guid Event { get; init; } = eventId;
+        public Guid Institution { get; init; } = institutionId;
     }
 }

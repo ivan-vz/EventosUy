@@ -133,6 +133,17 @@ namespace EventosUy.Application.Services
             return (dt, validationResult);
         }
 
+        public async Task<ActivityCard?> GetCardByIdAsync(Guid id)
+        {
+            Event? eventInstance = await _repo.GetByIdAsync(id);
+
+            if (eventInstance is null) { return null; }
+
+            var card = new ActivityCard(eventInstance.Id, eventInstance.Name, eventInstance.Initials);
+
+            return card;
+        }
+
         public async Task<Result<List<ActivityCard>>> GetByInstitutionAsync(Guid institutionId)
         {
             if (institutionId == Guid.Empty) { return Result<List<ActivityCard>>.Failure("Institution can not be empty."); }

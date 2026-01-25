@@ -1,14 +1,16 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.DTOs.DataTypes.Insert;
+using EventosUy.Application.DTOs.DataTypes.Update;
 using EventosUy.Application.Interfaces;
-using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
+using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;
-using EventosUy.Domain.ValueObjects;
+using FluentValidation.Results;
 
 namespace EventosUy.Application.Services
 {
-    internal class EditionService : IEditionService
+    public class EditionService : IEditionService
     {
         private readonly IEditionRepo _repo;
         private readonly IEventService _eventService;
@@ -21,112 +23,311 @@ namespace EventosUy.Application.Services
             _institutionService = institutionService;
         }
 
-        public async Task<Result<Guid>> CreateAsync(string name, string initials, string country, string city, string street, string number, DateOnly from, DateOnly to, Guid eventId, Guid institutionId)
+        public async Task<(DTEdition?, ValidationResult)> CreateAsync(DTInsertEdition dtInsert)
         {
-            List<string> errors = [];
+            var validationResult = new ValidationResult();
 
-            Result<Event> eventResult = await _eventService.GetByIdAsync(eventId);
-            if (!eventResult.IsSuccess) { errors.AddRange(eventResult.Errors); }
+            UserCard? userCard = await _institutionService.GetCardByIdAsync(dtInsert.Institution);
+            if (userCard is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Institution", "Institution Not Found.")
+                    );
+            }
 
-            Result<Institution> institutionResult = await _institutionService.GetByIdAsync(institutionId);
-            if (!institutionResult.IsSuccess) { errors.AddRange(institutionResult.Errors); }
+            ActivityCard? eventCard = await _eventService.GetCardByIdAsync(dtInsert.Event);
+            if (eventCard is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Event", "Event Not Found.")
+                    );
+            }
 
-            if (await _repo.ExistsAsync(name)) { errors.Add("Edition already exists."); }
+            if (await _repo.ExistsByNameAsync(dtInsert.Name)) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Name", "Event already in use.")
+                    );
+            }
 
-            Result<Address> addressResult = Address.Create(country, city, street, number);
-            if (addressResult.IsFailure) { errors.AddRange(addressResult.Errors); }
+            if (await _repo.ExistsByInitialsAsync(dtInsert.Initials))
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Initials", "Initials already in use.")
+                    );
+            }
 
-            if (errors.Any()) { return Result<Guid>.Failure(errors); } 
+            if (await _repo.ExistsEventAt(dtInsert.Country, dtInsert.City, dtInsert.Street, dtInsert.Number, dtInsert.Floor, dtInsert.From))
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Address | Date", $"Addres already in booked for {dtInsert.From:dd-MM-yyy}.")
+                    );
+            }
 
-            Result<Edition> editionResult = Edition.Create(name, initials, from, to, addressResult.Value!, eventId, institutionId);
+            if (!validationResult.IsValid) { return (null, validationResult); }
 
-            if (!editionResult.IsSuccess) { return Result<Guid>.Failure(editionResult.Errors); }
+            var edition = new Edition
+                (
+                name: dtInsert.Name, 
+                initials: dtInsert.Initials, 
+                from: dtInsert.From, 
+                to: dtInsert.To, 
+                country: dtInsert.Country,
+                city: dtInsert.City,
+                street: dtInsert.Street,
+                number: dtInsert.Number,
+                floor: dtInsert.Floor,
+                eventId: dtInsert.Event, 
+                institutionId: dtInsert.Institution
+                );
 
-            Edition editionInstance = editionResult.Value!;
-            await _repo.AddAsync(editionInstance);
+            await _repo.AddAsync(edition);
 
-            return Result<Guid>.Success(editionInstance.Id);
+            var dt = new DTEdition
+                (
+                id: edition.Id,
+                name: dtInsert.Name,
+                initials: dtInsert.Initials,
+                from: dtInsert.From,
+                to: dtInsert.To,
+                created: edition.Created,
+                country: dtInsert.Country,
+                city: dtInsert.City,
+                street: dtInsert.Street,
+                number: dtInsert.Number,
+                floor: dtInsert.Floor,
+                eventCard: eventCard!,
+                institutionCard: userCard!
+                );
+
+            return (dt, validationResult);
         }
 
-        public async Task<Result<List<ActivityCard>>> GetAllAsync()
+        public async Task<IEnumerable<ActivityCard>> GetAllAsync()
         {
             List<Edition> editions = await _repo.GetAllAsync();
-            List<ActivityCard> cards = editions.Select(edition => edition.GetCard()).ToList();
+            List<ActivityCard> cards = [.. editions.Select(edition => new ActivityCard(Id: edition.Id, Name: edition.Name, Initials: edition.Initials)) ];
 
-            return Result<List<ActivityCard>>.Success(cards);
+            return cards;
         }
 
-        public async Task<Result<List<ActivityCard>>> GetAllByEventAsync(Guid eventId)
+        public async Task<IEnumerable<ActivityCard>> GetAllByEventAsync(Guid eventId)
         {
-            if (eventId == Guid.Empty) { return Result<List<ActivityCard>>.Failure("Event can not be empty."); }
             List<Edition> editions = await _repo.GetAllByEventAsync(eventId);
-            List<ActivityCard> cards = editions.Select(edition => edition.GetCard()).ToList();
+            List<ActivityCard> cards = [.. editions.Select(edition => new ActivityCard(edition.Id, edition.Name, edition.Initials) )];
 
-            return Result<List<ActivityCard>>.Success(cards);
+            return cards;
         }
 
-        public async Task<Result<List<ActivityCard>>> GetAllByInstitutionAsync(Guid institutionId)
+        public async Task<IEnumerable<ActivityCard>> GetAllByInstitutionAsync(Guid institutionId)
         {
-            if (institutionId == Guid.Empty) { return Result<List<ActivityCard>>.Failure("Institution can not be empty."); }
             List<Edition> editions = await _repo.GetAllByInstitutionAsync(institutionId);
-            List<ActivityCard> cards = editions.Select(edition => edition.GetCard()).ToList();
+            List<ActivityCard> cards = [.. editions.Select(edition => new ActivityCard(edition.Id, edition.Name, edition.Initials))];
 
-            return Result<List<ActivityCard>>.Success(cards);
+            return cards;
         }
 
-        public async Task<Result<List<ActivityCard>>> GetAllPendingByEventAsync(Guid eventId)
+        public async Task<IEnumerable<ActivityCard>> GetAllPendingByEventAsync(Guid eventId)
         {
-            if (eventId == Guid.Empty) { return Result<List<ActivityCard>>.Failure("Event can not be empty."); }
             List<Edition> editions = await _repo.GetAllPendingByEventAsync(eventId);
-            List<ActivityCard> cards = editions.Select(edition => edition.GetCard()).ToList();
+            List<ActivityCard> cards = [.. editions.Select(edition => new ActivityCard(edition.Id, edition.Name, edition.Initials))];
 
-            return Result<List<ActivityCard>>.Success(cards);
+            return cards;
         }
 
-        public async Task<Result<Edition>> GetByIdAsync(Guid id)
+        public async Task<(DTEdition?, ValidationResult)> GetByIdAsync(Guid id)
         {
-            if (id == Guid.Empty) { return Result<Edition>.Failure("Edition can not be empty."); }
-            Edition? editionInstance = await _repo.GetByIdAsync(id);
-            if (editionInstance is null) { return Result<Edition>.Failure("Edition not Found."); }
+            Edition? edition = await _repo.GetByIdAsync(id);
 
-            return Result<Edition>.Success(editionInstance);
+            var validationResult = new ValidationResult();
+
+            if (edition is null || edition.State is not EditionState.ONGOING) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Id", "Edition not found.")
+                    );
+
+                return (null, validationResult);
+            }
+
+            UserCard? userCard = await _institutionService.GetCardByIdAsync(edition.Institution);
+            if (userCard is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Institution", "Institution Not Found.")
+                    );
+            }
+
+            ActivityCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
+            if (eventCard is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Event", "Event Not Found.")
+                    );
+            }
+
+            if (!validationResult.IsValid) { return (null, validationResult); }
+
+            var dt = new DTEdition
+                (
+                   id: edition.Id,
+                   name: edition.Name,
+                   initials: edition.Initials,
+                   from: edition.From,
+                   to: edition.To,
+                   created: edition.Created,
+                   country: edition.Country,
+                   city: edition.City,
+                   street: edition.Street,
+                   number: edition.Number,
+                   floor: edition.Floor,
+                   eventCard: eventCard!,
+                   institutionCard: userCard!
+                );
+
+            return (dt, validationResult);
         }
 
-        public async Task<Result<DTEdition>> GetDTAsync(Guid id)
+        public async Task<bool> ApproveAsync(Guid id)
         {
-            if (id == Guid.Empty) { return Result<DTEdition>.Failure("Edition can not be empty."); }
-            Edition? editionInstance = await _repo.GetByIdAsync(id);
-            if (editionInstance is null) { return Result<DTEdition>.Failure("Edition not Found."); }
+            Edition? edition = await _repo.GetByIdAsync(id);
 
-            Result<Event> eventResult = await _eventService.GetByIdAsync(editionInstance.Event);
-            if (!eventResult.IsSuccess) { return Result<DTEdition>.Failure(eventResult.Errors); }
+            if (edition is null || edition.State is not EditionState.PENDING) { return false; }
 
-            Result<Institution> institutionResult = await _institutionService.GetByIdAsync(editionInstance.Institution);
-            if (!institutionResult.IsSuccess) { return Result<DTEdition>.Failure(institutionResult.Errors); }
+            edition.State = EditionState.ONGOING;
 
-            return Result<DTEdition>.Success(editionInstance.GetDT(eventResult.Value!, institutionResult.Value!));
+            return true;
         }
 
-        public async Task<Result> ApproveAsync(Guid id)
+        public async Task<bool> RejectAsync(Guid id)
         {
-            if (id == Guid.Empty) { return Result.Failure("Edition can not be empty."); }
-            Edition? editionInstance = await _repo.GetByIdAsync(id);
-            if (editionInstance is null) { return Result.Failure("Edition not Found."); }
+            Edition? edition = await _repo.GetByIdAsync(id);
 
-            editionInstance.Approve();
+            if (edition is null || edition.State is not EditionState.PENDING) { return false; }
 
-            return Result.Success();
+            edition.State = EditionState.CANCELLED;
+
+            return true;
         }
 
-        public async Task<Result> RejectAsync(Guid id)
+        public async Task<(DTEdition?, ValidationResult)> UpdateAsync(DTUpdateEdition dtUpdate)
         {
-            if (id == Guid.Empty) { return Result.Failure("Edition can not be empty."); }
-            Edition? editionInstance = await _repo.GetByIdAsync(id);
-            if (editionInstance is null) { return Result.Failure("Edition not Found."); }
+            var edition = await _repo.GetByIdAsync(dtUpdate.Id);
 
-            editionInstance.Reject();
+            var validationResult = new ValidationResult();
 
-            return Result.Success();
+            if (edition is null || edition.State is not EditionState.ONGOING) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Id", "Edition not found.")
+                    );
+
+                return (null, validationResult);
+            }
+
+            UserCard? userCard = await _institutionService.GetCardByIdAsync(edition.Institution);
+            ActivityCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
+            
+
+            if (!edition.Name.Equals(dtUpdate.Name, StringComparison.OrdinalIgnoreCase) && await _repo.ExistsByNameAsync(dtUpdate.Name))
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Name", "Event already in use.")
+                    );
+            }
+
+            if (!edition.Initials.Equals(dtUpdate.Initials, StringComparison.OrdinalIgnoreCase) && await _repo.ExistsByInitialsAsync(dtUpdate.Initials))
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Initials", "Initials already in use.")
+                    );
+            }
+
+            if (!edition.Country.Equals(dtUpdate.Country, StringComparison.OrdinalIgnoreCase) 
+                && !edition.City.Equals(dtUpdate.City, StringComparison.OrdinalIgnoreCase)
+                && !edition.Street.Equals(dtUpdate.Street, StringComparison.OrdinalIgnoreCase)
+                && !edition.Number.Equals(dtUpdate.Number)
+                && edition.Floor != dtUpdate.Floor
+                && await _repo.ExistsEventAt(dtUpdate.Country, dtUpdate.City, dtUpdate.Street, dtUpdate.Number, dtUpdate.Floor, dtUpdate.From))
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Address | Date", $"Addres already in booked for {dtUpdate.From:dd-MM-yyy}.")
+                    );
+            }
+
+            if (!validationResult.IsValid) { return (null, validationResult); }
+
+            edition.Name = dtUpdate.Name;
+            edition.Initials = dtUpdate.Initials;
+            edition.From = dtUpdate.From;
+            edition.To = dtUpdate.To;
+            edition.Country = dtUpdate.Country;
+            edition.City = dtUpdate.City;
+            edition.Street = dtUpdate.Street;
+            edition.Number = dtUpdate.Number;
+            edition.Floor = dtUpdate.Floor;
+
+            var dt = new DTEdition
+                (
+                id: edition.Id,
+                name: edition.Name,
+                initials: edition.Initials,
+                from: edition.From,
+                to: edition.To,
+                created: edition.Created,
+                country: edition.Country,
+                city: edition.City,
+                street: edition.Street,
+                number: edition.Number,
+                floor: edition.Floor,
+                eventCard: eventCard!,
+                institutionCard: userCard!
+                );
+
+            return (dt, validationResult);
+        }
+
+        public async Task<DTEdition?> DeleteAsync(Guid id)
+        {
+            var edition = await _repo.GetByIdAsync( id );
+
+            if (edition is null || edition.State is EditionState.CANCELLED) { return null; }
+
+            edition.State = EditionState.CANCELLED;
+            
+            UserCard? userCard = await _institutionService.GetCardByIdAsync(edition.Institution);
+            ActivityCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
+
+            var dt = new DTEdition
+                (
+                id: edition.Id,
+                name: edition.Name,
+                initials: edition.Initials,
+                from: edition.From,
+                to: edition.To,
+                created: edition.Created,
+                country: edition.Country,
+                city: edition.City,
+                street: edition.Street,
+                number: edition.Number,
+                floor: edition.Floor,
+                eventCard: eventCard!,
+                institutionCard: userCard!
+                );
+
+            return dt;
         }
     }
 }

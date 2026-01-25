@@ -7,7 +7,7 @@ namespace EventosUy.API.Validators
     {
         public InstitutionUpdateValidator() 
         {
-            RuleFor(x => x.Id).NotNull().Must(id => id != Guid.Empty);
+            RuleFor(x => x.Id).NotEmpty();
             RuleFor(x => x.Nickname).NotEmpty();
             RuleFor(x => x.Email).EmailAddress();
             RuleFor(x => x.Description).NotEmpty();
