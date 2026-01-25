@@ -15,11 +15,17 @@ namespace EventosUy.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
-        public Task<bool> ExistsAsync(string name) { return Task.FromResult(_registerTypes.Any(registerType => registerType.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); }
+        public Task<bool> ExistsAsync(string name) 
+        { 
+            return Task.FromResult(_registerTypes.Any(registerType => registerType.Active && registerType.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); 
+        }
 
-        public Task<List<RegisterType>> GetAllByEditionAsync(Guid editionId) { return Task.FromResult(_registerTypes.Where(registerType => registerType.Edition == editionId).ToList()); }
+        public Task<List<RegisterType>> GetAllByEditionAsync(Guid editionId) 
+        { 
+            return Task.FromResult(_registerTypes.Where(registerType => registerType.Active && registerType.Edition == editionId).ToList()); 
+        }
 
-        public Task<RegisterType?> GetByIdAsync(Guid id) { return Task.FromResult(_registerTypes.SingleOrDefault(registerType => registerType.Id == id)); }
+        public Task<RegisterType?> GetByIdAsync(Guid id) { return Task.FromResult(_registerTypes.SingleOrDefault(registerType => registerType.Active && registerType.Id == id)); }
 
         public Task<bool> RemoveAsync(Guid id)
         {

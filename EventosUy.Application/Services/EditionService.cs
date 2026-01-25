@@ -140,41 +140,14 @@ namespace EventosUy.Application.Services
             return cards;
         }
 
-        public async Task<(DTEdition?, ValidationResult)> GetByIdAsync(Guid id)
+        public async Task<DTEdition?> GetByIdAsync(Guid id)
         {
             Edition? edition = await _repo.GetByIdAsync(id);
 
-            var validationResult = new ValidationResult();
-
-            if (edition is null || edition.State is not EditionState.ONGOING) 
-            {
-                validationResult.Errors.Add
-                    (
-                        new ValidationFailure("Id", "Edition not found.")
-                    );
-
-                return (null, validationResult);
-            }
+            if (edition is null || edition.State is not EditionState.ONGOING) { return null; }
 
             UserCard? userCard = await _institutionService.GetCardByIdAsync(edition.Institution);
-            if (userCard is null)
-            {
-                validationResult.Errors.Add
-                    (
-                        new ValidationFailure("Institution", "Institution Not Found.")
-                    );
-            }
-
             ActivityCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
-            if (eventCard is null)
-            {
-                validationResult.Errors.Add
-                    (
-                        new ValidationFailure("Event", "Event Not Found.")
-                    );
-            }
-
-            if (!validationResult.IsValid) { return (null, validationResult); }
 
             var dt = new DTEdition
                 (
@@ -193,7 +166,18 @@ namespace EventosUy.Application.Services
                    institutionCard: userCard!
                 );
 
-            return (dt, validationResult);
+            return dt;
+        }
+
+        public async Task<ActivityCard?> GetCardByIdAsync(Guid id)
+        {
+            Edition? edition = await _repo.GetByIdAsync(id);
+
+            if (edition is null || edition.State is not EditionState.ONGOING) { return null; }
+
+            var card = new ActivityCard(edition.Id, edition.Name, edition.Initials);
+
+            return card;
         }
 
         public async Task<bool> ApproveAsync(Guid id)

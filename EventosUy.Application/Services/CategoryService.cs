@@ -66,25 +66,15 @@ namespace EventosUy.Application.Services
             return names;
         }
 
-        public async Task<(DTCategory?, ValidationResult)> GetByIdAsync(Guid id)
+        public async Task<DTCategory?> GetByIdAsync(Guid id)
         {
-            var validationResult = new ValidationResult();
-
             Category? category = await _repo.GetByIdAsync(id);
 
-            if (category is null) 
-            {
-                validationResult.Errors.Add
-                    (
-                        new ValidationFailure("Id", "Category not found.")
-                    );
-
-                return (null, validationResult);
-            }
+            if (category is null) { return null; }
 
             var dt = new DTCategory(id: category.Id, name: category.Name, created: category.Created);
 
-            return (dt, validationResult);
+            return dt;
         }
 
         public async Task<DTCategory?> DeleteAsync(Guid id)

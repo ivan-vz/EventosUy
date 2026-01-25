@@ -94,31 +94,13 @@ namespace EventosUy.Application.Services
             return cards;
         }
 
-        public async Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> GetByIdAsync(Guid id)
+        public async Task<DTEvent?> GetByIdAsync(Guid id)
         {
             Event? eventInstance = await _repo.GetByIdAsync(id);
 
-            var validationResult = new ValidationResult();
-
-            if (eventInstance is null) 
-            {
-                validationResult.Errors.Add
-                    (
-                        new ValidationFailure("Event", "Event not Found.")
-                    );
-                return (null, validationResult); 
-            }
+            if (eventInstance is null) { return null; }
 
             UserCard? institutionCard = await _institutionService.GetCardByIdAsync(eventInstance.Institution);
-
-            if (institutionCard is null)
-            {
-                validationResult.Errors.Add
-                    (
-                        new ValidationFailure("Institution", "Institution not Found.")
-                    );
-                return (null, validationResult);
-            }
             
             var dt = new DTEvent(
                     id: eventInstance.Id,
@@ -127,10 +109,10 @@ namespace EventosUy.Application.Services
                     description: eventInstance.Description,
                     created: eventInstance.Created,
                     categories: eventInstance.Categories,
-                    card: institutionCard
+                    card: institutionCard!
                 );
 
-            return (dt, validationResult);
+            return dt;
         }
 
         public async Task<ActivityCard?> GetCardByIdAsync(Guid id)

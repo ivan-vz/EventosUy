@@ -26,6 +26,7 @@ builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IEditionService, EditionService>();
+builder.Services.AddScoped<IRegisterTypeService, RegisterTypeService>();
 
 // Validators
 builder.Services.AddScoped<IValidator<DTInsertClient>, ClientInsertValidator>();
@@ -36,6 +37,7 @@ builder.Services.AddScoped<IValidator<DTInsertEvent>, EventInsertValidator>();
 builder.Services.AddScoped<IValidator<DTUpdateEvent>, EventUpdateValidator>();
 builder.Services.AddScoped<IValidator<DTInsertEdition>, EditionInsertValidator>();
 builder.Services.AddScoped<IValidator<DTUpdateEdition>, EditionUpdateValidator>();
+builder.Services.AddScoped<IValidator<DTInsertRegisterType>, RegisterTypeInsertValidator>();
 
 var app = builder.Build();
 

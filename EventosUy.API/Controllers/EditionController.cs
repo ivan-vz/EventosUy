@@ -30,14 +30,12 @@ namespace EventosUy.API.Controllers
 
         // GET BY ID
 
-        [HttpGet("{id}")]
+        [HttpGet("detail/{id}")]
         public async Task<ActionResult<DTEdition>> GetById(Guid id)
         {
-            var (dt, validation) = await _editionService.GetByIdAsync(id);
+            var dt = await _editionService.GetByIdAsync(id);
 
-            if (!validation.IsValid) { return BadRequest(validation.Errors); }
-
-            return Ok(dt);
+            return dt is null ? NotFound() : Ok(dt);
         }
 
         // CREATE

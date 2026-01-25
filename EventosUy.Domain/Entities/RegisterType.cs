@@ -4,49 +4,19 @@ using EventosUy.Domain.DTOs.Records;
 
 namespace EventosUy.Domain.Entities
 {
-    public class RegisterType
+    public class RegisterType(string name, string description, decimal price, int quota, Guid editionId)
     {
-        public Guid Id { get; init; }
-        public string Name { get; init; }
-        public string Description { get; private set; }
-        public decimal Price { get; init; }
-        public int Quota { get; init; }
-        public int Used { get; private set; }
-        public bool Active { get; private set; }
-        public DateTimeOffset Created { get; init; }
-        public Guid Edition { get; init; }
+        public Guid Id { get; init; } = Guid.NewGuid();
+        public string Name { get; init; } = name;
+        public string Description { get; init; } = description;
+        public decimal Price { get; init; } = price;
+        public int Quota { get; init; } = quota;
+        public int Used { get; private set; } = 0;
+        public bool Active { get; set; } = true;
+        public DateTimeOffset Created { get; init; } = DateTimeOffset.UtcNow;
+        public Guid Edition { get; init; } = editionId;
 
-        private RegisterType(string name, string description, decimal price, int quota, Guid editionId) 
-        {
-            Id = Guid.NewGuid();
-            Name = name;
-            Description = description;
-            Price = price;
-            Quota = quota;
-            Used = 0;
-            Edition = editionId;
-            Active = true;
-            Created = DateTimeOffset.UtcNow;
-        }
-
-        public static Result<RegisterType> Create(string name, string description, decimal price, int quota, Guid editionId) 
-        {
-            List<string> errors = [] ;
-            
-            if (price < 0) { errors.Add("Price must be greater than or equal to 0."); }
-            if (quota <= 0) { errors.Add("Quota must be greater than 0."); }
-
-            if (errors.Count != 0) { return Result<RegisterType>.Failure(errors); }
-
-            RegisterType registerTypeInstance = new(name, description, price, quota, editionId);
-
-            return Result<RegisterType>.Success(registerTypeInstance);
-        }
-
-        public DTRegisterType GetDT(Edition editionInstance) { return new(Name, editionInstance.GetCard(), Description, Price, Quota, Created); }
-
-        public RegisterTypeCard GetCard() { return new(Id, Name, Active); }
-
+        // TODO: Esto iria en el servicio
         public Result UseSpot() 
         {
             if (Used >= Quota) { return Result.Failure("No available spots."); }

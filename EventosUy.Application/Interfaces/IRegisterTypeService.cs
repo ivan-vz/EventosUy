@@ -1,15 +1,15 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
-using EventosUy.Domain.Common;
+using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Domain.DTOs.Records;
-using EventosUy.Domain.Entities;
+using FluentValidation.Results;
 
 namespace EventosUy.Application.Interfaces
 {
     public interface IRegisterTypeService
     {
-        public Task<Result<Guid>> CreateAsync(string name, string description, decimal price, int quota, Guid eventiId);
-        public Task<Result<DTRegisterType>> GetDTAsync(Guid id);
-        public Task<Result<RegisterType>> GetByIdAsync(Guid id);
-        public Task<Result<List<RegisterTypeCard>>> GetAllByEditionAsync(Guid editionId);
+        public Task<(DTRegisterType?, ValidationResult)> CreateAsync(DTInsertRegisterType dtInsert);
+        public Task<DTRegisterType?> GetByIdAsync(Guid id);
+        public Task<IEnumerable<RegisterTypeCard>> GetAllByEditionAsync(Guid editionId);
+        public Task<DTRegisterType?> DeleteAsync(Guid id);
     }
 }

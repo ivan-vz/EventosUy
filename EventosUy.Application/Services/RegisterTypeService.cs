@@ -1,76 +1,123 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.Interfaces;
-using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
+using FluentValidation.Results;
 
 namespace EventosUy.Application.Services
 {
-    internal class RegisterTypeService : IRegisterTypeService
+    public class RegisterTypeService : IRegisterTypeService
     {
         private readonly IRegisterTypeRepo _repo;
         private readonly IEditionService _editionService;
-        private readonly IEventService _eventService;
 
-        public RegisterTypeService(IRegisterTypeRepo registerTypeRepo, IEditionService editionService, IEventService eventService)
+        public RegisterTypeService(IRegisterTypeRepo registerTypeRepo, IEditionService editionService)
         {
             _repo = registerTypeRepo;
             _editionService = editionService;
-            _eventService = eventService;
         }
 
-        public async Task<Result<Guid>> CreateAsync(string name, string description, decimal price, int quota, Guid eventiId)
+        public async Task<(DTRegisterType?, ValidationResult)> CreateAsync(DTInsertRegisterType dtInsert)
         {
-            List<string> errors = [];
-            Result<Event> eventResult = await _eventService.GetByIdAsync(eventiId);
-            if (!eventResult.IsSuccess) { errors.AddRange(eventResult.Errors); }
+            var validationResult = new ValidationResult();
 
-            if (await _repo.ExistsAsync(name)) { errors.Add("Register Type already exist."); }
+            if (await _repo.ExistsAsync(dtInsert.Name)) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Name", "Name already in use.")
+                    );
+            }
 
-            if (errors.Any()) { return Result<Guid>.Failure(errors); }
+            var edition = _editionService.GetByIdAsync(dtInsert.Edition);
 
-            Result<RegisterType> registerTypeResult = RegisterType.Create(name, description, price, quota, eventiId);
-            if (!registerTypeResult.IsSuccess) { return Result<Guid>.Failure(registerTypeResult.Errors); }
+            if (edition is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Edition", "Edition not found.")
+                    );
+            }
 
-            RegisterType registerTypeInstance = registerTypeResult.Value!;
-            await _repo.AddAsync(registerTypeInstance);
+            if (!validationResult.IsValid) { return (null, validationResult); }
+            
+            var registerType = new RegisterType(
+                name: dtInsert.Name, 
+                description: dtInsert.Description, 
+                price: dtInsert.Price, 
+                quota: dtInsert.Quota, 
+                editionId: dtInsert.Edition
+                );
 
-            return Result<Guid>.Success(registerTypeInstance.Id);
+            await _repo.AddAsync(registerType);
+
+            var editionCard = await _editionService.GetCardByIdAsync(dtInsert.Edition);
+
+            var dt = new DTRegisterType(
+                    id: registerType.Id,
+                    name: registerType.Name,
+                    description: registerType.Description,
+                    price: registerType.Price,
+                    quota: registerType.Quota,
+                    created: registerType.Created,
+                    editionCard: editionCard!
+                );
+
+            return (dt, validationResult);
         }
 
-        public async Task<Result<List<RegisterTypeCard>>> GetAllByEditionAsync(Guid editionId)
+        public async Task<IEnumerable<RegisterTypeCard>> GetAllByEditionAsync(Guid editionId)
         {
-            if (editionId == Guid.Empty) { return Result<List<RegisterTypeCard>>.Failure("Edition can not be empty."); }
             List<RegisterType> registerTypes = await _repo.GetAllByEditionAsync(editionId);
-            List<RegisterTypeCard> cards = registerTypes.Select(registerType => registerType.GetCard()).ToList();
+            List<RegisterTypeCard> cards = [.. registerTypes.Select(rt => new RegisterTypeCard(rt.Id, rt.Name) )];
 
-            return Result<List<RegisterTypeCard>>.Success(cards);
+            return cards;
         }
 
-        public async Task<Result<RegisterType>> GetByIdAsync(Guid id)
+        public async Task<DTRegisterType?> GetByIdAsync(Guid id)
         {
-            if (id == Guid.Empty) { return Result<RegisterType>.Failure("Register Type can not be empty."); }
-            RegisterType? registerTypeInstance = await _repo.GetByIdAsync(id);
+            var registerType = await _repo.GetByIdAsync(id);
 
-            if (registerTypeInstance is null) { return Result<RegisterType>.Failure("Register Type not Found."); }
+            if (registerType is null) { return null; }
 
-            return Result<RegisterType>.Success(registerTypeInstance);
+            var editionCard = await _editionService.GetCardByIdAsync(registerType.Edition);
+
+            var dt = new DTRegisterType(
+                    id: registerType.Id,
+                    name: registerType.Name,
+                    description: registerType.Description,
+                    price: registerType.Price,
+                    quota: registerType.Quota,
+                    created: registerType.Created,
+                    editionCard: editionCard!
+                );
+
+            return dt;
         }
 
-        public async Task<Result<DTRegisterType>> GetDTAsync(Guid id)
+        public async Task<DTRegisterType?> DeleteAsync(Guid id)
         {
-            List<string> errors = [];
-            Result<RegisterType> registerTypeResult = await GetByIdAsync(id);
-            if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
-            RegisterType registerTypeInstance = registerTypeResult.Value!;
+            var registerType = await _repo.GetByIdAsync(id);
 
-            Result<Edition> editionResult = await _editionService.GetByIdAsync(registerTypeInstance.Edition);
-            if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
+            if (registerType is null) { return null; }
 
-            if (errors.Any()) { return Result<DTRegisterType>.Failure(errors); }
+            registerType.Active = false;
 
-            return Result<DTRegisterType>.Success(registerTypeInstance.GetDT(editionResult.Value!));
+            var editionCard = await _editionService.GetCardByIdAsync(registerType.Edition);
+
+            var dt = new DTRegisterType(
+                    id: registerType.Id,
+                    name: registerType.Name,
+                    description: registerType.Description,
+                    price: registerType.Price,
+                    quota: registerType.Quota,
+                    created: registerType.Created,
+                    editionCard: editionCard!
+                );
+
+            return dt;
         }
     }
 }

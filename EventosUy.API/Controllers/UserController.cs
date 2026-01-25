@@ -47,7 +47,7 @@ namespace EventosUy.API.Controllers
 
         // GET BY ID
 
-        [HttpGet("clients/{id}")]
+        [HttpGet("client/detail/{id}")]
         public async Task<ActionResult<DTClient>> GetClientById(Guid id)
         {
             DTClient? dtClient = await _clientService.GetByIdAsync(id);
@@ -55,7 +55,7 @@ namespace EventosUy.API.Controllers
             return dtClient == null ? NotFound() : Ok(dtClient);
         }
 
-        [HttpGet("institution{id}")]
+        [HttpGet("institution/detail/{id}")]
         public async Task<ActionResult<DTInstitution>> GetInstitutionById(Guid id)
         {
             DTInstitution? dtInstitution = await _institutionService.GetByIdAsync(id);

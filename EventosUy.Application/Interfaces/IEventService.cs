@@ -10,7 +10,7 @@ namespace EventosUy.Application.Interfaces
     public interface IEventService
     {
         public Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> CreateAsync(DTInsertEvent dtInsert);
-        public Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> GetByIdAsync(Guid id);
+        public Task<DTEvent?> GetByIdAsync(Guid id);
         public Task<ActivityCard?> GetCardByIdAsync(Guid id);
         public Task<Result<List<ActivityCard>>> GetByInstitutionAsync(Guid institutionId);
         public Task<IEnumerable<ActivityCard>> GetAllAsync();
