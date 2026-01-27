@@ -2,8 +2,8 @@
 using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.DTOs.DataTypes.Update;
+using EventosUy.Application.DTOs.Records;
 using EventosUy.Application.Interfaces;
-using EventosUy.Domain.DTOs.Records;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventosUy.API.Controllers
@@ -26,7 +26,7 @@ namespace EventosUy.API.Controllers
         // GET ALL
 
         [HttpGet]
-        public async Task<IEnumerable<ActivityCard>> GetAll() => await _editionService.GetAllAsync();
+        public async Task<IEnumerable<EditionCard>> GetAll() => await _editionService.GetAllAsync();
 
         // GET BY ID
 

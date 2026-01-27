@@ -1,4 +1,5 @@
 ﻿using EventosUy.Domain.Entities;
+using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;
 
 namespace EventosUy.Infrastructure.Repositories
@@ -15,9 +16,11 @@ namespace EventosUy.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
-        public Task<bool> ExistsAsync(string code) { return Task.FromResult(_vouchers.Any(voucher => voucher.IsActive == true && voucher.Code.Equals(code))); }
+        public Task<bool> ExistsAsync(string code) { return Task.FromResult(_vouchers.Any(voucher => voucher.State.Equals(VoucherState.AVAILABLE) && voucher.Code.Equals(code))); }
 
-        public Task<Voucher?> GetByCodeAsync(string code) { return Task.FromResult(_vouchers.SingleOrDefault(voucher => voucher.IsActive == true && voucher.Code.Equals(code))); }
+        public Task<Voucher?> GetByCodeAsync(string code) { return Task.FromResult(_vouchers.SingleOrDefault(voucher => voucher.State.Equals(VoucherState.AVAILABLE) && voucher.Code.Equals(code))); }
+
+        public Task<Voucher?> GetByIdAsync(Guid id) { return Task.FromResult(_vouchers.SingleOrDefault(voucher => voucher.State.Equals(VoucherState.AVAILABLE) && voucher.Id == id)); }
 
         public Task<bool> RemoveAsync(string code)
         {

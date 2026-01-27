@@ -1,4 +1,5 @@
 ﻿using EventosUy.Domain.DTOs.Records;
+using EventosUy.Domain.Enumerates;
 
 namespace EventosUy.Application.DTOs.DataTypes.Detail
 {
@@ -9,12 +10,13 @@ namespace EventosUy.Application.DTOs.DataTypes.Detail
         DateOnly from, 
         DateOnly to, 
         DateTimeOffset created,
+        EditionState state,
         string country,
         string city,
         string street,
         string number,
         int floor,
-        ActivityCard eventCard, 
+        EventCard eventCard, 
         UserCard institutionCard
         )
     {
@@ -24,12 +26,13 @@ namespace EventosUy.Application.DTOs.DataTypes.Detail
         public DateOnly From { get; init; } = from;
         public DateOnly To { get; init; } = to;
         public DateTimeOffset Created { get; init; } = created;
+        public EditionState State { get; init; } = state;
         public string Country { get; init; } = country;
         public string City { get; init; } = city;
         public string Street { get; init; } = street;
         public string Number { get; init; } = number;
         public int Floor { get; init; } = floor;
-        public ActivityCard Event { get; init; } = eventCard;
+        public EventCard Event { get; init; } = eventCard;
         public UserCard Institution { get; init; } = institutionCard;
     }
 }

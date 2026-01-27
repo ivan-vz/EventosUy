@@ -1,6 +1,7 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.DTOs.DataTypes.Update;
+using EventosUy.Application.DTOs.Records;
 using EventosUy.Application.Interfaces;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
@@ -36,7 +37,7 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            ActivityCard? eventCard = await _eventService.GetCardByIdAsync(dtInsert.Event);
+            EventCard? eventCard = await _eventService.GetCardByIdAsync(dtInsert.Event);
             if (eventCard is null)
             {
                 validationResult.Errors.Add
@@ -96,6 +97,7 @@ namespace EventosUy.Application.Services
                 from: dtInsert.From,
                 to: dtInsert.To,
                 created: edition.Created,
+                state: edition.State,
                 country: dtInsert.Country,
                 city: dtInsert.City,
                 street: dtInsert.Street,
@@ -108,34 +110,34 @@ namespace EventosUy.Application.Services
             return (dt, validationResult);
         }
 
-        public async Task<IEnumerable<ActivityCard>> GetAllAsync()
+        public async Task<IEnumerable<EditionCard>> GetAllAsync()
         {
             List<Edition> editions = await _repo.GetAllAsync();
-            List<ActivityCard> cards = [.. editions.Select(edition => new ActivityCard(Id: edition.Id, Name: edition.Name, Initials: edition.Initials)) ];
+            List<EditionCard> cards = [.. editions.Select(edition => new EditionCard(Id: edition.Id, Name: edition.Name, Initials: edition.Initials, State: edition.State)) ];
 
             return cards;
         }
 
-        public async Task<IEnumerable<ActivityCard>> GetAllByEventAsync(Guid eventId)
+        public async Task<IEnumerable<EditionCard>> GetAllByEventAsync(Guid eventId)
         {
             List<Edition> editions = await _repo.GetAllByEventAsync(eventId);
-            List<ActivityCard> cards = [.. editions.Select(edition => new ActivityCard(edition.Id, edition.Name, edition.Initials) )];
+            List<EditionCard> cards = [.. editions.Select(edition => new EditionCard(edition.Id, edition.Name, edition.Initials, State: edition.State) )];
 
             return cards;
         }
 
-        public async Task<IEnumerable<ActivityCard>> GetAllByInstitutionAsync(Guid institutionId)
+        public async Task<IEnumerable<EditionCard>> GetAllByInstitutionAsync(Guid institutionId)
         {
             List<Edition> editions = await _repo.GetAllByInstitutionAsync(institutionId);
-            List<ActivityCard> cards = [.. editions.Select(edition => new ActivityCard(edition.Id, edition.Name, edition.Initials))];
+            List<EditionCard> cards = [.. editions.Select(edition => new EditionCard(edition.Id, edition.Name, edition.Initials, State: edition.State))];
 
             return cards;
         }
 
-        public async Task<IEnumerable<ActivityCard>> GetAllPendingByEventAsync(Guid eventId)
+        public async Task<IEnumerable<EditionCard>> GetAllPendingByEventAsync(Guid eventId)
         {
             List<Edition> editions = await _repo.GetAllPendingByEventAsync(eventId);
-            List<ActivityCard> cards = [.. editions.Select(edition => new ActivityCard(edition.Id, edition.Name, edition.Initials))];
+            List<EditionCard> cards = [.. editions.Select(edition => new EditionCard(edition.Id, edition.Name, edition.Initials, State: edition.State))];
 
             return cards;
         }
@@ -147,7 +149,7 @@ namespace EventosUy.Application.Services
             if (edition is null || edition.State is not EditionState.ONGOING) { return null; }
 
             UserCard? userCard = await _institutionService.GetCardByIdAsync(edition.Institution);
-            ActivityCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
+            EventCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
 
             var dt = new DTEdition
                 (
@@ -157,6 +159,7 @@ namespace EventosUy.Application.Services
                    from: edition.From,
                    to: edition.To,
                    created: edition.Created,
+                   state: edition.State,
                    country: edition.Country,
                    city: edition.City,
                    street: edition.Street,
@@ -169,13 +172,13 @@ namespace EventosUy.Application.Services
             return dt;
         }
 
-        public async Task<ActivityCard?> GetCardByIdAsync(Guid id)
+        public async Task<EditionCard?> GetCardByIdAsync(Guid id)
         {
             Edition? edition = await _repo.GetByIdAsync(id);
 
             if (edition is null || edition.State is not EditionState.ONGOING) { return null; }
 
-            var card = new ActivityCard(edition.Id, edition.Name, edition.Initials);
+            var card = new EditionCard(edition.Id, edition.Name, edition.Initials, State: edition.State);
 
             return card;
         }
@@ -219,7 +222,7 @@ namespace EventosUy.Application.Services
             }
 
             UserCard? userCard = await _institutionService.GetCardByIdAsync(edition.Institution);
-            ActivityCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
+            EventCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
             
 
             if (!edition.Name.Equals(dtUpdate.Name, StringComparison.OrdinalIgnoreCase) && await _repo.ExistsByNameAsync(dtUpdate.Name))
@@ -271,6 +274,7 @@ namespace EventosUy.Application.Services
                 from: edition.From,
                 to: edition.To,
                 created: edition.Created,
+                state: edition.State,
                 country: edition.Country,
                 city: edition.City,
                 street: edition.Street,
@@ -292,7 +296,7 @@ namespace EventosUy.Application.Services
             edition.State = EditionState.CANCELLED;
             
             UserCard? userCard = await _institutionService.GetCardByIdAsync(edition.Institution);
-            ActivityCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
+            EventCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
 
             var dt = new DTEdition
                 (
@@ -302,6 +306,7 @@ namespace EventosUy.Application.Services
                 from: edition.From,
                 to: edition.To,
                 created: edition.Created,
+                state: edition.State,
                 country: edition.Country,
                 city: edition.City,
                 street: edition.Street,

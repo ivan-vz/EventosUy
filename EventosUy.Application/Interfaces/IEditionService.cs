@@ -1,8 +1,8 @@
-﻿using EventosUy.Domain.DTOs.Records;
-using EventosUy.Application.DTOs.DataTypes.Detail;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
 using FluentValidation.Results;
 using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.DTOs.DataTypes.Update;
+using EventosUy.Application.DTOs.Records;
 
 namespace EventosUy.Application.Interfaces
 {
@@ -12,11 +12,11 @@ namespace EventosUy.Application.Interfaces
         public Task<bool> ApproveAsync(Guid id);
         public Task<bool> RejectAsync(Guid id);
         public Task<DTEdition?> GetByIdAsync(Guid id);
-        public Task<ActivityCard?> GetCardByIdAsync(Guid id);
-        public Task<IEnumerable<ActivityCard>> GetAllAsync();
-        public Task<IEnumerable<ActivityCard>> GetAllByInstitutionAsync(Guid institutionId);
-        public Task<IEnumerable<ActivityCard>> GetAllByEventAsync(Guid eventId);
-        public Task<IEnumerable<ActivityCard>> GetAllPendingByEventAsync(Guid eventId);
+        public Task<EditionCard?> GetCardByIdAsync(Guid id);
+        public Task<IEnumerable<EditionCard>> GetAllAsync();
+        public Task<IEnumerable<EditionCard>> GetAllByInstitutionAsync(Guid institutionId);
+        public Task<IEnumerable<EditionCard>> GetAllByEventAsync(Guid eventId);
+        public Task<IEnumerable<EditionCard>> GetAllPendingByEventAsync(Guid eventId);
         public Task<(DTEdition?, ValidationResult)> UpdateAsync(DTUpdateEdition dtUpdate);
         public Task<DTEdition?> DeleteAsync(Guid id);
     }

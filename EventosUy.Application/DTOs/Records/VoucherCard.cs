@@ -2,5 +2,5 @@
 
 namespace EventosUy.Domain.DTOs.Records
 {
-    public record VoucherCard(Guid Id, string Name, VoucherState State);
+    public record VoucherCard(Guid Id, string Name);
 }

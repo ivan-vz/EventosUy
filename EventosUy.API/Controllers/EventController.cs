@@ -26,7 +26,7 @@ namespace EventosUy.API.Controllers
         // GET ALL
 
         [HttpGet]
-        public async Task<IEnumerable<ActivityCard>> GetAll() => await _eventService.GetAllAsync();
+        public async Task<IEnumerable<EventCard>> GetAll() => await _eventService.GetAllAsync();
 
         // GET BY ID
 

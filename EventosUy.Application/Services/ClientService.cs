@@ -75,9 +75,9 @@ namespace EventosUy.Application.Services
             return cards;
         }
 
-        public async Task<DTClient?> GetByIdAsync(Guid personId)
+        public async Task<DTClient?> GetByIdAsync(Guid id)
         {
-            Client? client = await _repo.GetByIdAsync(personId);
+            Client? client = await _repo.GetByIdAsync(id);
 
             if (client is null) { return null; }
             
@@ -95,6 +95,17 @@ namespace EventosUy.Application.Services
             );
 
             return dt;
+        }
+
+        public async Task<UserCard?> GetCardByIdAsync(Guid id)
+        {
+            var client = await _repo.GetByIdAsync(id);
+
+            if (client == null) { return null; }
+
+            var card = new UserCard(client.Id, client.Nickname, client.Email);
+
+            return card;
         }
 
         public async Task<(DTClient? Client, ValidationResult ValidationResult)> UpdateAsync(DTUpdateClient dtUpdate)

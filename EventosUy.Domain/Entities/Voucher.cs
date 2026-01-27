@@ -1,41 +1,23 @@
-﻿using EventosUy.Domain.Common;
-using EventosUy.Domain.DTOs.DataTypes;
-using EventosUy.Domain.DTOs.Records;
-using EventosUy.Domain.Enumerates;
+﻿using EventosUy.Domain.Enumerates;
 
 namespace EventosUy.Domain.Entities
 {
-    public class Voucher
+    public class Voucher(string name, string code, int discount, int quota, bool automatic, Guid editionId, Guid registerTypeId, Guid? sponsorId)
     {
-        public Guid Id { get; init; }
-        public string Name { get; init; }
-        public string Code { get; init; }
-        public int Discount { get; init; }
-        public int Quota { get; init; }
-        public int Used { get; init; }
-        public bool IsAutoApplied { get; init; }
-        public DateTimeOffset Created { get; init; }
-        public DateOnly Expired { get; init; }
-        public VoucherState State { get; init; }
-        public Guid Edition { get; init; }
-        public Guid RegisterType { get; init; }
+        public Guid Id { get; init; } = Guid.NewGuid();
+        public string Name { get; init; } = name;
+        public string Code { get; init; } = code;
+        public int Discount { get; init; } = discount;
+        public int Quota { get; init; } = quota;
+        public int Used { get; set; } = 0;
+        public bool IsAutoApplied { get; init; } = automatic;
+        public DateTimeOffset Created { get; init; } = DateTimeOffset.Now;
+        public VoucherState State { get; set; } = VoucherState.AVAILABLE;
+        public Guid Edition { get; init; } = editionId;
+        public Guid RegisterType { get; init; } = registerTypeId;
+        public Guid? Sponsor { get; init; } = sponsorId;
 
-        private Voucher(string name, string code, int discount, int quota, bool automatic, DateOnly expired, Guid editionId, Guid registerTypeId) 
-        {
-            Id = Guid.NewGuid();
-            Name = name;
-            Code = code;
-            Discount = discount;
-            Quota = quota;
-            Used = 0;
-            IsAutoApplied = automatic;
-            Created = DateTimeOffset.Now;
-            Expired = expired;
-            State = VoucherState.AVAILABLE;
-            Edition = editionId;
-            RegisterType = registerTypeId;
-        }
-
+        /*
         public static Result<Voucher> Create(string name, int discount, int quota, bool automatic, Edition edition, RegisterType registerType) 
         {
             List<string> errors = [];
@@ -52,7 +34,7 @@ namespace EventosUy.Domain.Entities
 
             return Result<Voucher>.Success(instance);
         }
-
+        
         public static Result<Voucher> Create(string name, string code, int discount, int quota, bool automatic, Edition edition, RegisterType registerType)
         {
             List<string> errors = [];
@@ -67,10 +49,6 @@ namespace EventosUy.Domain.Entities
             Voucher instance = new(name, code, discount, quota, automatic, edition.To, edition.Id, registerType.Id);
 
             return Result<Voucher>.Success(instance);
-        }
-        
-        public DTVoucher GetDT(Edition edition) { return new(Name, Discount, Quota, Used, Created, Expired, State, edition); }
-
-        public VoucherCard GetCard() { return new(Id, Name, State); }
+        }*/
     }
 }

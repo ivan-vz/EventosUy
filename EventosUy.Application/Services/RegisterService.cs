@@ -1,191 +1,273 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.Interfaces;
 using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;
+using FluentValidation.Results;
 
 namespace EventosUy.Application.Services
 {
-    internal class RegisterService : IRegisterService
+    public class RegisterService : IRegisterService
     {
         private readonly IRegisterRepo _repo;
-        private readonly IClientService _personService;
+        private readonly IClientService _clientService;
         private readonly IEditionService _editionService;
         private readonly IRegisterTypeService _registerTypeService;
         private readonly ISponsorshipService _sponsorshipService;
-        private readonly IEmploymentService _employmentService;
+        private readonly IVoucherService _voucherService;
 
         public RegisterService(
             IRegisterRepo registerRepo, 
-            IClientService personService, 
+            IClientService clientService, 
             IEditionService editionService, 
             IRegisterTypeService registerTypeService, 
             ISponsorshipService sponsorshipService,
-            IEmploymentService employmentService) 
+            IVoucherService voucherService
+            )
         {
             _repo = registerRepo;
-            _personService = personService;
+            _clientService = clientService;
             _editionService = editionService;
             _registerTypeService = registerTypeService;
             _sponsorshipService = sponsorshipService;
-            _employmentService = employmentService;
-
+            _voucherService = voucherService;
         }
 
-        public async Task<Result<Guid>> CreateAsync(Guid personId, Guid editionId, Guid registerTypeId, Participation participation, string sponsorCode)
+        public async Task<(DTRegister?, ValidationResult)> CreateAsync(DTInsertRegisterWithVoucher dtInsert)
         {
-            List<string> errors = [];
+            var validationResult = new ValidationResult();
 
-            Result<Client> personResult = await _personService.GetByIdAsync(personId);
-            if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
-
-            Result<Edition> editionResult = await _editionService.GetByIdAsync(editionId);
-            if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
-
-            Result<RegisterType> registerTypeResult = await _registerTypeService.GetByIdAsync(registerTypeId);
-            if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
-
-            Result<Sponsorship> sponsorResult = await _sponsorshipService.GetByCodeAsync(sponsorCode);
-            if (!sponsorResult.IsSuccess) { errors.AddRange(sponsorResult.Errors); }
-            
-            if (errors.Any()) { return Result<Guid>.Failure(errors); }
-            
-            RegisterType registerTypeInstance = registerTypeResult.Value!;
-            Sponsorship sponsorshipInstance = sponsorResult.Value!;
-
-            if (!sponsorshipInstance.RegisterType.Equals(registerTypeId)) { errors.Add($"Sponsorship {sponsorshipInstance.Name} is not for register type {registerTypeInstance.Name}."); }
-
-            Result contractResult = await _employmentService.HasActiveContractAsync(personId, sponsorshipInstance.Institution);
-            if (contractResult.IsFailure) { errors.AddRange(contractResult.Errors); }
-
-            if (participation == Participation.CLIENT || participation == Participation.EMPLOYEE) { errors.Add("Clients and Employees cannot use a sponsor code."); }
-           
-            if (participation == Participation.GUEST) 
+            var client = await _clientService.GetCardByIdAsync(dtInsert.Client);
+            if (client is null) 
             {
-                if (!registerTypeInstance.IsActive()) { errors.Add($"Register Type {registerTypeInstance.Name} is completed."); }
-
-                if (!sponsorshipInstance.IsActive()) { errors.Add($"Sponsorship {sponsorshipInstance.Name} is completed."); }
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Client", "Client not found.")
+                    );
             }
 
-            if (errors.Any()) { return Result<Guid>.Failure(errors); }
-
-            if (await _repo.ExistsAsync(personId, editionId)) { return Result<Guid>.Failure("Register already exist."); }
-
-            Result<Register> registerResult = Register.Create(sponsorCode, personId, editionId, registerTypeInstance, participation);
-            if (!registerResult.IsSuccess) { return Result<Guid>.Failure(registerResult.Errors); }
-
-            if (participation == Participation.GUEST) 
+            var edition = await _editionService.GetCardByIdAsync(dtInsert.Edition);
+            if (edition is null)
             {
-                Result useSponsorResult = sponsorshipInstance.UseSpot();
-                if (useSponsorResult.IsFailure) { return Result<Guid>.Failure(useSponsorResult.Errors); }
-
-                Result useRegisterTypeResult = registerTypeInstance.UseSpot();
-                if (useRegisterTypeResult.IsFailure) { return Result<Guid>.Failure(useRegisterTypeResult.Errors); }
-            
-                //await _sponsorshipService.UpdateAsync(sponsorshipInstance);
-                //await _registerTypeService.UpdateAsync(registerTypeInstance);
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Edition", "Edition not found.")
+                    );
             }
 
-            Register registerInstance = registerResult.Value!;
-            await _repo.AddAsync(registerInstance);
+            var registerType = await _registerTypeService.GetByIdAsync(dtInsert.RegisterType);
+            if (registerType is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Register type", "Register type not found.")
+                    );
+            }
 
-            return Result<Guid>.Success(registerInstance.Id);
-        }
+            var voucher = await _voucherService.GetByCodeAsync(dtInsert.Code);
+            if (voucher is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("voucher", "voucher not found.")
+                    );
+            }
 
-        public async Task<Result<Guid>> CreateAsync(Guid personId, Guid editionId, Guid registerTypeId, Participation participation)
-        {
-            List<string> errors = [];
+            if (!validationResult.IsValid) { return (null, validationResult); }
 
-            Result<Client> personResult = await _personService.GetByIdAsync(personId);
-            if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
+            if (voucher!.Edition.Id != edition!.Id || voucher!.RegisterType.Id != registerType!.Id)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Voucher", "Voucher is not valid.")
+                    );
+            }
 
-            Result<Edition> editionResult = await _editionService.GetByIdAsync(editionId);
-            if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
+            if (!edition.State.Equals(EditionState.ONGOING)) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Edition state", "Editions is not available.")
+                    );
+            }
 
-            Result<RegisterType> registerTypeResult = await _registerTypeService.GetByIdAsync(registerTypeId);
-            if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
+            if (!registerType!.Active) 
+            {
+                validationResult.Errors.Add
+                        (
+                            new ValidationFailure("Register type state", "Register type is not available.")
+                        );
+            }
 
-            if (errors.Any()) { return Result<Guid>.Failure(errors); }
+            if (voucher.Used >= voucher.Quota) 
+            {
+                validationResult.Errors.Add
+                        (
+                            new ValidationFailure("Voucher Quota", "Voucher is already completed.")
+                        );
+            }
 
-            RegisterType registerTypeInstance = registerTypeResult.Value!;
+            if (registerType.Used >= registerType.Quota)
+            {
+                validationResult.Errors.Add
+                        (
+                            new ValidationFailure("Register Type Quota", "Register Type is already completed.")
+                        );
+            }
+
+            if (!validationResult.IsValid) { return (null, validationResult); }
+
+            decimal discount = registerType.Price * voucher.Discount / 100;
+            decimal price = registerType.Price - discount;
             
-            if (await _repo.ExistsAsync(personId, editionId)) { return Result<Guid>.Failure("Register already exist."); }
+            var register = new Register(
+                    total: price,
+                    clientId: client!.Id,
+                    editionId: edition.Id,
+                    registerTypeId: registerType.Id,
+                    voucherId: voucher.Id
+                );
 
-            if (!registerTypeInstance.IsActive()) { return Result<Guid>.Failure($"Register type '{registerTypeInstance.Name}' is full."); }
+            await _voucherService.UseSpotAsync(voucher.Id);
+            await _registerTypeService.UseSpotAsync(registerType.Id);
+            
+            await _repo.AddAsync(register);
 
-            Result<Register> registerResult = Register.Create(personId, editionId, registerTypeInstance, participation);
-            if (!registerResult.IsSuccess) { return Result<Guid>.Failure(registerResult.Errors); }
+            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(registerType.Id);
+            var voucherCard = await _voucherService.GetCardByIdAsync(voucher.Id);
 
-            Register registerInstance = registerResult.Value!;
+            var dt = new DTRegister
+                (
+                    id: register.Id,
+                    total: register.Total,
+                    created: register.Created,
+                    registerTypeCard: registerTypeCard!,
+                    editionCard: edition,
+                    clientCard: client,
+                    voucherCard: voucherCard
+                );
 
-            Result useSpotResult = registerTypeInstance.UseSpot();
-            if (!useSpotResult.IsSuccess) { return Result<Guid>.Failure(useSpotResult.Errors); }
-
-            await _repo.AddAsync(registerInstance);
-            //await _registerTypeService.UpdateAsync(registerTypeInstance);
-
-            return Result<Guid>.Success(registerInstance.Id);
+            return (dt, validationResult);
         }
 
-        public async Task<Result<List<RegisterCardByEdition>>> GetAllByEditionAsync(Guid editionId)
+        public async Task<(DTRegister?, ValidationResult)> CreateAsync(DTInsertRegisterWithoutVoucher dtInsert)
         {
-            if (editionId == Guid.Empty) { return Result<List<RegisterCardByEdition>>.Failure("Edition can not be empty."); }
-            List<Register> registers = await _repo.GetAllByEditionAsync(editionId);
+            var validationResult = new ValidationResult();
 
-            List<string> errors = [];
+            var client = await _clientService.GetCardByIdAsync(dtInsert.Client);
+            if (client is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Client", "Client not found.")
+                    );
+            }
+
+            var edition = await _editionService.GetCardByIdAsync(dtInsert.Edition);
+            if (edition is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Edition", "Edition not found.")
+                    );
+            }
+
+            var registerType = await _registerTypeService.GetByIdAsync(dtInsert.RegisterType);
+            if (registerType is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Register type", "Register type not found.")
+                    );
+            }
+
+            if (!validationResult.IsValid) { return (null, validationResult); }
+
+            if (!edition!.State.Equals(EditionState.ONGOING))
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Edition state", "Editions is not available.")
+                    );
+            }
+
+            if (!registerType!.Active)
+            {
+                validationResult.Errors.Add
+                        (
+                            new ValidationFailure("Register type state", "Register type is not available.")
+                        );
+            }
+
+            if (registerType.Used >= registerType.Quota)
+            {
+                validationResult.Errors.Add
+                        (
+                            new ValidationFailure("Register Type Quota", "Register Type is already completed.")
+                        );
+            }
+
+            if (!validationResult.IsValid) { return (null, validationResult); }
+
+            var register = new Register(
+                    total: registerType.Price,
+                    clientId: client!.Id,
+                    editionId: edition.Id,
+                    registerTypeId: registerType.Id,
+                    voucherId: null
+                );
+
+            await _registerTypeService.UseSpotAsync(registerType.Id);
+
+            await _repo.AddAsync(register);
+
+            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(registerType.Id);
+
+            var dt = new DTRegister
+                (
+                    id: register.Id,
+                    total: register.Total,
+                    created: register.Created,
+                    registerTypeCard: registerTypeCard!,
+                    editionCard: edition,
+                    clientCard: client,
+                    voucherCard: null
+                );
+
+            return (dt, validationResult);
+        }
+
+        public async Task<IEnumerable<RegisterCardByEdition>> GetAllByEditionAsync(Guid id)
+        {
+            var registers = await _repo.GetAllByEditionAsync(id);
+
             List<RegisterCardByEdition> cards = [];
             foreach (Register register in registers) 
             {
-                Result<Client> personResult = await _personService.GetByIdAsync(register.Person);
-                if (!personResult.IsSuccess) { errors.AddRange(personResult.Errors); }
+                var client = await _clientService.GetByIdAsync(register.Client);
 
-                cards.Add(register.GetCardByEdition(personResult.Value!));
+                cards.Add( new RegisterCardByEdition(register.Id, client!.Nickname, register.Created) );
             }
 
-            if (errors.Any()) { return Result<List<RegisterCardByEdition>>.Failure(errors); }
-
-            return Result<List<RegisterCardByEdition>>.Success(cards);
+            return cards;
         }
 
-        public async Task<Result<List<RegisterCardByClient>>> GetAllByPersonAsync(Guid personId)
+        public async Task<IEnumerable<RegisterCardByClient>> GetAllByClientAsync(Guid id)
         {
-            if (personId == Guid.Empty) { return Result<List<RegisterCardByClient>>.Failure("Person can not be empty."); }
-            List<Register> registers = await _repo.GetAllByPersonAsync(personId);
+            var registers = await _repo.GetAllByPersonAsync(id);
 
-            List<string> errors = [];
             List<RegisterCardByClient> cards = [];
             foreach (Register register in registers)
             {
-                Result<Edition> editionResult = await _editionService.GetByIdAsync(register.Edition);
-                if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
+                var edition = await _editionService.GetByIdAsync(register.Edition);
 
-                cards.Add(register.GetCardByPerson(editionResult.Value!));
+                cards.Add( new RegisterCardByClient(register.Id, edition!.Name, register.Created) );
             }
 
-            if (errors.Any()) { return Result<List<RegisterCardByClient>>.Failure(errors); }
-
-            return Result<List<RegisterCardByClient>>.Success(cards);
-        }
-
-        public async Task<Result<DTRegister>> GetDTAsync(Guid id)
-        {
-            if (id == Guid.Empty) { return Result<DTRegister>.Failure("Register can not be empty."); }
-            Register? registerInstance = await _repo.GetByIdAsync(id);
-
-            if (registerInstance is null) { return Result<DTRegister>.Failure("Register not Found."); }
-
-            List<string> errors = [];
-            Result<Edition> editionResult = await _editionService.GetByIdAsync(registerInstance.Edition);
-            if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
-
-            Result<RegisterType> registerTypeResult = await _registerTypeService.GetByIdAsync(registerInstance.RegisterType);
-            if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
-
-            if (errors.Any()) { return Result<DTRegister>.Failure(errors); }
-
-            return Result<DTRegister>.Success(registerInstance.GetDT(editionResult.Value!, registerTypeResult.Value!));
+            return cards;
         }
     }
 }

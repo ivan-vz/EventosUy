@@ -1,10 +1,11 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
+using EventosUy.Application.DTOs.Records;
 using EventosUy.Application.Interfaces;
-using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 using FluentValidation.Results;
+using System;
 
 namespace EventosUy.Application.Services
 {
@@ -61,7 +62,9 @@ namespace EventosUy.Application.Services
                     description: registerType.Description,
                     price: registerType.Price,
                     quota: registerType.Quota,
+                    used: registerType.Used,
                     created: registerType.Created,
+                    active: registerType.Active,
                     editionCard: editionCard!
                 );
 
@@ -71,7 +74,7 @@ namespace EventosUy.Application.Services
         public async Task<IEnumerable<RegisterTypeCard>> GetAllByEditionAsync(Guid editionId)
         {
             List<RegisterType> registerTypes = await _repo.GetAllByEditionAsync(editionId);
-            List<RegisterTypeCard> cards = [.. registerTypes.Select(rt => new RegisterTypeCard(rt.Id, rt.Name) )];
+            List<RegisterTypeCard> cards = [.. registerTypes.Select(rt => new RegisterTypeCard(rt.Id, rt.Name, rt.Price) )];
 
             return cards;
         }
@@ -90,11 +93,24 @@ namespace EventosUy.Application.Services
                     description: registerType.Description,
                     price: registerType.Price,
                     quota: registerType.Quota,
+                    used: registerType.Used,
                     created: registerType.Created,
+                    active: registerType.Active,
                     editionCard: editionCard!
                 );
 
             return dt;
+        }
+
+        public async Task<RegisterTypeCard?> GetCardByIdAsync(Guid id)
+        {
+            var registerType = await _repo.GetByIdAsync(id);
+
+            if (registerType is null) { return null; }
+
+            var card = new RegisterTypeCard(registerType.Id, registerType.Name, registerType.Price);
+
+            return card;
         }
 
         public async Task<DTRegisterType?> DeleteAsync(Guid id)
@@ -113,11 +129,28 @@ namespace EventosUy.Application.Services
                     description: registerType.Description,
                     price: registerType.Price,
                     quota: registerType.Quota,
+                    used: registerType.Used,
                     created: registerType.Created,
+                    active: registerType.Active,
                     editionCard: editionCard!
                 );
 
             return dt;
+        }
+
+        public async Task UseSpotAsync(Guid id)
+        {
+            var registerType = await _repo.GetByIdAsync(id);
+
+            if (registerType is not null) 
+            { 
+                registerType.Used++;
+
+                if (registerType.Used == registerType.Quota) 
+                { 
+                    registerType.Active = false; 
+                }
+            }
         }
     }
 }

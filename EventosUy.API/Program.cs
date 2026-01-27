@@ -27,6 +27,9 @@ builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IEditionService, EditionService>();
 builder.Services.AddScoped<IRegisterTypeService, RegisterTypeService>();
+builder.Services.AddScoped<ISponsorshipService, SponsorshipService>();
+builder.Services.AddScoped<IRegisterService, RegisterService>();
+builder.Services.AddScoped<IVoucherService, VoucherService>();
 
 // Validators
 builder.Services.AddScoped<IValidator<DTInsertClient>, ClientInsertValidator>();
@@ -38,6 +41,9 @@ builder.Services.AddScoped<IValidator<DTUpdateEvent>, EventUpdateValidator>();
 builder.Services.AddScoped<IValidator<DTInsertEdition>, EditionInsertValidator>();
 builder.Services.AddScoped<IValidator<DTUpdateEdition>, EditionUpdateValidator>();
 builder.Services.AddScoped<IValidator<DTInsertRegisterType>, RegisterTypeInsertValidator>();
+builder.Services.AddScoped<IValidator<DTInsertSponsorship>, SponsorshipInsertValidator>();
+builder.Services.AddScoped<IValidator<DTInsertRegisterWithVoucher>, RegisterInsertWithVoucherValidator>();
+builder.Services.AddScoped<IValidator<DTInsertRegisterWithoutVoucher>, RegisterInsertWithoutVoucherValidator>();
 
 var app = builder.Build();
 

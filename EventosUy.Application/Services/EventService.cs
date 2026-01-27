@@ -86,10 +86,10 @@ namespace EventosUy.Application.Services
             return (dt, validationResult);
         }
 
-        public async Task<IEnumerable<ActivityCard>> GetAllAsync()
+        public async Task<IEnumerable<EventCard>> GetAllAsync()
         {
             List<Event> events = await _repo.GetAllAsync();
-            List<ActivityCard> cards = [.. events.Select(eventInstance => new ActivityCard(eventInstance.Id, eventInstance.Name, eventInstance.Initials) )];
+            List<EventCard> cards = [.. events.Select(eventInstance => new EventCard(eventInstance.Id, eventInstance.Name, eventInstance.Initials) )];
 
             return cards;
         }
@@ -115,24 +115,24 @@ namespace EventosUy.Application.Services
             return dt;
         }
 
-        public async Task<ActivityCard?> GetCardByIdAsync(Guid id)
+        public async Task<EventCard?> GetCardByIdAsync(Guid id)
         {
             Event? eventInstance = await _repo.GetByIdAsync(id);
 
             if (eventInstance is null) { return null; }
 
-            var card = new ActivityCard(eventInstance.Id, eventInstance.Name, eventInstance.Initials);
+            var card = new EventCard(eventInstance.Id, eventInstance.Name, eventInstance.Initials);
 
             return card;
         }
 
-        public async Task<Result<List<ActivityCard>>> GetByInstitutionAsync(Guid institutionId)
+        public async Task<Result<List<EventCard>>> GetByInstitutionAsync(Guid institutionId)
         {
-            if (institutionId == Guid.Empty) { return Result<List<ActivityCard>>.Failure("Institution can not be empty."); }
+            if (institutionId == Guid.Empty) { return Result<List<EventCard>>.Failure("Institution can not be empty."); }
             List<Event> events = await _repo.GetAllByInstitutionAsync(institutionId);
-            List<ActivityCard> cards = events.Select(eventInstance => eventInstance.GetCard()).ToList();
+            List<EventCard> cards = events.Select(eventInstance => eventInstance.GetCard()).ToList();
 
-            return Result<List<ActivityCard>>.Success(cards);
+            return Result<List<EventCard>>.Success(cards);
         }
 
         public async Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> UpdateAsync(DTUpdateEvent dtUpdate)

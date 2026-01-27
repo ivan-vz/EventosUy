@@ -1,45 +1,102 @@
-﻿using EventosUy.Application.Interfaces;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.DTOs.DataTypes.Insert;
+using EventosUy.Application.Interfaces;
 using EventosUy.Domain.Common;
+using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
+using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;
 
 namespace EventosUy.Application.Services
 {
-    internal class VoucherService : IVoucherService
+    public class VoucherService : IVoucherService
     {
-        private readonly IVoucherRepo _voucherRepo;
-        private readonly IEditionService _EditionService;
+        private readonly IVoucherRepo _repo;
+        private readonly IEditionService _editionService;
+        private readonly IRegisterTypeService _registerTypeService;
 
-        public VoucherService(IVoucherRepo voucherRepo, IEditionService editionService)
+        public VoucherService(IVoucherRepo voucherRepo, IEditionService editionService, IRegisterTypeService registerTypeService)
         {
-            _voucherRepo = voucherRepo;
-            _EditionService = editionService;
+            _repo = voucherRepo;
+            _editionService = editionService;
+            _registerTypeService = registerTypeService;
         }
 
-        public async Task<Result<string>> CreateAsync(int discount, bool automatic, Guid editionId)
+        public async Task<VoucherCard> CreateAsync(DTInsertVoucher dtInsert)
         {
-            if (editionId == Guid.Empty) { return Result<string>.Failure("Edition cannot be empty."); }
-            Result<Edition> editionResult = await _EditionService.GetByIdAsync(editionId);
-            if (editionResult.IsFailure) { return Result<string>.Failure("Edition not Found."); }
+            var voucher = new Voucher
+                (
+                    name: dtInsert.Name,
+                    code: dtInsert.Code,
+                    discount: dtInsert.Discount,
+                    quota: dtInsert.quota,
+                    automatic: dtInsert.Automatic,
+                    editionId: dtInsert.EditionId,
+                    registerTypeId: dtInsert.RegisterTypeId,
+                    sponsorId: dtInsert.SponsorId
+                );
 
+            await _repo.AddAsync( voucher );
 
+            var card = new VoucherCard(voucher.Id, voucher.Name);
 
-            throw new NotImplementedException();
+            return card;
         }
 
         public Task<Result<string>> CreateAsync(string code, int discount, bool automatic, Guid editionId)
         {
             throw new NotImplementedException();
         }
+        
+        public async Task<VoucherCard?> GetCardByIdAsync(Guid id)
+        { 
+            var voucher = await _repo.GetByIdAsync(id);
 
-        public async Task<Result<Voucher>> GetByCode(string code)
+            if (voucher is null) { return null;}
+
+            var card = new VoucherCard(Id: voucher.Id, Name: voucher.Name);
+
+            return card;
+        }
+
+        public async Task<DTVoucher?> GetByCodeAsync(string code)
         {
-            if (string.IsNullOrWhiteSpace(code)) { return Result<Voucher>.Failure("Code cannot be empty."); }
+            var voucher = await _repo.GetByCodeAsync(code);
 
-            Voucher? instance = await _voucherRepo.GetByCodeAsync(code);
-            if (instance is null) { return Result<Voucher>.Failure("Voucher not Found.");}
+            if (voucher is null) { return null; }
 
-            return Result<Voucher>.Success(instance);
+            var editionCard = await _editionService.GetCardByIdAsync(voucher.Edition);
+            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(voucher.RegisterType);
+
+            var card = new DTVoucher
+                (
+                id: voucher.Id, 
+                name: voucher.Name,
+                discount: voucher.Discount,
+                quota: voucher.Quota,
+                used: voucher.Used,
+                created: voucher.Created,
+                state: voucher.State,
+                editionCard: editionCard!,
+                registerTypeCard: registerTypeCard!
+                );
+
+            return card;
+        }
+
+        public async Task UseSpotAsync(Guid id)
+        {
+            var voucher = await _repo.GetByIdAsync(id);
+
+            if (voucher is not null)
+            {
+                voucher.Used++;
+
+                if (voucher.Used == voucher.Quota)
+                {
+                    voucher.State = VoucherState.COMPLETED;
+                }
+            }
         }
     }
 }

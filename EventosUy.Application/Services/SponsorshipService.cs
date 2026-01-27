@@ -1,100 +1,222 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.Interfaces;
-using EventosUy.Domain.Common;
 using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;
-using EventosUy.Domain.ValueObjects;
+using FluentValidation.Results;
 
 namespace EventosUy.Application.Services
 {
-    internal class SponsorshipService : ISponsorshipService
+    public class SponsorshipService : ISponsorshipService
     {
         private readonly ISponsorshipRepo _repo;
         private readonly IEditionService _editionService;
         private readonly IInstitutionService _institutionService;
         private readonly IRegisterTypeService _registerTypeService;
+        private readonly IVoucherService _voucherService;
 
-        public SponsorshipService(ISponsorshipRepo sponsorship, IEditionService editionService, IInstitutionService institutionService, IRegisterTypeService registerTypeService) 
+        private static readonly Dictionary<SponsorshipTier, (decimal min, decimal max)> tierRanges = new() {
+            { SponsorshipTier.BRONZE, (min: 1_000m, max: 9_999.99m) },
+            { SponsorshipTier.SILVER, (min: 10_000m, max: 99_999.99m) },
+            { SponsorshipTier.GOLD, (min: 100_000m, max: 999_999.99m) },
+            { SponsorshipTier.PLATINUM, (min: 1_000_000m, max: decimal.MaxValue) },
+        };
+
+        public SponsorshipService(
+            ISponsorshipRepo sponsorship, 
+            IEditionService editionService, 
+            IInstitutionService institutionService, 
+            IRegisterTypeService registerTypeService,
+            IVoucherService voucherService
+            ) 
         {
             _repo = sponsorship;
             _editionService = editionService;
             _institutionService = institutionService;
             _registerTypeService = registerTypeService;
+            _voucherService = voucherService;
         }
 
-        public async Task<Result<Guid>> CreateAsync(string name, SponsorshipTier tier, decimal amount, DateOnly expiration, Guid editionId, Guid institutionId, Guid registerTypeId)
+        public async Task<(DTSponsorship?, ValidationResult)> CreateAsync(DTInsertSponsorship dtInsert)
         {
-            List<string> errors = [];
-            Result<Edition> editionResult = await _editionService.GetByIdAsync(editionId);
-            if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
+            var validationResult = new ValidationResult();
 
-            Result<Institution> institutionResult = await _institutionService.GetByIdAsync(institutionId);
-            if (!institutionResult.IsSuccess) { errors.AddRange(institutionResult.Errors); }
+            var userCard = await _institutionService.GetCardByIdAsync(dtInsert.Institution);
+            if (userCard is null) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Institution", "Institution not found.")
+                    );
+            }
 
-            Result<RegisterType> registerTypeResult = await _registerTypeService.GetByIdAsync(registerTypeId);
-            if (!registerTypeResult.IsSuccess) { errors.AddRange(registerTypeResult.Errors); }
+            var editionCard = await _editionService.GetCardByIdAsync(dtInsert.Edition);
+            if (editionCard is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Edition", "Edition not found.")
+                    );
+            }
 
-            Result<SponsorLevel> sponsorLevelResult = SponsorLevel.Create(amount, tier, registerTypeResult.Value!.Price);
-            if (!sponsorLevelResult.IsSuccess) { errors.AddRange(sponsorLevelResult.Errors); }
+            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(dtInsert.RegisterType);
+            if (registerTypeCard is null)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Register Type", "Register type not found.")
+                    );
+            }
 
-            if (errors.Any()) { return Result<Guid>.Failure(errors); }
+            if (!tierRanges.TryGetValue(dtInsert.Tier, out var ranges))
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Tier", "Tier not found.")
+                    );
+            }
 
-            if (await _repo.ExistsAsync(editionId, institutionId)) { return Result<Guid>.Failure("Sponsorship already exist."); }
+            if (dtInsert.Amount < ranges.min)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Tier", $"Amount must be at least {ranges.min:N0} for {dtInsert.Tier} tier.")
+                    );
+            }
 
-            Result<Sponsorship> sponsorResult = Sponsorship.Create(name, sponsorLevelResult.Value!, institutionResult.Value!, editionResult.Value!, registerTypeResult.Value!, expiration);
-            if (!sponsorResult.IsSuccess) { return Result<Guid>.Failure(sponsorResult.Errors); }
+            if (dtInsert.Amount > ranges.max)
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Tier", $"Amount {dtInsert.Amount:N0} exceeds maximum for {dtInsert.Tier} tier. Please upgrade to the next tier.")
+                    );
+            }
 
-            Sponsorship sponsorInstance = sponsorResult.Value!;
-            await _repo.AddAsync(sponsorInstance);
+            if (await _repo.ExistsAsync(dtInsert.Edition, dtInsert.Institution)) 
+            {
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Edition | Institution", "Sponsorship already exists.")
+                    );
+            }
 
-            return Result<Guid>.Success(sponsorInstance.Id);
-        }
+            if (!validationResult.IsValid) { return (null, validationResult); }
 
-        public async Task<Result<List<SponsorshipCard>>> GetAllByEditionAsync(Guid editionId)
-        {
-            if (editionId == Guid.Empty) { return Result<List<SponsorshipCard>>.Failure("Edition can not be empty."); }
-            List<Sponsorship> sponsorships = await _repo.GetAllByEditionAsync(editionId);
-            List<SponsorshipCard> cards = sponsorships.Select(sponsor => sponsor.GetCard()).ToList();
-
-            return Result<List<SponsorshipCard>>.Success(cards);
-        }
-
-        public async Task<Result<List<SponsorshipCard>>> GetAllByInstitutionAsync(Guid institutionId)
-        {
-            if (institutionId == Guid.Empty) { return Result<List<SponsorshipCard>>.Failure("Institution can not be empty."); }
-            List<Sponsorship> sponsorships = await _repo.GetAllByInstitutionAsync(institutionId);
-            List<SponsorshipCard> cards = sponsorships.Select(sponsor => sponsor.GetCard()).ToList();
+            int free = (int)Math.Floor((0.2m * dtInsert.Amount) / registerTypeCard!.Price);
             
-            return Result<List<SponsorshipCard>>.Success(cards);
+            var sponsorship = new Sponsorship(
+                name: dtInsert.Name, 
+                amount: dtInsert.Amount, 
+                tier: dtInsert.Tier, 
+                edition: dtInsert.Edition, 
+                institution: dtInsert.Institution,
+                registerType: dtInsert.RegisterType
+                );
+
+            var dtInsertVoucher = new DTInsertVoucher
+                (
+                    name: dtInsert.Name,
+                    dtInsert.VoucherCode,
+                    100,
+                    free,
+                    false,
+                    dtInsert.Edition,
+                    dtInsert.RegisterType,
+                    sponsorship.Id
+                );
+
+            var voucherCard = await _voucherService.CreateAsync(dtInsertVoucher);
+
+            sponsorship.AssingVoucher(voucherCard.Id);
+
+            await _repo.AddAsync(sponsorship);
+            
+            var dt = new DTSponsorship(
+                    id: sponsorship.Id,
+                    name: sponsorship.Name,
+                    amount: sponsorship.Amount,
+                    tier: sponsorship.Tier,
+                    created: sponsorship.Created,
+                    editionCard: editionCard!,
+                    institutionCard: userCard!,
+                    registerTypeCard: registerTypeCard,
+                    voucherCard: voucherCard
+                );
+
+            return (dt, validationResult);
         }
 
-        public async Task<Result<Sponsorship>> GetByCodeAsync(string code)
+        public async Task<IEnumerable<SponsorshipCard>> GetAllByEditionAsync(Guid editionId)
         {
-            if (string.IsNullOrEmpty(code)) { return Result<Sponsorship>.Failure("Code cannot be empty."); }
-            Sponsorship? sponsorInstance = await _repo.GetByCodeAsync(code);
-            if (sponsorInstance is null) { return Result<Sponsorship>.Failure("Sponsorship not Found."); }
+            List<Sponsorship> sponsorships = await _repo.GetAllByEditionAsync(editionId);
+            List<SponsorshipCard> cards = [.. sponsorships.Select(sponsor => new SponsorshipCard(sponsor.Id, sponsor.Name, sponsor.Tier) )];
 
-            return Result<Sponsorship>.Success(sponsorInstance);
+            return cards;
         }
 
-        public async Task<Result<DTSponsorship>> GetDTAsync(Guid id)
+        public async Task<IEnumerable<SponsorshipCard>> GetAllByInstitutionAsync(Guid institutionId)
         {
-            if (id == Guid.Empty) { return Result<DTSponsorship>.Failure("Sponsorship can not be empty."); }
-            Sponsorship? sponsorInstance = await _repo.GetByIdAsync(id);
-            if (sponsorInstance is null) { return Result<DTSponsorship>.Failure("Sponsorship not Found."); }
-
-            List<string> errors = [];
-            Result<Edition> editionResult = await _editionService.GetByIdAsync(sponsorInstance.Edition);
-            if (!editionResult.IsSuccess) { errors.AddRange(editionResult.Errors); }
-
-            Result<Institution> institutionResult = await _institutionService.GetByIdAsync(sponsorInstance.Institution);
-            if (!institutionResult.IsSuccess) { errors.AddRange(institutionResult.Errors); }
-
-            if (errors.Any()) { return Result<DTSponsorship>.Failure(errors); }
-
-            return Result<DTSponsorship>.Success(sponsorInstance.GetDT(editionResult.Value!, institutionResult.Value!));
+            List<Sponsorship> sponsorships = await _repo.GetAllByInstitutionAsync(institutionId);
+            List<SponsorshipCard> cards = [.. sponsorships.Select(sponsor => new SponsorshipCard(sponsor.Id, sponsor.Name, sponsor.Tier))];
+            
+            return cards;
         }
+
+        public async Task<DTSponsorship?> GetByIdAsync(Guid id)
+        {
+            Sponsorship? sponsor = await _repo.GetByIdAsync(id);
+            if (sponsor is null) { return null; }
+
+            var userCard = await _institutionService.GetCardByIdAsync(sponsor.Institution);
+            var editionCard = await _editionService.GetCardByIdAsync(sponsor.Edition);
+            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(sponsor.RegisterType);
+            var voucherCard = await _voucherService.GetCardByIdAsync(sponsor.Voucher);
+
+            var dt = new DTSponsorship(
+                    id: sponsor.Id,
+                    name: sponsor.Name,
+                    amount: sponsor.Amount,
+                    tier: sponsor.Tier,
+                    created: sponsor.Created,
+                    editionCard: editionCard!,
+                    institutionCard: userCard!,
+                    registerTypeCard: registerTypeCard!,
+                    voucherCard: voucherCard!
+                );
+
+            return dt;
+        }
+
+        public async Task<DTSponsorship?> DeleteAsync(Guid id)
+        {
+            var sponsor = await _repo.GetByIdAsync(id);
+
+            if (sponsor is null) { return null; }
+
+            sponsor.Active = false;
+
+            var userCard = await _institutionService.GetCardByIdAsync(sponsor.Institution);
+            var editionCard = await _editionService.GetCardByIdAsync(sponsor.Edition);
+            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(sponsor.RegisterType);
+            var voucherCard = await _voucherService.GetCardByIdAsync(sponsor.Voucher);
+
+            var dt = new DTSponsorship(
+                    id: sponsor.Id,
+                    name: sponsor.Name,
+                    amount: sponsor.Amount,
+                    tier: sponsor.Tier,
+                    created: sponsor.Created,
+                    editionCard: editionCard!,
+                    institutionCard: userCard!,
+                    registerTypeCard: registerTypeCard!,
+                    voucherCard: voucherCard!
+                );
+
+            return dt;
+        }
+
+        public async Task<bool> ValidateCodeAsync(string code, Guid editionId, Guid registerTypeId) => await _repo.ValidateCodeAsync(code, editionId, registerTypeId);
     }
 }
