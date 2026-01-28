@@ -1,7 +1,7 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.DTOs.DataTypes.Update;
-using EventosUy.Domain.DTOs.Records;
+using EventosUy.Application.DTOs.Records;
 using FluentValidation.Results;
 
 namespace EventosUy.Application.Interfaces

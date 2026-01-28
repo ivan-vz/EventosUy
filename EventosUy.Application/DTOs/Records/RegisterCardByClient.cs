@@ -1,4 +1,4 @@
-﻿namespace EventosUy.Domain.DTOs.Records
+﻿namespace EventosUy.Application.DTOs.Records
 {
     public  record RegisterCardByClient(Guid Id, string Edition, DateTimeOffset Created);
 }

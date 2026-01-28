@@ -3,7 +3,6 @@ using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.DTOs.DataTypes.Update;
 using EventosUy.Application.DTOs.Records;
 using EventosUy.Application.Interfaces;
-using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;

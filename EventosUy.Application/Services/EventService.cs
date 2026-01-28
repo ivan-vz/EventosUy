@@ -1,9 +1,8 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.DTOs.DataTypes.Update;
+using EventosUy.Application.DTOs.Records;
 using EventosUy.Application.Interfaces;
-using EventosUy.Domain.Common;
-using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 using FluentValidation.Results;
@@ -124,15 +123,6 @@ namespace EventosUy.Application.Services
             var card = new EventCard(eventInstance.Id, eventInstance.Name, eventInstance.Initials);
 
             return card;
-        }
-
-        public async Task<Result<List<EventCard>>> GetByInstitutionAsync(Guid institutionId)
-        {
-            if (institutionId == Guid.Empty) { return Result<List<EventCard>>.Failure("Institution can not be empty."); }
-            List<Event> events = await _repo.GetAllByInstitutionAsync(institutionId);
-            List<EventCard> cards = events.Select(eventInstance => eventInstance.GetCard()).ToList();
-
-            return Result<List<EventCard>>.Success(cards);
         }
 
         public async Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> UpdateAsync(DTUpdateEvent dtUpdate)

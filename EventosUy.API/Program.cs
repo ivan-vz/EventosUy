@@ -44,6 +44,8 @@ builder.Services.AddScoped<IValidator<DTInsertRegisterType>, RegisterTypeInsertV
 builder.Services.AddScoped<IValidator<DTInsertSponsorship>, SponsorshipInsertValidator>();
 builder.Services.AddScoped<IValidator<DTInsertRegisterWithVoucher>, RegisterInsertWithVoucherValidator>();
 builder.Services.AddScoped<IValidator<DTInsertRegisterWithoutVoucher>, RegisterInsertWithoutVoucherValidator>();
+builder.Services.AddScoped<IValidator<DTInsertVoucherWithSponsor>, VoucherInsertWithSponsorValidator>();
+builder.Services.AddScoped<IValidator<DTInsertVoucherWithoutSponsor>, VoucherInsertWithoutSponsorValidator>();
 
 var app = builder.Build();
 

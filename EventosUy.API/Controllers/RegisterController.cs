@@ -1,9 +1,8 @@
 ﻿using EventosUy.API.Validators;
 using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
+using EventosUy.Application.DTOs.Records;
 using EventosUy.Application.Interfaces;
-using EventosUy.Domain.DTOs.Records;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventosUy.API.Controllers

@@ -1,6 +1,4 @@
-﻿using EventosUy.Domain.DTOs.Records;
-
-namespace EventosUy.Application.DTOs.DataTypes.Insert
+﻿namespace EventosUy.Application.DTOs.DataTypes.Insert
 {
     public class DTInsertEdition(
         string name,

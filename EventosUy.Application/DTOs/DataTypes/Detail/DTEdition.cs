@@ -1,4 +1,4 @@
-﻿using EventosUy.Domain.DTOs.Records;
+﻿using EventosUy.Application.DTOs.Records;
 using EventosUy.Domain.Enumerates;
 
 namespace EventosUy.Application.DTOs.DataTypes.Detail

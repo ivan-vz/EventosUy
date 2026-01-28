@@ -1,4 +1,4 @@
-﻿using EventosUy.Domain.DTOs.Records;
+﻿using EventosUy.Application.DTOs.Records;
 
 namespace EventosUy.Application.DTOs.DataTypes.Detail
 {

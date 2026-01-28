@@ -1,6 +1,4 @@
-﻿using EventosUy.Domain.Enumerates;
-
-namespace EventosUy.Domain.DTOs.Records
+﻿namespace EventosUy.Application.DTOs.Records
 {
     public record VoucherCard(Guid Id, string Name);
 }

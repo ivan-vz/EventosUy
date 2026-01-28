@@ -1,5 +1,4 @@
 ﻿using EventosUy.Application.DTOs.Records;
-using EventosUy.Domain.DTOs.Records;
 
 namespace EventosUy.Application.DTOs.DataTypes.Detail
 {

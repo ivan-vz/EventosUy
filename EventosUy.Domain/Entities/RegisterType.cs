@@ -1,6 +1,4 @@
-﻿using EventosUy.Domain.Common;
-
-namespace EventosUy.Domain.Entities
+﻿namespace EventosUy.Domain.Entities
 {
     public class RegisterType(string name, string description, decimal price, int quota, Guid editionId)
     {

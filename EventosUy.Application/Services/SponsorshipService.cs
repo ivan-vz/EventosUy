@@ -1,7 +1,7 @@
 ﻿using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
+using EventosUy.Application.DTOs.Records;
 using EventosUy.Application.Interfaces;
-using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;
@@ -15,7 +15,6 @@ namespace EventosUy.Application.Services
         private readonly IEditionService _editionService;
         private readonly IInstitutionService _institutionService;
         private readonly IRegisterTypeService _registerTypeService;
-        private readonly IVoucherService _voucherService;
 
         private static readonly Dictionary<SponsorshipTier, (decimal min, decimal max)> tierRanges = new() {
             { SponsorshipTier.BRONZE, (min: 1_000m, max: 9_999.99m) },
@@ -36,7 +35,6 @@ namespace EventosUy.Application.Services
             _editionService = editionService;
             _institutionService = institutionService;
             _registerTypeService = registerTypeService;
-            _voucherService = voucherService;
         }
 
         public async Task<(DTSponsorship?, ValidationResult)> CreateAsync(DTInsertSponsorship dtInsert)
@@ -103,8 +101,6 @@ namespace EventosUy.Application.Services
             }
 
             if (!validationResult.IsValid) { return (null, validationResult); }
-
-            int free = (int)Math.Floor((0.2m * dtInsert.Amount) / registerTypeCard!.Price);
             
             var sponsorship = new Sponsorship(
                 name: dtInsert.Name, 
@@ -114,22 +110,6 @@ namespace EventosUy.Application.Services
                 institution: dtInsert.Institution,
                 registerType: dtInsert.RegisterType
                 );
-
-            var dtInsertVoucher = new DTInsertVoucher
-                (
-                    name: dtInsert.Name,
-                    dtInsert.VoucherCode,
-                    100,
-                    free,
-                    false,
-                    dtInsert.Edition,
-                    dtInsert.RegisterType,
-                    sponsorship.Id
-                );
-
-            var voucherCard = await _voucherService.CreateAsync(dtInsertVoucher);
-
-            sponsorship.AssingVoucher(voucherCard.Id);
 
             await _repo.AddAsync(sponsorship);
             
@@ -141,8 +121,7 @@ namespace EventosUy.Application.Services
                     created: sponsorship.Created,
                     editionCard: editionCard!,
                     institutionCard: userCard!,
-                    registerTypeCard: registerTypeCard,
-                    voucherCard: voucherCard
+                    registerTypeCard: registerTypeCard!
                 );
 
             return (dt, validationResult);
@@ -172,7 +151,6 @@ namespace EventosUy.Application.Services
             var userCard = await _institutionService.GetCardByIdAsync(sponsor.Institution);
             var editionCard = await _editionService.GetCardByIdAsync(sponsor.Edition);
             var registerTypeCard = await _registerTypeService.GetCardByIdAsync(sponsor.RegisterType);
-            var voucherCard = await _voucherService.GetCardByIdAsync(sponsor.Voucher);
 
             var dt = new DTSponsorship(
                     id: sponsor.Id,
@@ -182,11 +160,24 @@ namespace EventosUy.Application.Services
                     created: sponsor.Created,
                     editionCard: editionCard!,
                     institutionCard: userCard!,
-                    registerTypeCard: registerTypeCard!,
-                    voucherCard: voucherCard!
+                    registerTypeCard: registerTypeCard!
                 );
 
             return dt;
+        }
+
+        public async Task<SponsorshipCard?> GetCardByIdAsync(Guid id)
+        {
+            Sponsorship? sponsor = await _repo.GetByIdAsync(id);
+            if (sponsor is null) { return null; }
+
+            var card = new SponsorshipCard(
+                    Id: sponsor.Id,
+                    Name: sponsor.Name,
+                    Tier: sponsor.Tier
+                );
+
+            return card;
         }
 
         public async Task<DTSponsorship?> DeleteAsync(Guid id)
@@ -200,7 +191,6 @@ namespace EventosUy.Application.Services
             var userCard = await _institutionService.GetCardByIdAsync(sponsor.Institution);
             var editionCard = await _editionService.GetCardByIdAsync(sponsor.Edition);
             var registerTypeCard = await _registerTypeService.GetCardByIdAsync(sponsor.RegisterType);
-            var voucherCard = await _voucherService.GetCardByIdAsync(sponsor.Voucher);
 
             var dt = new DTSponsorship(
                     id: sponsor.Id,
@@ -210,8 +200,7 @@ namespace EventosUy.Application.Services
                     created: sponsor.Created,
                     editionCard: editionCard!,
                     institutionCard: userCard!,
-                    registerTypeCard: registerTypeCard!,
-                    voucherCard: voucherCard!
+                    registerTypeCard: registerTypeCard!
                 );
 
             return dt;

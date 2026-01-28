@@ -13,12 +13,5 @@ namespace EventosUy.Domain.Entities
         public Guid Edition { get; init; } = edition;
         public Guid Institution { get; init; } = institution;
         public Guid RegisterType { get; init; } = registerType;
-        public Guid Voucher { get; private set; } = Guid.Empty;
-
-
-        public void AssingVoucher(Guid id)
-        {
-            if (Voucher == Guid.Empty) { Voucher = id; }
-        }
     }
 }

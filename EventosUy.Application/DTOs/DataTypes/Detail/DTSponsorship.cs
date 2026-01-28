@@ -1,5 +1,4 @@
 ﻿using EventosUy.Application.DTOs.Records;
-using EventosUy.Domain.DTOs.Records;
 using EventosUy.Domain.Enumerates;
 
 namespace EventosUy.Application.DTOs.DataTypes.Detail
@@ -10,19 +9,18 @@ namespace EventosUy.Application.DTOs.DataTypes.Detail
         decimal amount, 
         SponsorshipTier tier, 
         DateTimeOffset created, 
-        ActivityCard editionCard, 
+        EditionCard editionCard, 
         UserCard institutionCard,
-        RegisterTypeCard registerTypeCard,
-        VoucherCard voucherCard)
+        RegisterTypeCard registerTypeCard
+        )
     {
         public Guid Id { get; init; } = id;
         public string Name { get; init; } = name;
         public decimal Amount { get; init; } = amount;
         public SponsorshipTier Tier { get; init; } = tier;
         public DateTimeOffset Created { get; init; } = created;
-        public ActivityCard Edition { get; init; } = editionCard;
+        public EditionCard Edition { get; init; } = editionCard;
         public UserCard Institution { get; init; } = institutionCard;
         public RegisterTypeCard RegisterType { get; init; } = registerTypeCard;
-        public VoucherCard Voucher { get; init; } = voucherCard;
     }
 }

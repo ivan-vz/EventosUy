@@ -5,7 +5,6 @@ using EventosUy.Application.Interfaces;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 using FluentValidation.Results;
-using System;
 
 namespace EventosUy.Application.Services
 {
@@ -74,7 +73,7 @@ namespace EventosUy.Application.Services
         public async Task<IEnumerable<RegisterTypeCard>> GetAllByEditionAsync(Guid editionId)
         {
             List<RegisterType> registerTypes = await _repo.GetAllByEditionAsync(editionId);
-            List<RegisterTypeCard> cards = [.. registerTypes.Select(rt => new RegisterTypeCard(rt.Id, rt.Name, rt.Price) )];
+            List<RegisterTypeCard> cards = [.. registerTypes.Select(rt => new RegisterTypeCard(rt.Id, rt.Name, rt.Price, rt.Quota) )];
 
             return cards;
         }
@@ -108,7 +107,7 @@ namespace EventosUy.Application.Services
 
             if (registerType is null) { return null; }
 
-            var card = new RegisterTypeCard(registerType.Id, registerType.Name, registerType.Price);
+            var card = new RegisterTypeCard(registerType.Id, registerType.Name, registerType.Price, registerType.Quota);
 
             return card;
         }
