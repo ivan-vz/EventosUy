@@ -5,7 +5,7 @@ namespace EventosUy.Application.Interfaces
 {
     public interface ICategoryService
     {
-        public Task<(DTCategory?, ValidationResult)> CreateAsync(string name);
+        public Task<(DTCategory? dt, ValidationResult validation)> CreateAsync(string name);
         public Task<DTCategory?> GetByIdAsync(Guid id);
         public Task<IEnumerable<string>> GetAllAsync();
         public Task<bool> ExistsAsync(string name);

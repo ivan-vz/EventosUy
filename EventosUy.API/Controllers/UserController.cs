@@ -50,7 +50,7 @@ namespace EventosUy.API.Controllers
         [HttpGet("client/detail/{id}")]
         public async Task<ActionResult<DTClient>> GetClientById(Guid id)
         {
-            DTClient? dtClient = await _clientService.GetByIdAsync(id);
+            DTClient? dtClient = (await _clientService.GetByIdAsync(id)).dt;
 
             return dtClient == null ? NotFound() : Ok(dtClient);
         }
@@ -58,7 +58,7 @@ namespace EventosUy.API.Controllers
         [HttpGet("institution/detail/{id}")]
         public async Task<ActionResult<DTInstitution>> GetInstitutionById(Guid id)
         {
-            DTInstitution? dtInstitution = await _institutionService.GetByIdAsync(id);
+            DTInstitution? dtInstitution = (await _institutionService.GetByIdAsync(id)).dt;
 
             return dtInstitution == null ? NotFound() : Ok(dtInstitution);
         }

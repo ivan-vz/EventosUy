@@ -7,9 +7,8 @@ namespace EventosUy.Application.Interfaces
 {
     public interface ISponsorshipService
     {
-        public Task<(DTSponsorship?, ValidationResult)> CreateAsync(DTInsertSponsorship dTInsert);
-        public Task<DTSponsorship?> GetByIdAsync(Guid id);
-        public Task<SponsorshipCard?> GetCardByIdAsync(Guid id);
+        public Task<(DTSponsorship? dt, ValidationResult validation)> CreateAsync(DTInsertSponsorship dTInsert);
+        public Task<(DTSponsorship? dt, SponsorshipCard? card)> GetByIdAsync(Guid id);
         public Task<IEnumerable<SponsorshipCard>> GetAllByEditionAsync(Guid editionId);
         public Task<IEnumerable<SponsorshipCard>> GetAllByInstitutionAsync(Guid institutionId);
         public Task<bool> ValidateCodeAsync(string code, Guid editionId, Guid registerTypeId);

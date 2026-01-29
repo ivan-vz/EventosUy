@@ -33,7 +33,7 @@ namespace EventosUy.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<DTSponsorship?>> GetById(Guid id)
         {
-            var dt = await _sponsorshipService.GetByIdAsync(id);
+            var dt = (await _sponsorshipService.GetByIdAsync(id)).dt;
 
             return dt is null ? NotFound() : dt;
         }

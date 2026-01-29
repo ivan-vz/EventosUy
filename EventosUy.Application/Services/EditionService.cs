@@ -23,11 +23,11 @@ namespace EventosUy.Application.Services
             _institutionService = institutionService;
         }
 
-        public async Task<(DTEdition?, ValidationResult)> CreateAsync(DTInsertEdition dtInsert)
+        public async Task<(DTEdition? dt, ValidationResult validation)> CreateAsync(DTInsertEdition dtInsert)
         {
             var validationResult = new ValidationResult();
 
-            UserCard? userCard = await _institutionService.GetCardByIdAsync(dtInsert.Institution);
+            var userCard = (await _institutionService.GetByIdAsync(dtInsert.Institution)).card;
             if (userCard is null)
             {
                 validationResult.Errors.Add
@@ -36,7 +36,7 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            EventCard? eventCard = await _eventService.GetCardByIdAsync(dtInsert.Event);
+            var eventCard = (await _eventService.GetByIdAsync(dtInsert.Event)).card;
             if (eventCard is null)
             {
                 validationResult.Errors.Add
@@ -141,14 +141,14 @@ namespace EventosUy.Application.Services
             return cards;
         }
 
-        public async Task<DTEdition?> GetByIdAsync(Guid id)
+        public async Task<(DTEdition? dt, EditionCard? card)> GetByIdAsync(Guid id)
         {
             Edition? edition = await _repo.GetByIdAsync(id);
 
-            if (edition is null || edition.State is not EditionState.ONGOING) { return null; }
+            if (edition is null || edition.State is not EditionState.ONGOING) { return (null, null); }
 
-            UserCard? userCard = await _institutionService.GetCardByIdAsync(edition.Institution);
-            EventCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
+            var userCard = (await _institutionService.GetByIdAsync(edition.Institution)).card;
+            var eventCard = (await _eventService.GetByIdAsync(edition.Event)).card;
 
             var dt = new DTEdition
                 (
@@ -168,18 +168,9 @@ namespace EventosUy.Application.Services
                    institutionCard: userCard!
                 );
 
-            return dt;
-        }
-
-        public async Task<EditionCard?> GetCardByIdAsync(Guid id)
-        {
-            Edition? edition = await _repo.GetByIdAsync(id);
-
-            if (edition is null || edition.State is not EditionState.ONGOING) { return null; }
-
             var card = new EditionCard(edition.Id, edition.Name, edition.Initials, State: edition.State);
-
-            return card;
+            
+            return (dt, card);
         }
 
         public async Task<bool> ApproveAsync(Guid id)
@@ -204,7 +195,7 @@ namespace EventosUy.Application.Services
             return true;
         }
 
-        public async Task<(DTEdition?, ValidationResult)> UpdateAsync(DTUpdateEdition dtUpdate)
+        public async Task<(DTEdition? dt, ValidationResult validation)> UpdateAsync(DTUpdateEdition dtUpdate)
         {
             var edition = await _repo.GetByIdAsync(dtUpdate.Id);
 
@@ -220,8 +211,8 @@ namespace EventosUy.Application.Services
                 return (null, validationResult);
             }
 
-            UserCard? userCard = await _institutionService.GetCardByIdAsync(edition.Institution);
-            EventCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
+            var userCard = (await _institutionService.GetByIdAsync(edition.Institution)).card;
+            var eventCard = (await _eventService.GetByIdAsync(edition.Event)).card;
             
 
             if (!edition.Name.Equals(dtUpdate.Name, StringComparison.OrdinalIgnoreCase) && await _repo.ExistsByNameAsync(dtUpdate.Name))
@@ -293,9 +284,9 @@ namespace EventosUy.Application.Services
             if (edition is null || edition.State is EditionState.CANCELLED) { return null; }
 
             edition.State = EditionState.CANCELLED;
-            
-            UserCard? userCard = await _institutionService.GetCardByIdAsync(edition.Institution);
-            EventCard? eventCard = await _eventService.GetCardByIdAsync(edition.Event);
+
+            var userCard = (await _institutionService.GetByIdAsync(edition.Institution)).card;
+            var eventCard = (await _eventService.GetByIdAsync(edition.Event)).card;
 
             var dt = new DTEdition
                 (

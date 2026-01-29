@@ -15,7 +15,7 @@ namespace EventosUy.Application.Services
             _repo = categoryRepo;
         }
 
-        public async Task<(DTCategory?, ValidationResult)> CreateAsync(string name)
+        public async Task<(DTCategory? dt, ValidationResult validation)> CreateAsync(string name)
         {
             var validationResult = new ValidationResult();
 

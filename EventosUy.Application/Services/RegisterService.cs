@@ -35,12 +35,12 @@ namespace EventosUy.Application.Services
             _voucherService = voucherService;
         }
 
-        public async Task<(DTRegister?, ValidationResult)> CreateAsync(DTInsertRegisterWithVoucher dtInsert)
+        public async Task<(DTRegister? dt, ValidationResult validation)> CreateAsync(DTInsertRegisterWithVoucher dtInsert)
         {
             var validationResult = new ValidationResult();
 
-            var client = await _clientService.GetCardByIdAsync(dtInsert.Client);
-            if (client is null) 
+            var userCard = (await _clientService.GetByIdAsync(dtInsert.Client)).card;
+            if (userCard is null) 
             {
                 validationResult.Errors.Add
                     (
@@ -48,8 +48,8 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            var edition = await _editionService.GetCardByIdAsync(dtInsert.Edition);
-            if (edition is null)
+            var editionCard = (await _editionService.GetByIdAsync(dtInsert.Edition)).card;
+            if (editionCard is null)
             {
                 validationResult.Errors.Add
                     (
@@ -57,8 +57,8 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            var registerType = await _registerTypeService.GetByIdAsync(dtInsert.RegisterType);
-            if (registerType is null)
+            var (dtRegisterType, registerTypeCard) = await _registerTypeService.GetByIdAsync(dtInsert.RegisterType);
+            if (dtRegisterType is null)
             {
                 validationResult.Errors.Add
                     (
@@ -66,8 +66,8 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            var voucher = await _voucherService.GetByCodeAsync(dtInsert.Code);
-            if (voucher is null)
+            var (dtVoucher, voucherCard) = await _voucherService.GetByCodeAsync(dtInsert.Code);
+            if (dtVoucher is null)
             {
                 validationResult.Errors.Add
                     (
@@ -77,7 +77,7 @@ namespace EventosUy.Application.Services
 
             if (!validationResult.IsValid) { return (null, validationResult); }
 
-            if (voucher!.Edition.Id != edition!.Id || voucher!.RegisterType.Id != registerType!.Id)
+            if (dtVoucher!.Edition.Id != editionCard!.Id || dtVoucher!.RegisterType.Id != dtRegisterType!.Id)
             {
                 validationResult.Errors.Add
                     (
@@ -85,7 +85,7 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            if (!edition.State.Equals(EditionState.ONGOING)) 
+            if (!editionCard.State.Equals(EditionState.ONGOING)) 
             {
                 validationResult.Errors.Add
                     (
@@ -93,7 +93,7 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            if (!registerType!.Active) 
+            if (!dtRegisterType!.Active) 
             {
                 validationResult.Errors.Add
                         (
@@ -101,7 +101,7 @@ namespace EventosUy.Application.Services
                         );
             }
 
-            if (voucher.Used >= voucher.Quota) 
+            if (dtVoucher.Used >= dtVoucher.Quota) 
             {
                 validationResult.Errors.Add
                         (
@@ -109,7 +109,7 @@ namespace EventosUy.Application.Services
                         );
             }
 
-            if (registerType.Used >= registerType.Quota)
+            if (dtRegisterType.Used >= dtRegisterType.Quota)
             {
                 validationResult.Errors.Add
                         (
@@ -119,24 +119,21 @@ namespace EventosUy.Application.Services
 
             if (!validationResult.IsValid) { return (null, validationResult); }
 
-            decimal discount = registerType.Price * voucher.Discount / 100;
-            decimal price = registerType.Price - discount;
+            decimal discount = dtRegisterType.Price * dtVoucher.Discount / 100;
+            decimal price = dtRegisterType.Price - discount;
             
             var register = new Register(
                     total: price,
-                    clientId: client!.Id,
-                    editionId: edition.Id,
-                    registerTypeId: registerType.Id,
-                    voucherId: voucher.Id
+                    clientId: userCard!.Id,
+                    editionId: editionCard!.Id,
+                    registerTypeId: registerTypeCard!.Id,
+                    voucherId: voucherCard!.Id
                 );
 
-            await _voucherService.UseSpotAsync(voucher.Id);
-            await _registerTypeService.UseSpotAsync(registerType.Id);
+            await _voucherService.UseSpotAsync(voucherCard.Id);
+            await _registerTypeService.UseSpotAsync(registerTypeCard.Id);
             
             await _repo.AddAsync(register);
-
-            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(registerType.Id);
-            var voucherCard = await _voucherService.GetCardByIdAsync(voucher.Id);
 
             var dt = new DTRegister
                 (
@@ -144,20 +141,20 @@ namespace EventosUy.Application.Services
                     total: register.Total,
                     created: register.Created,
                     registerTypeCard: registerTypeCard!,
-                    editionCard: edition,
-                    clientCard: client,
+                    editionCard: editionCard,
+                    clientCard: userCard,
                     voucherCard: voucherCard
                 );
 
             return (dt, validationResult);
         }
 
-        public async Task<(DTRegister?, ValidationResult)> CreateAsync(DTInsertRegisterWithoutVoucher dtInsert)
+        public async Task<(DTRegister? dt, ValidationResult validation)> CreateAsync(DTInsertRegisterWithoutVoucher dtInsert)
         {
             var validationResult = new ValidationResult();
 
-            var client = await _clientService.GetCardByIdAsync(dtInsert.Client);
-            if (client is null)
+            var userCard = (await _clientService.GetByIdAsync(dtInsert.Client)).card;
+            if (userCard is null)
             {
                 validationResult.Errors.Add
                     (
@@ -165,8 +162,8 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            var edition = await _editionService.GetCardByIdAsync(dtInsert.Edition);
-            if (edition is null)
+            var editionCard = (await _editionService.GetByIdAsync(dtInsert.Edition)).card;
+            if (editionCard is null)
             {
                 validationResult.Errors.Add
                     (
@@ -174,8 +171,8 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            var registerType = await _registerTypeService.GetByIdAsync(dtInsert.RegisterType);
-            if (registerType is null)
+            var (dtRegisterType, registerTypeCard) = await _registerTypeService.GetByIdAsync(dtInsert.RegisterType);
+            if (dtRegisterType is null)
             {
                 validationResult.Errors.Add
                     (
@@ -185,7 +182,7 @@ namespace EventosUy.Application.Services
 
             if (!validationResult.IsValid) { return (null, validationResult); }
 
-            if (!edition!.State.Equals(EditionState.ONGOING))
+            if (!editionCard!.State.Equals(EditionState.ONGOING))
             {
                 validationResult.Errors.Add
                     (
@@ -193,7 +190,7 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            if (!registerType!.Active)
+            if (!dtRegisterType!.Active)
             {
                 validationResult.Errors.Add
                         (
@@ -201,7 +198,7 @@ namespace EventosUy.Application.Services
                         );
             }
 
-            if (registerType.Used >= registerType.Quota)
+            if (dtRegisterType.Used >= dtRegisterType.Quota)
             {
                 validationResult.Errors.Add
                         (
@@ -212,18 +209,16 @@ namespace EventosUy.Application.Services
             if (!validationResult.IsValid) { return (null, validationResult); }
 
             var register = new Register(
-                    total: registerType.Price,
-                    clientId: client!.Id,
-                    editionId: edition.Id,
-                    registerTypeId: registerType.Id,
+                    total: dtRegisterType.Price,
+                    clientId: userCard!.Id,
+                    editionId: editionCard!.Id,
+                    registerTypeId: registerTypeCard!.Id,
                     voucherId: null
                 );
 
-            await _registerTypeService.UseSpotAsync(registerType.Id);
+            await _registerTypeService.UseSpotAsync(dtRegisterType.Id);
 
             await _repo.AddAsync(register);
-
-            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(registerType.Id);
 
             var dt = new DTRegister
                 (
@@ -231,8 +226,8 @@ namespace EventosUy.Application.Services
                     total: register.Total,
                     created: register.Created,
                     registerTypeCard: registerTypeCard!,
-                    editionCard: edition,
-                    clientCard: client,
+                    editionCard: editionCard,
+                    clientCard: userCard,
                     voucherCard: null
                 );
 
@@ -246,9 +241,9 @@ namespace EventosUy.Application.Services
             List<RegisterCardByEdition> cards = [];
             foreach (Register register in registers) 
             {
-                var client = await _clientService.GetByIdAsync(register.Client);
+                var card = (await _clientService.GetByIdAsync(register.Client)).card;
 
-                cards.Add( new RegisterCardByEdition(register.Id, client!.Nickname, register.Created) );
+                cards.Add( new RegisterCardByEdition(register.Id, card!.Nickname, register.Created) );
             }
 
             return cards;
@@ -261,9 +256,9 @@ namespace EventosUy.Application.Services
             List<RegisterCardByClient> cards = [];
             foreach (Register register in registers)
             {
-                var edition = await _editionService.GetByIdAsync(register.Edition);
+                var card = (await _editionService.GetByIdAsync(register.Edition)).card;
 
-                cards.Add( new RegisterCardByClient(register.Id, edition!.Name, register.Created) );
+                cards.Add( new RegisterCardByClient(register.Id, card!.Name, register.Created) );
             }
 
             return cards;

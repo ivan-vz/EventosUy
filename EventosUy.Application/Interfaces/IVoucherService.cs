@@ -7,11 +7,10 @@ namespace EventosUy.Application.Interfaces
 {
     public interface IVoucherService
     {
-        public Task<(DTVoucher?, ValidationResult)> CreateAsync(DTInsertVoucherWithSponsor dtInsert);
-        public Task<(DTVoucher?, ValidationResult)> CreateAsync(DTInsertVoucherWithoutSponsor dtInsert);
-        public Task<DTVoucher?> GetByIdAsync(Guid id);
-        public Task<VoucherCard?> GetCardByIdAsync(Guid id);
-        public Task<DTVoucher?> GetByCodeAsync(string code);
+        public Task<(DTVoucher? dt, ValidationResult validation)> CreateAsync(DTInsertVoucherWithSponsor dtInsert);
+        public Task<(DTVoucher? dt, ValidationResult validation)> CreateAsync(DTInsertVoucherWithoutSponsor dtInsert);
+        public Task<(DTVoucher? dt, VoucherCard? card)> GetByIdAsync(Guid id);
+        public Task<(DTVoucher? dt, VoucherCard? card)> GetByCodeAsync(string code);
         public Task UseSpotAsync(Guid id);
     }
 }

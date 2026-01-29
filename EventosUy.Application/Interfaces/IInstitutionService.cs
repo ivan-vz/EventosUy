@@ -8,11 +8,10 @@ namespace EventosUy.Application.Interfaces
 {
     public interface IInstitutionService
     {
-        public Task<(DTInstitution? Institution, ValidationResult ValidationResult)> CreateAsync(DTInsertInstitution dtInser);
-        public Task<DTInstitution?> GetByIdAsync(Guid id);
-        public Task<UserCard?> GetCardByIdAsync(Guid id);
+        public Task<(DTInstitution? dt, ValidationResult validation)> CreateAsync(DTInsertInstitution dtInser);
+        public Task<(DTInstitution? dt, UserCard? card)> GetByIdAsync(Guid id);
         public Task<IEnumerable<UserCard>> GetAllAsync();
-        public Task<(DTInstitution? Institution, ValidationResult ValidationResult)> UpdateAsync(DTUpdateInstitution dtUpdate);
+        public Task<(DTInstitution? dt, ValidationResult validation)> UpdateAsync(DTUpdateInstitution dtUpdate);
         public Task<DTInstitution?> DeleteAsync(Guid id);
     }
 }

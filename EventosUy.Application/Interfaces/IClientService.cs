@@ -8,11 +8,10 @@ namespace EventosUy.Application.Interfaces
 {
     public interface IClientService
     {
-        public Task<(DTClient? Client, ValidationResult ValidationResult)> CreateAsync(DTInsertClient dtInsert);
-        public Task<DTClient?> GetByIdAsync(Guid id);
-        public Task<UserCard?> GetCardByIdAsync(Guid id);
+        public Task<(DTClient? Client, ValidationResult validation)> CreateAsync(DTInsertClient dtInsert);
+        public Task<(DTClient? dt, UserCard? card)> GetByIdAsync(Guid id);
         public Task<IEnumerable<UserCard>> GetAllAsync();
-        public Task<(DTClient? Client, ValidationResult ValidationResult)> UpdateAsync(DTUpdateClient dtUpdate);
+        public Task<(DTClient? Client, ValidationResult validation)> UpdateAsync(DTUpdateClient dtUpdate);
         public Task<DTClient?> DeleteAsync(Guid id);
     }
 }

@@ -19,7 +19,7 @@ namespace EventosUy.Application.Services
             _editionService = editionService;
         }
 
-        public async Task<(DTRegisterType?, ValidationResult)> CreateAsync(DTInsertRegisterType dtInsert)
+        public async Task<(DTRegisterType? dt, ValidationResult validation)> CreateAsync(DTInsertRegisterType dtInsert)
         {
             var validationResult = new ValidationResult();
 
@@ -53,7 +53,7 @@ namespace EventosUy.Application.Services
 
             await _repo.AddAsync(registerType);
 
-            var editionCard = await _editionService.GetCardByIdAsync(dtInsert.Edition);
+            var editionCard = (await _editionService.GetByIdAsync(dtInsert.Edition)).card;
 
             var dt = new DTRegisterType(
                     id: registerType.Id,
@@ -78,13 +78,13 @@ namespace EventosUy.Application.Services
             return cards;
         }
 
-        public async Task<DTRegisterType?> GetByIdAsync(Guid id)
+        public async Task<(DTRegisterType? dt, RegisterTypeCard? card)> GetByIdAsync(Guid id)
         {
             var registerType = await _repo.GetByIdAsync(id);
 
-            if (registerType is null) { return null; }
+            if (registerType is null) { return (null, null); }
 
-            var editionCard = await _editionService.GetCardByIdAsync(registerType.Edition);
+            var editionCard = (await _editionService.GetByIdAsync(registerType.Edition)).card;
 
             var dt = new DTRegisterType(
                     id: registerType.Id,
@@ -98,18 +98,9 @@ namespace EventosUy.Application.Services
                     editionCard: editionCard!
                 );
 
-            return dt;
-        }
-
-        public async Task<RegisterTypeCard?> GetCardByIdAsync(Guid id)
-        {
-            var registerType = await _repo.GetByIdAsync(id);
-
-            if (registerType is null) { return null; }
-
             var card = new RegisterTypeCard(registerType.Id, registerType.Name, registerType.Price, registerType.Quota);
 
-            return card;
+            return (dt, card);
         }
 
         public async Task<DTRegisterType?> DeleteAsync(Guid id)
@@ -120,7 +111,7 @@ namespace EventosUy.Application.Services
 
             registerType.Active = false;
 
-            var editionCard = await _editionService.GetCardByIdAsync(registerType.Edition);
+            var editionCard = (await _editionService.GetByIdAsync(registerType.Edition)).card;
 
             var dt = new DTRegisterType(
                     id: registerType.Id,

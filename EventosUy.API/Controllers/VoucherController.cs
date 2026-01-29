@@ -31,7 +31,7 @@ namespace EventosUy.API.Controllers
         {
             if (id == Guid.Empty) { return BadRequest("Invalid Id"); }
 
-            var dt = await _voucherService.GetByIdAsync(id);
+            var dt = (await _voucherService.GetByIdAsync(id)).dt;
 
             return dt is null ? NotFound() : Ok(dt);
         }

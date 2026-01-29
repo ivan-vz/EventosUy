@@ -24,11 +24,11 @@ namespace EventosUy.Application.Services
             _sponsorshipService = sponsorshipService;
         }
 
-        public async Task<(DTVoucher?, ValidationResult)> CreateAsync(DTInsertVoucherWithSponsor dtInsert)
+        public async Task<(DTVoucher? dt, ValidationResult validation)> CreateAsync(DTInsertVoucherWithSponsor dtInsert)
         {
             var validationResult = new ValidationResult();
 
-            var dtSponsor = await _sponsorshipService.GetByIdAsync(dtInsert.Sponsor);
+            var (dtSponsor, sponsorCard) = await _sponsorshipService.GetByIdAsync(dtInsert.Sponsor);
             if (dtSponsor is null)
             {
                 validationResult.Errors.Add
@@ -64,8 +64,6 @@ namespace EventosUy.Application.Services
             // TODO: En el apartado de consulta de Sponsor tiene que haber un voton que mande el create al VoucherController con discount = 100 y automatic = false 
 
             await _repo.AddAsync(voucher);
-
-            var sponsorCard = await _sponsorshipService.GetCardByIdAsync(dtSponsor.Id);
             
             var dt = new DTVoucher
                 (
@@ -84,11 +82,11 @@ namespace EventosUy.Application.Services
             return (dt, validationResult);
         }
 
-        public async Task<(DTVoucher?, ValidationResult)> CreateAsync(DTInsertVoucherWithoutSponsor dtInsert)
+        public async Task<(DTVoucher? dt, ValidationResult validation)> CreateAsync(DTInsertVoucherWithoutSponsor dtInsert)
         {
             var validationResult = new ValidationResult();
 
-            var dtRegisterType = await _registerTypeService.GetByIdAsync(dtInsert.RegisterType);
+            var (dtRegisterType, registerTypeCard) = await _registerTypeService.GetByIdAsync(dtInsert.RegisterType);
             if (dtRegisterType is null)
             {
                 validationResult.Errors.Add
@@ -121,8 +119,6 @@ namespace EventosUy.Application.Services
 
             await _repo.AddAsync(voucher);
 
-            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(dtRegisterType.Id);
-
             var dt = new DTVoucher
                 (
                     id: voucher.Id,
@@ -140,28 +136,17 @@ namespace EventosUy.Application.Services
             return (dt, validationResult);
         }
 
-        public async Task<VoucherCard?> GetCardByIdAsync(Guid id)
-        { 
-            var voucher = await _repo.GetByIdAsync(id);
-
-            if (voucher is null) { return null;}
-
-            var card = new VoucherCard(Id: voucher.Id, Name: voucher.Name);
-
-            return card;
-        }
-
-        public async Task<DTVoucher?> GetByIdAsync(Guid id)
+        public async Task<(DTVoucher? dt, VoucherCard? card)> GetByIdAsync(Guid id)
         {
             var voucher = await _repo.GetByIdAsync(id);
 
-            if (voucher is null) { return null; }
+            if (voucher is null) { return (null, null); }
 
-            var editionCard = await _editionService.GetCardByIdAsync(voucher.Edition);
-            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(voucher.RegisterType);
-            SponsorshipCard? sponsorCard = voucher.Sponsor is Guid sponsorId ? await _sponsorshipService.GetCardByIdAsync(sponsorId) : null;
+            var editionCard = (await _editionService.GetByIdAsync(voucher.Edition)).card;
+            var registerTypeCard = (await _registerTypeService.GetByIdAsync(voucher.RegisterType)).card;
+            var sponsorCard = voucher.Sponsor is Guid sponsorId ? (await _sponsorshipService.GetByIdAsync(sponsorId)).card : null;
 
-            var card = new DTVoucher
+            var dt = new DTVoucher
                 (
                 id: voucher.Id,
                 name: voucher.Name,
@@ -175,20 +160,22 @@ namespace EventosUy.Application.Services
                 sponsorCard: sponsorCard
                 );
 
-            return card;
+            var card = new VoucherCard(Id: voucher.Id, Name: voucher.Name);
+
+            return (dt, card);
         }
 
-        public async Task<DTVoucher?> GetByCodeAsync(string code)
+        public async Task<(DTVoucher? dt, VoucherCard? card)> GetByCodeAsync(string code)
         {
             var voucher = await _repo.GetByCodeAsync(code);
 
-            if (voucher is null) { return null; }
+            if (voucher is null) { return (null, null); }
 
-            var editionCard = await _editionService.GetCardByIdAsync(voucher.Edition);
-            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(voucher.RegisterType);
-            SponsorshipCard? sponsorCard = voucher.Sponsor is Guid sponsorId ? await _sponsorshipService.GetCardByIdAsync(sponsorId) : null;
-
-            var card = new DTVoucher
+            var editionCard = (await _editionService.GetByIdAsync(voucher.Edition)).card; 
+            var registerTypeCard = (await _registerTypeService.GetByIdAsync(voucher.RegisterType)).card;
+            var sponsorCard = voucher.Sponsor is Guid sponsorId ? (await _sponsorshipService.GetByIdAsync(sponsorId)).card : null;    
+            
+            var dt = new DTVoucher
                 (
                 id: voucher.Id, 
                 name: voucher.Name,
@@ -202,7 +189,9 @@ namespace EventosUy.Application.Services
                 sponsorCard: sponsorCard
                 );
 
-            return card;
+            var card = new VoucherCard(Id: voucher.Id, Name: voucher.Name);
+
+            return (dt, card);
         }
 
         public async Task UseSpotAsync(Guid id)

@@ -30,7 +30,7 @@ namespace EventosUy.API.Controllers
         [HttpGet("detail/{id}")]
         public async Task<ActionResult<DTRegisterType>> GetById(Guid id) 
         {
-            var dt = await _registerTypeService.GetByIdAsync(id);
+            var dt = (await _registerTypeService.GetByIdAsync(id)).dt;
 
             return dt is null ? NotFound() : Ok(dt);
         }

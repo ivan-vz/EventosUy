@@ -37,11 +37,11 @@ namespace EventosUy.Application.Services
             _registerTypeService = registerTypeService;
         }
 
-        public async Task<(DTSponsorship?, ValidationResult)> CreateAsync(DTInsertSponsorship dtInsert)
+        public async Task<(DTSponsorship? dt, ValidationResult validation)> CreateAsync(DTInsertSponsorship dtInsert)
         {
             var validationResult = new ValidationResult();
 
-            var userCard = await _institutionService.GetCardByIdAsync(dtInsert.Institution);
+            var userCard = (await _institutionService.GetByIdAsync(dtInsert.Institution)).card;
             if (userCard is null) 
             {
                 validationResult.Errors.Add
@@ -50,7 +50,7 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            var editionCard = await _editionService.GetCardByIdAsync(dtInsert.Edition);
+            var editionCard = (await _editionService.GetByIdAsync(dtInsert.Edition)).card;
             if (editionCard is null)
             {
                 validationResult.Errors.Add
@@ -59,7 +59,7 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(dtInsert.RegisterType);
+            var registerTypeCard = (await _registerTypeService.GetByIdAsync(dtInsert.RegisterType)).card;
             if (registerTypeCard is null)
             {
                 validationResult.Errors.Add
@@ -143,14 +143,14 @@ namespace EventosUy.Application.Services
             return cards;
         }
 
-        public async Task<DTSponsorship?> GetByIdAsync(Guid id)
+        public async Task<(DTSponsorship? dt, SponsorshipCard? card)> GetByIdAsync(Guid id)
         {
             Sponsorship? sponsor = await _repo.GetByIdAsync(id);
-            if (sponsor is null) { return null; }
+            if (sponsor is null) { return (null, null); }
 
-            var userCard = await _institutionService.GetCardByIdAsync(sponsor.Institution);
-            var editionCard = await _editionService.GetCardByIdAsync(sponsor.Edition);
-            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(sponsor.RegisterType);
+            var userCard = (await _institutionService.GetByIdAsync(sponsor.Institution)).card;
+            var editionCard = (await _editionService.GetByIdAsync(sponsor.Edition)).card;
+            var registerTypeCard = (await _registerTypeService.GetByIdAsync(sponsor.RegisterType)).card;
 
             var dt = new DTSponsorship(
                     id: sponsor.Id,
@@ -163,21 +163,9 @@ namespace EventosUy.Application.Services
                     registerTypeCard: registerTypeCard!
                 );
 
-            return dt;
-        }
+            var card = new SponsorshipCard(Id: sponsor.Id, Name: sponsor.Name, Tier: sponsor.Tier);
 
-        public async Task<SponsorshipCard?> GetCardByIdAsync(Guid id)
-        {
-            Sponsorship? sponsor = await _repo.GetByIdAsync(id);
-            if (sponsor is null) { return null; }
-
-            var card = new SponsorshipCard(
-                    Id: sponsor.Id,
-                    Name: sponsor.Name,
-                    Tier: sponsor.Tier
-                );
-
-            return card;
+            return (dt, card);
         }
 
         public async Task<DTSponsorship?> DeleteAsync(Guid id)
@@ -188,9 +176,9 @@ namespace EventosUy.Application.Services
 
             sponsor.Active = false;
 
-            var userCard = await _institutionService.GetCardByIdAsync(sponsor.Institution);
-            var editionCard = await _editionService.GetCardByIdAsync(sponsor.Edition);
-            var registerTypeCard = await _registerTypeService.GetCardByIdAsync(sponsor.RegisterType);
+            var userCard = (await _institutionService.GetByIdAsync(sponsor.Institution)).card;
+            var editionCard = (await _editionService.GetByIdAsync(sponsor.Edition)).card;
+            var registerTypeCard = (await _registerTypeService.GetByIdAsync(sponsor.RegisterType)).card;
 
             var dt = new DTSponsorship(
                     id: sponsor.Id,

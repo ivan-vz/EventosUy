@@ -14,7 +14,7 @@ namespace EventosUy.Application.Services
     {
         private readonly IClientRepo _repo = clientRepo;
 
-        public async Task<(DTClient? Client, ValidationResult ValidationResult)> CreateAsync(DTInsertClient dtInsert)
+        public async Task<(DTClient? Client, ValidationResult validation)> CreateAsync(DTInsertClient dtInsert)
         {
             var validationResult = new ValidationResult();
 
@@ -75,11 +75,11 @@ namespace EventosUy.Application.Services
             return cards;
         }
 
-        public async Task<DTClient?> GetByIdAsync(Guid id)
+        public async Task<(DTClient? dt, UserCard? card)> GetByIdAsync(Guid id)
         {
             Client? client = await _repo.GetByIdAsync(id);
 
-            if (client is null) { return null; }
+            if (client is null) { return (null, null); }
             
             var dt = new DTClient(
                 id: client.Id,
@@ -94,21 +94,12 @@ namespace EventosUy.Application.Services
                 ci: client.Ci
             );
 
-            return dt;
-        }
-
-        public async Task<UserCard?> GetCardByIdAsync(Guid id)
-        {
-            var client = await _repo.GetByIdAsync(id);
-
-            if (client == null) { return null; }
-
             var card = new UserCard(client.Id, client.Nickname, client.Email);
 
-            return card;
+            return (dt, card);
         }
 
-        public async Task<(DTClient? Client, ValidationResult ValidationResult)> UpdateAsync(DTUpdateClient dtUpdate)
+        public async Task<(DTClient? Client, ValidationResult validation)> UpdateAsync(DTUpdateClient dtUpdate)
         {
             var client = await _repo.GetByIdAsync(dtUpdate.Id);
 

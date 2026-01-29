@@ -14,7 +14,7 @@ namespace EventosUy.Application.Services
     {
         private readonly IInstitutionRepo _repo = institutionRepo;
 
-        public async Task<(DTInstitution? Institution, ValidationResult ValidationResult)> CreateAsync(DTInsertInstitution dtInsert)
+        public async Task<(DTInstitution? dt, ValidationResult validation)> CreateAsync(DTInsertInstitution dtInsert)
         {
             var validationResult = new ValidationResult();
 
@@ -102,11 +102,11 @@ namespace EventosUy.Application.Services
             return cards;
         }
 
-        public async Task<DTInstitution?> GetByIdAsync(Guid id)
+        public async Task<(DTInstitution? dt, UserCard? card)> GetByIdAsync(Guid id)
         {
             Institution? institution = await _repo.GetByIdAsync(id);
 
-            if (institution is null) { return null; }
+            if (institution is null) { return (null, null); }
             
             var dt = new DTInstitution
                 (
@@ -125,21 +125,12 @@ namespace EventosUy.Application.Services
                     created: institution.Created
                 );
 
-            return dt;
-        }
-
-        public async Task<UserCard?> GetCardByIdAsync(Guid id)
-        {
-            Institution? institution = await _repo.GetByIdAsync(id);
-
-            if (institution is null) { return null; }
-
             var card = new UserCard(institution.Id, institution.Nickname, institution.Email);
 
-            return card;
+            return (dt, card);
         }
 
-        public async Task<(DTInstitution? Institution, ValidationResult ValidationResult)> UpdateAsync(DTUpdateInstitution dtUpdate)
+        public async Task<(DTInstitution? dt, ValidationResult validation)> UpdateAsync(DTUpdateInstitution dtUpdate)
         {
             var institution = await _repo.GetByIdAsync(dtUpdate.Id);
 

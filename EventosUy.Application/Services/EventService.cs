@@ -22,7 +22,7 @@ namespace EventosUy.Application.Services
             _institutionService = institutionService;
         }
 
-        public async Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> CreateAsync(DTInsertEvent dtInsert)
+        public async Task<(DTEvent? dt, ValidationResult validation)> CreateAsync(DTInsertEvent dtInsert)
         {
             var validationResult = new ValidationResult();
 
@@ -51,7 +51,7 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            UserCard? userCard = await _institutionService.GetCardByIdAsync(dtInsert.Institution);
+            var userCard = (await _institutionService.GetByIdAsync(dtInsert.Institution)).card;
             if (userCard is null) 
             {
                 validationResult.Errors.Add
@@ -93,13 +93,13 @@ namespace EventosUy.Application.Services
             return cards;
         }
 
-        public async Task<DTEvent?> GetByIdAsync(Guid id)
+        public async Task<(DTEvent? dt, EventCard? card)> GetByIdAsync(Guid id)
         {
             Event? eventInstance = await _repo.GetByIdAsync(id);
 
-            if (eventInstance is null) { return null; }
+            if (eventInstance is null) { return (null, null); }
 
-            UserCard? institutionCard = await _institutionService.GetCardByIdAsync(eventInstance.Institution);
+            var userCard = (await _institutionService.GetByIdAsync(eventInstance.Institution)).card;
             
             var dt = new DTEvent(
                     id: eventInstance.Id,
@@ -108,24 +108,15 @@ namespace EventosUy.Application.Services
                     description: eventInstance.Description,
                     created: eventInstance.Created,
                     categories: eventInstance.Categories,
-                    card: institutionCard!
+                    card: userCard!
                 );
-
-            return dt;
-        }
-
-        public async Task<EventCard?> GetCardByIdAsync(Guid id)
-        {
-            Event? eventInstance = await _repo.GetByIdAsync(id);
-
-            if (eventInstance is null) { return null; }
 
             var card = new EventCard(eventInstance.Id, eventInstance.Name, eventInstance.Initials);
 
-            return card;
+            return (dt, card);
         }
 
-        public async Task<(DTEvent? dtEvent, ValidationResult ValidationResult)> UpdateAsync(DTUpdateEvent dtUpdate)
+        public async Task<(DTEvent? dt, ValidationResult validation)> UpdateAsync(DTUpdateEvent dtUpdate)
         {
             var eventInstance = await _repo.GetByIdAsync(dtUpdate.Id);
 
@@ -173,7 +164,7 @@ namespace EventosUy.Application.Services
             eventInstance.Description = dtUpdate.Description;
             eventInstance.Categories = categories;
 
-            UserCard? institutionCard = await _institutionService.GetCardByIdAsync(eventInstance.Institution);
+            var userCard = (await _institutionService.GetByIdAsync(eventInstance.Institution)).card;
             
             var dt = new DTEvent(
                     id: eventInstance.Id,
@@ -182,7 +173,7 @@ namespace EventosUy.Application.Services
                     description: eventInstance.Description,
                     created: eventInstance.Created,
                     categories: eventInstance.Categories,
-                    card: institutionCard!
+                    card: userCard!
                 );
 
             return (dt, validationResult);
@@ -196,7 +187,7 @@ namespace EventosUy.Application.Services
 
             eventInstance.Active = false;
 
-            UserCard? institutionCard = await _institutionService.GetCardByIdAsync(eventInstance.Institution);
+            var userCard = (await _institutionService.GetByIdAsync(eventInstance.Institution)).card;
 
             var dt = new DTEvent(
                     id: eventInstance.Id,
@@ -205,7 +196,7 @@ namespace EventosUy.Application.Services
                     description: eventInstance.Description,
                     created: eventInstance.Created,
                     categories: eventInstance.Categories,
-                    card: institutionCard!
+                    card: userCard!
                 );
 
             return dt;
