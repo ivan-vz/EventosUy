@@ -15,26 +15,14 @@ namespace EventosUy.API.Controllers
 
         private readonly IInstitutionService _institutionService;
         private readonly IClientService _clientService;
-        private readonly IValidator<DTInsertClient> _clientInsertValidator;
-        private readonly IValidator<DTUpdateClient> _clientUpdateValidator;
-        private readonly IValidator<DTInsertInstitution> _institutionInsertValidator;
-        private readonly IValidator<DTUpdateInstitution> _institutionUpdateValidator;
 
         public UserController(
             IInstitutionService institutionService, 
-            IClientService clientService, 
-            IValidator<DTInsertClient> clientInsertValidator,
-            IValidator<DTUpdateClient> clientUpdateValidator,
-            IValidator<DTInsertInstitution> institutionInsertValidator,
-            IValidator<DTUpdateInstitution> institutionUpdateValidator
+            IClientService clientService
             )
         {
             _institutionService = institutionService;
             _clientService = clientService;
-            _clientInsertValidator = clientInsertValidator;
-            _clientUpdateValidator = clientUpdateValidator; 
-            _institutionInsertValidator = institutionInsertValidator;
-            _institutionUpdateValidator = institutionUpdateValidator;
         }
 
         // GET ALL
@@ -66,9 +54,12 @@ namespace EventosUy.API.Controllers
         // CREATE
 
         [HttpPost("client")]
-        public async Task<ActionResult<DTClient>> CreateClient(DTInsertClient dtInsert) 
+        public async Task<ActionResult<DTClient>> CreateClient(
+            DTInsertClient dtInsert,
+            [FromServices] IValidator<DTInsertClient> validator
+            ) 
         {
-            var validationResult = await _clientInsertValidator.ValidateAsync(dtInsert);
+            var validationResult = await validator.ValidateAsync(dtInsert);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 
@@ -80,9 +71,12 @@ namespace EventosUy.API.Controllers
         }
 
         [HttpPost("institution")]
-        public async Task<ActionResult<DTInstitution>> CreateInstitution(DTInsertInstitution dtInsert)
+        public async Task<ActionResult<DTInstitution>> CreateInstitution(
+            DTInsertInstitution dtInsert,
+            [FromServices] IValidator<DTInsertInstitution> validator
+            )
         {
-            var validationResult = await _institutionInsertValidator.ValidateAsync(dtInsert);
+            var validationResult = await validator.ValidateAsync(dtInsert);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 
@@ -96,9 +90,12 @@ namespace EventosUy.API.Controllers
         // UPDATE
 
         [HttpPut("client")]
-        public async Task<ActionResult<DTClient>> UpdateClient(DTUpdateClient dtUpdate)
+        public async Task<ActionResult<DTClient>> UpdateClient(
+            DTUpdateClient dtUpdate,
+            [FromServices] IValidator<DTUpdateClient> validator
+            )
         {
-            var validationResult = await _clientUpdateValidator.ValidateAsync(dtUpdate);
+            var validationResult = await validator.ValidateAsync(dtUpdate);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 
@@ -110,9 +107,12 @@ namespace EventosUy.API.Controllers
         }
 
         [HttpPut("institution")]
-        public async Task<ActionResult<DTInstitution>> UpdateInstitution(DTUpdateInstitution dtUpdate)
+        public async Task<ActionResult<DTInstitution>> UpdateInstitution(
+            DTUpdateInstitution dtUpdate, 
+            [FromServices] IValidator<DTUpdateInstitution> validator
+            )
         {
-            var validationResult = await _institutionUpdateValidator.ValidateAsync(dtUpdate);
+            var validationResult = await validator.ValidateAsync(dtUpdate);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 

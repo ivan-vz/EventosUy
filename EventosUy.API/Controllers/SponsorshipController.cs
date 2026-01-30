@@ -1,8 +1,8 @@
-﻿using EventosUy.API.Validators;
-using EventosUy.Application.DTOs.DataTypes.Detail;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.DTOs.Records;
 using EventosUy.Application.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventosUy.API.Controllers
@@ -12,12 +12,10 @@ namespace EventosUy.API.Controllers
     public class SponsorshipController : ControllerBase
     {
         private readonly ISponsorshipService _sponsorshipService;
-        private readonly SponsorshipInsertValidator _sponsorInsertValidator;
 
-        public SponsorshipController(ISponsorshipService sponsorshipService, SponsorshipInsertValidator sponsorInsertValidator)
+        public SponsorshipController(ISponsorshipService sponsorshipService)
         {
             _sponsorshipService = sponsorshipService;
-            _sponsorInsertValidator = sponsorInsertValidator;
         }
 
         // GET ALL
@@ -41,9 +39,11 @@ namespace EventosUy.API.Controllers
         // CREATE
 
         [HttpPost]
-        public async Task<ActionResult<DTSponsorship>> Create(DTInsertSponsorship dtInsert)
+        public async Task<ActionResult<DTSponsorship>> Create(
+            DTInsertSponsorship dtInsert,
+            [FromServices] IValidator<DTInsertSponsorship> validator)
         {
-            var validationResult = await _sponsorInsertValidator.ValidateAsync(dtInsert);
+            var validationResult = await validator.ValidateAsync(dtInsert);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 

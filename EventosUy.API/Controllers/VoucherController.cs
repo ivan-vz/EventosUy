@@ -1,7 +1,7 @@
-﻿using EventosUy.API.Validators;
-using EventosUy.Application.DTOs.DataTypes.Detail;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventosUy.API.Controllers
@@ -11,17 +11,10 @@ namespace EventosUy.API.Controllers
     public class VoucherController : ControllerBase
     {
         private readonly IVoucherService _voucherService;
-        private readonly VoucherInsertWithSponsorValidator _voucherInsertWithSponsorValidator;
-        private readonly VoucherInsertWithoutSponsorValidator _voucherInsertWithoutSponsorValidator;
 
-        public VoucherController(
-            IVoucherService voucherService, 
-            VoucherInsertWithSponsorValidator voucherInsertWithSponsorValidator, 
-            VoucherInsertWithoutSponsorValidator voucherInsertWithoutSponsorValidator)
+        public VoucherController(IVoucherService voucherService)
         {
             _voucherService = voucherService;
-            _voucherInsertWithSponsorValidator = voucherInsertWithSponsorValidator;
-            _voucherInsertWithoutSponsorValidator = voucherInsertWithoutSponsorValidator;
         }
 
         // GET BY ID
@@ -39,9 +32,12 @@ namespace EventosUy.API.Controllers
         // CREATE 
 
         [HttpPost]
-        public async Task<ActionResult<DTVoucher>> Create(DTInsertVoucherWithSponsor dtInsert) 
+        public async Task<ActionResult<DTVoucher>> Create(
+            DTInsertVoucherWithSponsor dtInsert,
+            [FromServices] IValidator<DTInsertVoucherWithSponsor> validator
+            ) 
         {
-            var validationResult = await _voucherInsertWithSponsorValidator.ValidateAsync(dtInsert);
+            var validationResult = await validator.ValidateAsync(dtInsert);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 
@@ -53,9 +49,11 @@ namespace EventosUy.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<DTVoucher>> Create(DTInsertVoucherWithoutSponsor dtInsert)
+        public async Task<ActionResult<DTVoucher>> Create(
+            DTInsertVoucherWithoutSponsor dtInsert,
+            [FromServices] IValidator<DTInsertVoucherWithoutSponsor> validator)
         {
-            var validationResult = await _voucherInsertWithoutSponsorValidator.ValidateAsync(dtInsert);
+            var validationResult = await validator.ValidateAsync(dtInsert);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 

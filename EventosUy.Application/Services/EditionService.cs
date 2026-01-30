@@ -27,16 +27,8 @@ namespace EventosUy.Application.Services
         {
             var validationResult = new ValidationResult();
 
-            var userCard = (await _institutionService.GetByIdAsync(dtInsert.Institution)).card;
-            if (userCard is null)
-            {
-                validationResult.Errors.Add
-                    (
-                        new ValidationFailure("Institution", "Institution Not Found.")
-                    );
-            }
+            var (dtEvent, eventCard) = await _eventService.GetByIdAsync(dtInsert.Event);
 
-            var eventCard = (await _eventService.GetByIdAsync(dtInsert.Event)).card;
             if (eventCard is null)
             {
                 validationResult.Errors.Add
@@ -82,8 +74,8 @@ namespace EventosUy.Application.Services
                 street: dtInsert.Street,
                 number: dtInsert.Number,
                 floor: dtInsert.Floor,
-                eventId: dtInsert.Event, 
-                institutionId: dtInsert.Institution
+                eventId: dtEvent!.Id, 
+                institutionId: dtEvent!.Institution.Id
                 );
 
             await _repo.AddAsync(edition);
@@ -103,7 +95,7 @@ namespace EventosUy.Application.Services
                 number: dtInsert.Number,
                 floor: dtInsert.Floor,
                 eventCard: eventCard!,
-                institutionCard: userCard!
+                institutionCard: dtEvent.Institution
                 );
 
             return (dt, validationResult);
@@ -147,8 +139,7 @@ namespace EventosUy.Application.Services
 
             if (edition is null || edition.State is not EditionState.ONGOING) { return (null, null); }
 
-            var userCard = (await _institutionService.GetByIdAsync(edition.Institution)).card;
-            var eventCard = (await _eventService.GetByIdAsync(edition.Event)).card;
+            var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.Event);
 
             var dt = new DTEdition
                 (
@@ -165,7 +156,7 @@ namespace EventosUy.Application.Services
                    number: edition.Number,
                    floor: edition.Floor,
                    eventCard: eventCard!,
-                   institutionCard: userCard!
+                   institutionCard: dtEvent!.Institution
                 );
 
             var card = new EditionCard(edition.Id, edition.Name, edition.Initials, State: edition.State);
@@ -211,8 +202,7 @@ namespace EventosUy.Application.Services
                 return (null, validationResult);
             }
 
-            var userCard = (await _institutionService.GetByIdAsync(edition.Institution)).card;
-            var eventCard = (await _eventService.GetByIdAsync(edition.Event)).card;
+            var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.Event);
             
 
             if (!edition.Name.Equals(dtUpdate.Name, StringComparison.OrdinalIgnoreCase) && await _repo.ExistsByNameAsync(dtUpdate.Name))
@@ -271,7 +261,7 @@ namespace EventosUy.Application.Services
                 number: edition.Number,
                 floor: edition.Floor,
                 eventCard: eventCard!,
-                institutionCard: userCard!
+                institutionCard: dtEvent!.Institution
                 );
 
             return (dt, validationResult);
@@ -285,8 +275,7 @@ namespace EventosUy.Application.Services
 
             edition.State = EditionState.CANCELLED;
 
-            var userCard = (await _institutionService.GetByIdAsync(edition.Institution)).card;
-            var eventCard = (await _eventService.GetByIdAsync(edition.Event)).card;
+            var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.Event);
 
             var dt = new DTEdition
                 (
@@ -303,7 +292,7 @@ namespace EventosUy.Application.Services
                 number: edition.Number,
                 floor: edition.Floor,
                 eventCard: eventCard!,
-                institutionCard: userCard!
+                institutionCard: dtEvent!.Institution
                 );
 
             return dt;

@@ -11,7 +11,6 @@ namespace EventosUy.Application.Interfaces
         public Task<(DTSponsorship? dt, SponsorshipCard? card)> GetByIdAsync(Guid id);
         public Task<IEnumerable<SponsorshipCard>> GetAllByEditionAsync(Guid editionId);
         public Task<IEnumerable<SponsorshipCard>> GetAllByInstitutionAsync(Guid institutionId);
-        public Task<bool> ValidateCodeAsync(string code, Guid editionId, Guid registerTypeId);
         public Task<DTSponsorship?> DeleteAsync(Guid id);
     }
 }

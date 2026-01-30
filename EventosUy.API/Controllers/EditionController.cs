@@ -1,9 +1,9 @@
-﻿using EventosUy.API.Validators;
-using EventosUy.Application.DTOs.DataTypes.Detail;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.DTOs.DataTypes.Update;
 using EventosUy.Application.DTOs.Records;
 using EventosUy.Application.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventosUy.API.Controllers
@@ -13,14 +13,10 @@ namespace EventosUy.API.Controllers
     public class EditionController : ControllerBase
     {
         private readonly IEditionService _editionService;
-        private readonly EditionInsertValidator _editionInsertValidator;
-        private readonly EditionUpdateValidator _editionUpdateValidator;
 
-        public EditionController(IEditionService editionService, EditionInsertValidator editionInsertValidator, EditionUpdateValidator editionUpdateValidator)
+        public EditionController(IEditionService editionService)
         {
             _editionService = editionService;
-            _editionInsertValidator = editionInsertValidator;
-            _editionUpdateValidator = editionUpdateValidator;
         }
 
         // GET ALL
@@ -41,9 +37,12 @@ namespace EventosUy.API.Controllers
         // CREATE
 
         [HttpPost]
-        public async Task<ActionResult<DTEdition>> Create(DTInsertEdition dtInsert)
+        public async Task<ActionResult<DTEdition>> Create(
+            DTInsertEdition dtInsert,
+            [FromServices] IValidator<DTInsertEdition> validator
+            )
         {
-            var validationResult = await _editionInsertValidator.ValidateAsync(dtInsert);
+            var validationResult = await validator.ValidateAsync(dtInsert);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 
@@ -57,9 +56,12 @@ namespace EventosUy.API.Controllers
         // UPDATE
 
         [HttpPut]
-        public async Task<ActionResult<DTEdition>> Update(DTUpdateEdition dtUpdate)
+        public async Task<ActionResult<DTEdition>> Update(
+            DTUpdateEdition dtUpdate,
+            [FromServices] IValidator<DTUpdateEdition> validator
+            )
         {
-            var validationResult = await _editionUpdateValidator.ValidateAsync(dtUpdate);
+            var validationResult = await validator.ValidateAsync(dtUpdate);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 

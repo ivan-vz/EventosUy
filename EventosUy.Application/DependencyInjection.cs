@@ -9,13 +9,14 @@ namespace EventosUy.Application
         public static IServiceCollection AddApplication(this IServiceCollection services) //De esta froma solo se hace publica la funcion y no las implementaciones
         {
             services.AddScoped<ICategoryService, CategoryService>();
-            services.AddScoped<IEditionService, EditionService>();
-            services.AddScoped<IEventService, EventService>();
-            services.AddScoped<IInstitutionService, InstitutionService>();
             services.AddScoped<IClientService, ClientService>();
-            services.AddScoped<IRegisterService, RegisterService>();
+            services.AddScoped<IInstitutionService, InstitutionService>();
+            services.AddScoped<IEventService, EventService>();
+            services.AddScoped<IEditionService, EditionService>();
             services.AddScoped<IRegisterTypeService, RegisterTypeService>();
             services.AddScoped<ISponsorshipService, SponsorshipService>();
+            services.AddScoped<IVoucherService, VoucherService>();
+            services.AddScoped<IRegisterService, RegisterService>();
 
             return services;
         }

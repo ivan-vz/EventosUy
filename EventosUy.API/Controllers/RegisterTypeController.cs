@@ -1,8 +1,8 @@
-﻿using EventosUy.API.Validators;
-using EventosUy.Application.DTOs.DataTypes.Detail;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.DTOs.Records;
 using EventosUy.Application.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventosUy.API.Controllers
@@ -12,12 +12,10 @@ namespace EventosUy.API.Controllers
     public class RegisterTypeController : ControllerBase
     {
         private readonly IRegisterTypeService _registerTypeService;
-        private readonly RegisterTypeInsertValidator _registerTypeInsertValidator;
 
-        public RegisterTypeController(IRegisterTypeService registerTypeService, RegisterTypeInsertValidator registerTypeInsertValidator) 
+        public RegisterTypeController(IRegisterTypeService registerTypeService) 
         {
             _registerTypeService = registerTypeService;
-            _registerTypeInsertValidator = registerTypeInsertValidator;
         }
 
         // GET ALL
@@ -38,9 +36,11 @@ namespace EventosUy.API.Controllers
         // CREATE
 
         [HttpPost]
-        public async Task<ActionResult<DTRegisterType>> Create(DTInsertRegisterType dtInsert) 
+        public async Task<ActionResult<DTRegisterType>> Create(
+            DTInsertRegisterType dtInsert,
+            [FromServices] IValidator<DTInsertRegisterType> validator) 
         {
-            var validationResult = await _registerTypeInsertValidator.ValidateAsync(dtInsert);
+            var validationResult = await validator.ValidateAsync(dtInsert);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 

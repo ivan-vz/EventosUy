@@ -8,7 +8,6 @@ namespace EventosUy.API.Validators
         public RegisterInsertWithVoucherValidator() 
         {
             RuleFor(x => x.Client).NotEmpty();
-            RuleFor(x => x.Edition).NotEmpty();
             RuleFor(x => x.RegisterType).NotEmpty();
             RuleFor(x => x.Code).NotEmpty();
         }

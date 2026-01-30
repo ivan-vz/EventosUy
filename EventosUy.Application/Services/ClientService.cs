@@ -33,6 +33,13 @@ namespace EventosUy.Application.Services
                 );
             }
 
+            if (await _repo.ExistsByCiAsync(dtInsert.Ci)) 
+            {
+                validationResult.Errors.Add(
+                        new ValidationFailure("Ci", "Ci already in use.")
+                    );
+            }
+
             if (!validationResult.IsValid) { return (null, validationResult); }
 
             var hash = PasswordHasher.Hash(dtInsert.Password);

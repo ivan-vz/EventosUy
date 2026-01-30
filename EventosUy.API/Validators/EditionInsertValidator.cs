@@ -18,7 +18,6 @@ namespace EventosUy.API.Validators
             RuleFor(x => x.Number).NotEmpty();
             RuleFor(x => x.Floor).NotEmpty();
             RuleFor(x => x.Event).NotEmpty();
-            RuleFor(x => x.Institution).NotEmpty();
         }
     }
 }

@@ -5,11 +5,9 @@ namespace EventosUy.Domain.Interfaces
     public interface ISponsorshipRepo
     {
         public Task<Sponsorship?> GetByIdAsync(Guid id);
-        public Task<Sponsorship?> GetByCodeAsync(string code);
         public Task<List<Sponsorship>> GetAllByEditionAsync(Guid editionId);
         public Task<List<Sponsorship>> GetAllByInstitutionAsync(Guid institutionId);
         public Task<bool> ExistsAsync(Guid editionId, Guid institutionId);
-        public Task<bool> ValidateCodeAsync(string code, Guid editionId, Guid registerTypeId);
         public Task AddAsync(Sponsorship sponsorship);
         public Task<bool> RemoveAsync(Guid id);
     }

@@ -22,6 +22,8 @@ namespace EventosUy.Infrastructure.Repositories
 
         public Task<bool> ExistsByNicknameAsync(string nickname) { return Task.FromResult(_clients.Any(client => client.Active && client.Nickname == nickname)); }
 
+        public Task<bool> ExistsByCiAsync(string ci) { return Task.FromResult(_clients.Any(client => client.Active && client.Ci == ci)); }
+
         public Task<List<Client>> GetAllAsync() { return Task.FromResult(_clients.Where(client => client.Active).ToList()); }
 
         public Task<Client?> GetByIdAsync(Guid id) { return Task.FromResult(_clients.SingleOrDefault(client => client.Active && client.Id == id)); }

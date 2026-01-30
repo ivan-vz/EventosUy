@@ -12,14 +12,12 @@ namespace EventosUy.Application.Services
     public class VoucherService : IVoucherService
     {
         private readonly IVoucherRepo _repo;
-        private readonly IEditionService _editionService;
         private readonly IRegisterTypeService _registerTypeService;
         private readonly ISponsorshipService _sponsorshipService;
 
-        public VoucherService(IVoucherRepo voucherRepo, IEditionService editionService, IRegisterTypeService registerTypeService, ISponsorshipService sponsorshipService)
+        public VoucherService(IVoucherRepo voucherRepo, IRegisterTypeService registerTypeService, ISponsorshipService sponsorshipService)
         {
             _repo = voucherRepo;
-            _editionService = editionService;
             _registerTypeService = registerTypeService;
             _sponsorshipService = sponsorshipService;
         }
@@ -142,9 +140,7 @@ namespace EventosUy.Application.Services
 
             if (voucher is null) { return (null, null); }
 
-            var editionCard = (await _editionService.GetByIdAsync(voucher.Edition)).card;
-            var registerTypeCard = (await _registerTypeService.GetByIdAsync(voucher.RegisterType)).card;
-            var sponsorCard = voucher.Sponsor is Guid sponsorId ? (await _sponsorshipService.GetByIdAsync(sponsorId)).card : null;
+            var (dtSponsor, sponsorCard) = voucher.Sponsor is Guid sponsorId ? await _sponsorshipService.GetByIdAsync(sponsorId) : (null, null);
 
             var dt = new DTVoucher
                 (
@@ -155,8 +151,8 @@ namespace EventosUy.Application.Services
                 used: voucher.Used,
                 created: voucher.Created,
                 state: voucher.State,
-                editionCard: editionCard!,
-                registerTypeCard: registerTypeCard!,
+                editionCard: dtSponsor!.Edition,
+                registerTypeCard: dtSponsor!.RegisterType,
                 sponsorCard: sponsorCard
                 );
 
@@ -171,10 +167,8 @@ namespace EventosUy.Application.Services
 
             if (voucher is null) { return (null, null); }
 
-            var editionCard = (await _editionService.GetByIdAsync(voucher.Edition)).card; 
-            var registerTypeCard = (await _registerTypeService.GetByIdAsync(voucher.RegisterType)).card;
-            var sponsorCard = voucher.Sponsor is Guid sponsorId ? (await _sponsorshipService.GetByIdAsync(sponsorId)).card : null;    
-            
+            var (dtSponsor, sponsorCard) = voucher.Sponsor is Guid sponsorId ? await _sponsorshipService.GetByIdAsync(sponsorId) : (null, null);
+
             var dt = new DTVoucher
                 (
                 id: voucher.Id, 
@@ -184,8 +178,8 @@ namespace EventosUy.Application.Services
                 used: voucher.Used,
                 created: voucher.Created,
                 state: voucher.State,
-                editionCard: editionCard!,
-                registerTypeCard: registerTypeCard!,
+                editionCard: dtSponsor!.Edition,
+                registerTypeCard: dtSponsor!.RegisterType,
                 sponsorCard: sponsorCard
                 );
 

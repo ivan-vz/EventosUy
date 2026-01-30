@@ -1,3 +1,4 @@
+using EventosUy.API;
 using EventosUy.Application;
 using EventosUy.Infrastructure;
 using System.Text.Json.Serialization;
@@ -8,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(); //Maneja todos los repositorios Internos
 builder.Services.AddApplication(); //Maneja todos los servicios internos
-builder.Services.AddControllers(); //Manjea todos los validadores
+builder.Services.AddController(); //Manjea todos los validadores
 
 builder.Services.AddControllers().AddJsonOptions(options => 
 {

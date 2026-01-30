@@ -15,15 +15,13 @@ namespace EventosUy.Application.Services
         private readonly IClientService _clientService;
         private readonly IEditionService _editionService;
         private readonly IRegisterTypeService _registerTypeService;
-        private readonly ISponsorshipService _sponsorshipService;
         private readonly IVoucherService _voucherService;
 
         public RegisterService(
             IRegisterRepo registerRepo, 
             IClientService clientService, 
             IEditionService editionService, 
-            IRegisterTypeService registerTypeService, 
-            ISponsorshipService sponsorshipService,
+            IRegisterTypeService registerTypeService,
             IVoucherService voucherService
             )
         {
@@ -31,7 +29,6 @@ namespace EventosUy.Application.Services
             _clientService = clientService;
             _editionService = editionService;
             _registerTypeService = registerTypeService;
-            _sponsorshipService = sponsorshipService;
             _voucherService = voucherService;
         }
 
@@ -45,15 +42,6 @@ namespace EventosUy.Application.Services
                 validationResult.Errors.Add
                     (
                         new ValidationFailure("Client", "Client not found.")
-                    );
-            }
-
-            var editionCard = (await _editionService.GetByIdAsync(dtInsert.Edition)).card;
-            if (editionCard is null)
-            {
-                validationResult.Errors.Add
-                    (
-                        new ValidationFailure("Edition", "Edition not found.")
                     );
             }
 
@@ -77,7 +65,7 @@ namespace EventosUy.Application.Services
 
             if (!validationResult.IsValid) { return (null, validationResult); }
 
-            if (dtVoucher!.Edition.Id != editionCard!.Id || dtVoucher!.RegisterType.Id != dtRegisterType!.Id)
+            if (dtVoucher!.Edition.Id != dtRegisterType!.Edition.Id || dtVoucher!.RegisterType.Id != dtRegisterType!.Id)
             {
                 validationResult.Errors.Add
                     (
@@ -85,7 +73,7 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            if (!editionCard.State.Equals(EditionState.ONGOING)) 
+            if (!dtRegisterType.Edition.State.Equals(EditionState.ONGOING)) 
             {
                 validationResult.Errors.Add
                     (
@@ -125,7 +113,7 @@ namespace EventosUy.Application.Services
             var register = new Register(
                     total: price,
                     clientId: userCard!.Id,
-                    editionId: editionCard!.Id,
+                    editionId: dtRegisterType.Edition.Id,
                     registerTypeId: registerTypeCard!.Id,
                     voucherId: voucherCard!.Id
                 );
@@ -141,7 +129,7 @@ namespace EventosUy.Application.Services
                     total: register.Total,
                     created: register.Created,
                     registerTypeCard: registerTypeCard!,
-                    editionCard: editionCard,
+                    editionCard: dtRegisterType.Edition,
                     clientCard: userCard,
                     voucherCard: voucherCard
                 );
@@ -162,15 +150,6 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            var editionCard = (await _editionService.GetByIdAsync(dtInsert.Edition)).card;
-            if (editionCard is null)
-            {
-                validationResult.Errors.Add
-                    (
-                        new ValidationFailure("Edition", "Edition not found.")
-                    );
-            }
-
             var (dtRegisterType, registerTypeCard) = await _registerTypeService.GetByIdAsync(dtInsert.RegisterType);
             if (dtRegisterType is null)
             {
@@ -182,7 +161,7 @@ namespace EventosUy.Application.Services
 
             if (!validationResult.IsValid) { return (null, validationResult); }
 
-            if (!editionCard!.State.Equals(EditionState.ONGOING))
+            if (!dtRegisterType!.Edition.State.Equals(EditionState.ONGOING))
             {
                 validationResult.Errors.Add
                     (
@@ -211,7 +190,7 @@ namespace EventosUy.Application.Services
             var register = new Register(
                     total: dtRegisterType.Price,
                     clientId: userCard!.Id,
-                    editionId: editionCard!.Id,
+                    editionId: dtRegisterType!.Edition.Id,
                     registerTypeId: registerTypeCard!.Id,
                     voucherId: null
                 );
@@ -226,7 +205,7 @@ namespace EventosUy.Application.Services
                     total: register.Total,
                     created: register.Created,
                     registerTypeCard: registerTypeCard!,
-                    editionCard: editionCard,
+                    editionCard: dtRegisterType.Edition,
                     clientCard: userCard,
                     voucherCard: null
                 );

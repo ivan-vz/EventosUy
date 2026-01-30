@@ -31,9 +31,9 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            var edition = _editionService.GetByIdAsync(dtInsert.Edition);
+            var editionCard = (await _editionService.GetByIdAsync(dtInsert.Edition)).card;
 
-            if (edition is null)
+            if (editionCard is null)
             {
                 validationResult.Errors.Add
                     (
@@ -52,8 +52,6 @@ namespace EventosUy.Application.Services
                 );
 
             await _repo.AddAsync(registerType);
-
-            var editionCard = (await _editionService.GetByIdAsync(dtInsert.Edition)).card;
 
             var dt = new DTRegisterType(
                     id: registerType.Id,

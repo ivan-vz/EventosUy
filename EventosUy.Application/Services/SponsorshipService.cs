@@ -12,7 +12,6 @@ namespace EventosUy.Application.Services
     public class SponsorshipService : ISponsorshipService
     {
         private readonly ISponsorshipRepo _repo;
-        private readonly IEditionService _editionService;
         private readonly IInstitutionService _institutionService;
         private readonly IRegisterTypeService _registerTypeService;
 
@@ -24,15 +23,12 @@ namespace EventosUy.Application.Services
         };
 
         public SponsorshipService(
-            ISponsorshipRepo sponsorship, 
-            IEditionService editionService, 
+            ISponsorshipRepo sponsorship,
             IInstitutionService institutionService, 
-            IRegisterTypeService registerTypeService,
-            IVoucherService voucherService
+            IRegisterTypeService registerTypeService
             ) 
         {
             _repo = sponsorship;
-            _editionService = editionService;
             _institutionService = institutionService;
             _registerTypeService = registerTypeService;
         }
@@ -50,16 +46,7 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            var editionCard = (await _editionService.GetByIdAsync(dtInsert.Edition)).card;
-            if (editionCard is null)
-            {
-                validationResult.Errors.Add
-                    (
-                        new ValidationFailure("Edition", "Edition not found.")
-                    );
-            }
-
-            var registerTypeCard = (await _registerTypeService.GetByIdAsync(dtInsert.RegisterType)).card;
+            var (dtRegisterType, registerTypeCard) = await _registerTypeService.GetByIdAsync(dtInsert.RegisterType);
             if (registerTypeCard is null)
             {
                 validationResult.Errors.Add
@@ -92,7 +79,7 @@ namespace EventosUy.Application.Services
                     );
             }
 
-            if (await _repo.ExistsAsync(dtInsert.Edition, dtInsert.Institution)) 
+            if (await _repo.ExistsAsync(dtRegisterType!.Edition.Id, dtInsert.Institution)) 
             {
                 validationResult.Errors.Add
                     (
@@ -106,7 +93,7 @@ namespace EventosUy.Application.Services
                 name: dtInsert.Name, 
                 amount: dtInsert.Amount, 
                 tier: dtInsert.Tier, 
-                edition: dtInsert.Edition, 
+                edition: dtRegisterType!.Edition.Id, 
                 institution: dtInsert.Institution,
                 registerType: dtInsert.RegisterType
                 );
@@ -119,7 +106,7 @@ namespace EventosUy.Application.Services
                     amount: sponsorship.Amount,
                     tier: sponsorship.Tier,
                     created: sponsorship.Created,
-                    editionCard: editionCard!,
+                    editionCard: dtRegisterType!.Edition,
                     institutionCard: userCard!,
                     registerTypeCard: registerTypeCard!
                 );
@@ -149,8 +136,7 @@ namespace EventosUy.Application.Services
             if (sponsor is null) { return (null, null); }
 
             var userCard = (await _institutionService.GetByIdAsync(sponsor.Institution)).card;
-            var editionCard = (await _editionService.GetByIdAsync(sponsor.Edition)).card;
-            var registerTypeCard = (await _registerTypeService.GetByIdAsync(sponsor.RegisterType)).card;
+            var (dtRegisterType, registerTypeCard) = await _registerTypeService.GetByIdAsync(sponsor.RegisterType);
 
             var dt = new DTSponsorship(
                     id: sponsor.Id,
@@ -158,7 +144,7 @@ namespace EventosUy.Application.Services
                     amount: sponsor.Amount,
                     tier: sponsor.Tier,
                     created: sponsor.Created,
-                    editionCard: editionCard!,
+                    editionCard: dtRegisterType!.Edition,
                     institutionCard: userCard!,
                     registerTypeCard: registerTypeCard!
                 );
@@ -177,8 +163,7 @@ namespace EventosUy.Application.Services
             sponsor.Active = false;
 
             var userCard = (await _institutionService.GetByIdAsync(sponsor.Institution)).card;
-            var editionCard = (await _editionService.GetByIdAsync(sponsor.Edition)).card;
-            var registerTypeCard = (await _registerTypeService.GetByIdAsync(sponsor.RegisterType)).card;
+            var (dtRegisterType, registerTypeCard) = await _registerTypeService.GetByIdAsync(sponsor.RegisterType);
 
             var dt = new DTSponsorship(
                     id: sponsor.Id,
@@ -186,14 +171,12 @@ namespace EventosUy.Application.Services
                     amount: sponsor.Amount,
                     tier: sponsor.Tier,
                     created: sponsor.Created,
-                    editionCard: editionCard!,
+                    editionCard: dtRegisterType!.Edition,
                     institutionCard: userCard!,
                     registerTypeCard: registerTypeCard!
                 );
 
             return dt;
         }
-
-        public async Task<bool> ValidateCodeAsync(string code, Guid editionId, Guid registerTypeId) => await _repo.ValidateCodeAsync(code, editionId, registerTypeId);
     }
 }

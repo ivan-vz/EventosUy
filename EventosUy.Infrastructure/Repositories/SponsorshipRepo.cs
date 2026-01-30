@@ -21,19 +21,12 @@ namespace EventosUy.Infrastructure.Repositories
 
         public Task<List<Sponsorship>> GetAllByInstitutionAsync(Guid institutionId) { return Task.FromResult(_sponsorships.Where(sponsor => sponsor.Institution == institutionId).ToList()); }
 
-        public Task<Sponsorship?> GetByCodeAsync(string code) {  return Task.FromResult(_sponsorships.SingleOrDefault(sponsor => sponsor.Code.Equals(code))); }
-
         public Task<Sponsorship?> GetByIdAsync(Guid id) { return Task.FromResult(_sponsorships.SingleOrDefault(sponsor => sponsor.Id == id)); }
 
         public Task<bool> RemoveAsync(Guid id)
         {
             int result = _sponsorships.RemoveWhere(sponsor => sponsor.Id == id);
             return Task.FromResult(result > 0);
-        }
-
-        public Task<bool> ValidateCodeAsync(string code, Guid editionId, Guid registerTypeId)
-        {
-            return Task.FromResult(_sponsorships.Any(sponsor => sponsor.));
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿using EventosUy.API.Validators;
-using EventosUy.Application.DTOs.DataTypes.Detail;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.DTOs.Records;
 using EventosUy.Application.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventosUy.API.Controllers
@@ -13,18 +13,10 @@ namespace EventosUy.API.Controllers
     {
 
         private readonly IRegisterService _registerService;
-        private readonly RegisterInsertWithVoucherValidator _registerInsertWithVoucherValidator;
-        private readonly RegisterInsertWithoutVoucherValidator _registerInsertWithoutVoucherValidator;
 
-        public RegisterController(
-            IRegisterService registerService, 
-            RegisterInsertWithVoucherValidator registerInsertWithVoucherValidator, 
-            RegisterInsertWithoutVoucherValidator registerInsertWithoutVoucherValidator
-            ) 
+        public RegisterController(IRegisterService registerService) 
         {
             _registerService = registerService;
-            _registerInsertWithVoucherValidator = registerInsertWithVoucherValidator;
-            _registerInsertWithoutVoucherValidator = registerInsertWithoutVoucherValidator;
         }
 
         // GET ALL
@@ -38,9 +30,12 @@ namespace EventosUy.API.Controllers
         // CREATE
 
         [HttpPost]
-        public async Task<ActionResult<DTRegister>> Create(DTInsertRegisterWithVoucher dtInsert) 
+        public async Task<ActionResult<DTRegister>> Create(
+            DTInsertRegisterWithVoucher dtInsert,
+            [FromServices] IValidator<DTInsertRegisterWithVoucher> validator
+            ) 
         {
-            var validationResult = await _registerInsertWithVoucherValidator.ValidateAsync(dtInsert);
+            var validationResult = await validator.ValidateAsync(dtInsert);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 
@@ -52,9 +47,12 @@ namespace EventosUy.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<DTRegister>> Create(DTInsertRegisterWithoutVoucher dtInsert)
+        public async Task<ActionResult<DTRegister>> Create(
+            DTInsertRegisterWithoutVoucher dtInsert,
+            [FromServices] IValidator<DTInsertRegisterWithoutVoucher> validator
+            )
         {
-            var validationResult = await _registerInsertWithoutVoucherValidator.ValidateAsync(dtInsert);
+            var validationResult = await validator.ValidateAsync(dtInsert);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 

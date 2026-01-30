@@ -10,8 +10,7 @@
         string street,
         string number,
         int floor,
-        Guid eventId,
-        Guid institutionId
+        Guid eventId
         )
     {
         public string Name { get; init; } = name;
@@ -24,6 +23,5 @@
         public string Number { get; init; } = number;
         public int Floor { get; init; } = floor;
         public Guid Event { get; init; } = eventId;
-        public Guid Institution { get; init; } = institutionId;
     }
 }

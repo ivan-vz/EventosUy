@@ -1,9 +1,9 @@
-﻿using EventosUy.API.Validators;
-using EventosUy.Application.DTOs.DataTypes.Detail;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
 using EventosUy.Application.DTOs.DataTypes.Insert;
 using EventosUy.Application.DTOs.DataTypes.Update;
 using EventosUy.Application.DTOs.Records;
 using EventosUy.Application.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventosUy.API.Controllers
@@ -13,14 +13,10 @@ namespace EventosUy.API.Controllers
     public class EventController : ControllerBase
     {
         private readonly IEventService _eventService;
-        private readonly EventInsertValidator _eventInsertValidator;
-        private readonly EventUpdateValidator _eventUpdateValidator;
 
-        public EventController(IEventService eventService, EventInsertValidator eventInsertValidator, EventUpdateValidator eventUpdateValidator)
+        public EventController(IEventService eventService)
         {
             _eventService = eventService;
-            _eventInsertValidator = eventInsertValidator;
-            _eventUpdateValidator = eventUpdateValidator;
         }
 
         // GET ALL
@@ -41,9 +37,12 @@ namespace EventosUy.API.Controllers
         // CREATE   
 
         [HttpPost]
-        public async Task<ActionResult<DTEvent>> Create(DTInsertEvent dtInsert) 
+        public async Task<ActionResult<DTEvent>> Create(
+            DTInsertEvent dtInsert,
+            [FromServices] IValidator<DTInsertEvent> validator
+            ) 
         {
-            var validationResult = await _eventInsertValidator.ValidateAsync(dtInsert);
+            var validationResult = await validator.ValidateAsync(dtInsert);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 
@@ -57,9 +56,12 @@ namespace EventosUy.API.Controllers
         // UPDATE
 
         [HttpPut]
-        public async Task<ActionResult<DTEvent>> Update(DTUpdateEvent dtUpdate) 
+        public async Task<ActionResult<DTEvent>> Update(
+            DTUpdateEvent dtUpdate,
+            [FromServices] IValidator<DTUpdateEvent> validator
+            ) 
         {
-            var validationResult = await _eventUpdateValidator.ValidateAsync(dtUpdate);
+            var validationResult = await validator.ValidateAsync(dtUpdate);
 
             if (!validationResult.IsValid) { return BadRequest(validationResult.Errors); }
 
