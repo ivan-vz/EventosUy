@@ -10,8 +10,9 @@ namespace EventosUy.API.Validators
             RuleFor(x => x.Name).NotEmpty();
             RuleFor(x => x.Initials).NotEmpty();
             RuleFor(x => x.Description).NotEmpty();
-            RuleFor(x => x.Categories).NotEmpty();
-            RuleFor(x => x.Institution).NotNull().Must(id => id != Guid.Empty);
+            RuleFor(x => x.Categories).NotEmpty().WithMessage("Include at least 1 category.");
+            RuleForEach(x => x.Categories).NotEmpty().WithMessage("Categories cannot be empties.");
+            RuleFor(x => x.Institution).NotEmpty();
         }
     }
 }
