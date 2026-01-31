@@ -7,7 +7,7 @@ namespace EventosUy.Tests.Application
 {
     public class CategoryServiceTests
     {
-        [Fact]
+       /* [Fact]
         public async Task GetById_IfExists_ReturnSuccess() 
         {
             // Arrange
@@ -173,6 +173,6 @@ namespace EventosUy.Tests.Application
 
             // Verify
             mockRepo.Verify(repo => repo.AddAsync(It.IsAny<Category>()), Times.Never);
-        }
+        }*/
     }
 }

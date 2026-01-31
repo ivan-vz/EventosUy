@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EventosUy.API\EventosUy.API.csproj" />
     <ProjectReference Include="..\EventosUy.Application\EventosUy.Application.csproj" />
     <ProjectReference Include="..\EventosUy.Domain\EventosUy.Domain.csproj" />
     <ProjectReference Include="..\EventosUy.Infrastructure\EventosUy.Infrastructure.csproj" />
