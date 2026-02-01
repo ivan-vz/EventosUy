@@ -8,12 +8,11 @@ namespace EventosUy.API.Validators
         public SponsorshipInsertValidator() 
         {
             RuleFor(x => x.Name).NotEmpty();
-            RuleFor(x => x.Amount).GreaterThan(0);
-            RuleFor(x => x.Tier).NotEmpty();
+            RuleFor(x => x.Amount).NotNull().GreaterThan(0);
             RuleFor(x => x.Institution).NotEmpty();
             RuleFor(x => x.RegisterType).NotEmpty();
             RuleFor(x => x.VoucherName).NotEmpty();
-            RuleFor(x => x.VoucherCode).NotEmpty();
+            RuleFor(x => x.VoucherCode).NotEmpty().MinimumLength(8);
         }
     }
 }

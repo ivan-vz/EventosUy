@@ -27,7 +27,6 @@ namespace EventosUy.API.Validators
             RuleFor(x => x.City).NotEmpty();
             RuleFor(x => x.Street).NotEmpty();
             RuleFor(x => x.Number).NotEmpty().Length(4);
-            RuleFor(x => x.Floor).NotNull();
         }
     }
 }

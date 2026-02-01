@@ -9,7 +9,7 @@ namespace EventosUy.API.Validators
         {
             RuleFor(x => x.Client).NotEmpty();
             RuleFor(x => x.RegisterType).NotEmpty();
-            RuleFor(x => x.Code).NotEmpty();
+            RuleFor(x => x.Code).NotEmpty().MinimumLength(8);
         }
     }
 }
