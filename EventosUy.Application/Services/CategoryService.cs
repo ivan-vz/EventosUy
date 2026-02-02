@@ -21,15 +21,12 @@ namespace EventosUy.Application.Services
 
             if (await _repo.ExistsAsync(name))
             {
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    validationResult.Errors.Add
-                        (
-                            new ValidationFailure("Name", "Name is already in use.")
-                        );
-                }
+                validationResult.Errors.Add
+                    (
+                        new ValidationFailure("Name", "Name is already in use.")
+                    );
 
-                if (!validationResult.IsValid) { return (null, validationResult); }
+                return (null, validationResult);
             }
 
             var category = new Category(name: name);

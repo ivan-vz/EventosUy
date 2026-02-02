@@ -1,4 +1,5 @@
-﻿using EventosUy.Application.Services;
+﻿using EventosUy.Application.DTOs.DataTypes.Detail;
+using EventosUy.Application.Services;
 using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
 using Moq;
@@ -7,31 +8,32 @@ namespace EventosUy.Tests.Application
 {
     public class CategoryServiceTests
     {
-       /* [Fact]
-        public async Task GetById_IfExists_ReturnSuccess() 
+        [Fact]
+        public async Task Get_By_Id_With_Existent_Id() 
         {
             // Arrange
             var mockRepo = new Mock<ICategoryRepo>();
-            var expectedCategory = Category.Create("categoryOne", "DescriptionOne");
 
-            Guid categoryId = expectedCategory.Value!.Id;
+            var name = "name";
+            var expected = new Category(name);
 
-            mockRepo.Setup(repo => repo.GetByIdAsync(categoryId)).ReturnsAsync(expectedCategory.Value);
+            mockRepo.Setup(repo => repo.GetByIdAsync(expected.Id)).ReturnsAsync(expected);
 
             var service = new CategoryService(mockRepo.Object);
 
             // Act
-            var result = await service.GetByIdAsync(categoryId);
+            var result = await service.GetByIdAsync(expected.Id);
 
             // Assert
-            Assert.True(result.IsSuccess);
-            Assert.NotNull(result.Value);
-            Assert.Equal("categoryOne", result.Value.Name);
-            Assert.Empty(result.Errors);
+            Assert.NotNull(result);
+            Assert.IsType<DTCategory>(result);
+            Assert.Equal(expected.Id, result.Id);
+            Assert.Equal(name, result.Name);
+            Assert.Equal(expected.Created, result.Created);
         }
 
         [Fact]
-        public async Task GetById_IfNotExists_ReturnFailure()
+        public async Task Get_By_Id_With_Non_Existent_Id()
         {
             // Arrange
             var mockRepo = new Mock<ICategoryRepo>();
@@ -45,43 +47,17 @@ namespace EventosUy.Tests.Application
             var result = await service.GetByIdAsync(noExistentCategory);
 
             // Assert
-            Assert.True(result.IsFailure);
-            Assert.Null(result.Value);
-            Assert.NotEmpty(result.Errors);
-            Assert.Equal("Category not Found.", result.Errors[0]);
+            Assert.Null(result);
         }
 
         [Fact]
-        public async Task GetById_WithEmptyGuid_ReturnFailure()
+        public async Task Get_All_When_Exists() 
         {
             // Arrange
             var mockRepo = new Mock<ICategoryRepo>();
 
-            mockRepo.Setup(repo => repo.GetByIdAsync(Guid.Empty)).ReturnsAsync((Category?)null);
-
-            var service = new CategoryService(mockRepo.Object);
-
-            // Act
-            var result = await service.GetByIdAsync(Guid.Empty);
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Null(result.Value);
-            Assert.NotEmpty(result.Errors);
-            Assert.Equal("Category can not be empty.", result.Errors[0]);
-
-            // Verify
-            mockRepo.Verify(repo => repo.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task GetAll_WhenExists_ReturnSuccess() 
-        {
-            // Arrange
-            var mockRepo = new Mock<ICategoryRepo>();
-
-            var cat1 = Category.Create("Cat1", "Descr1").Value!;
-            var cat2 = Category.Create("Cat2", "Descr2").Value!;
+            var cat1 = new Category("Cat1");
+            var cat2 = new Category("Cat2");
 
             mockRepo.Setup(repo => repo.GetAllAsync()).ReturnsAsync([cat1, cat2]);
 
@@ -91,25 +67,14 @@ namespace EventosUy.Tests.Application
             var result = await service.GetAllAsync();
 
             // Assert
-            Assert.True(result.IsSuccess);
-            Assert.Equal(2, result.Value!.Count);
-
-            // Verify
-            var card1 = result.Value[0];
-            Assert.Equal(cat1.Id, card1.Id);
-            Assert.Equal("Cat1", card1.Name);
-            Assert.Equal("Descr1", card1.Description);
-            Assert.Equal(cat1.Created, card1.Creation);
-
-            var card2 = result.Value[1];
-            Assert.Equal(cat2.Id, card2.Id);
-            Assert.Equal("Cat2", card2.Name);
-            Assert.Equal("Descr2", card2.Description);
-            Assert.Equal(cat2.Created, card2.Creation);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count());
+            Assert.Contains(cat1.Name, result);
+            Assert.Contains(cat1.Name, result);
         }
 
         [Fact]
-        public async Task GetAll_WhenEmpty_ReturnSuccess() 
+        public async Task Get_All_When_Empty() 
         {
             // Arrange
             var mockRepo = new Mock<ICategoryRepo>();
@@ -122,57 +87,143 @@ namespace EventosUy.Tests.Application
             var result = await service.GetAllAsync();
 
             // Assert
-            Assert.True(result.IsSuccess);
-            Assert.NotNull(result.Value);
-            Assert.Empty(result.Value);
+            Assert.Empty(result);
         }
 
         [Fact]
-        public async Task Create_ReturnSuccess() 
+        public async Task Exists_Async_When_All_Names_Exists() 
         {
             // Arrange
             var mockRepo = new Mock<ICategoryRepo>();
+            var names = new[] { "cat1", "cat2", "cat3" };
 
-            mockRepo.Setup(repo => repo.ExistsAsync("NewCategory")).ReturnsAsync(false);
-
-            Category? capturedCategory = null;
-            mockRepo.Setup(repo => repo.AddAsync(It.IsAny<Category>())).Callback<Category>(c => capturedCategory = c).Returns(Task.CompletedTask);
+            mockRepo.Setup(repo => repo.ExistsAsync(It.IsAny<string>())).ReturnsAsync(true);
 
             var service = new CategoryService(mockRepo.Object);
 
             // Act
-            var result = await service.CreateAsync("NewCategory", "Description");
+            var result = await service.ExistsAsync(names);
 
             // Assert
-            Assert.True(result.IsSuccess);
-            Assert.NotEqual(Guid.Empty, result.Value);
-            Assert.Equal(capturedCategory!.Id, result.Value);
+            Assert.True(result);
 
             // Verify
-            mockRepo.Verify(repo => repo.AddAsync(It.Is<Category>(c => "NewCategory".Equals(c.Name) && "Description".Equals(c.Description))), Times.Once);
+            mockRepo.Verify(repo => repo.ExistsAsync(It.IsAny<string>()), Times.Exactly(3));
         }
 
         [Fact]
-        public async Task Create_WithExistingName_ReturnFailure() 
+        public async Task Exists_Async_When_Not_All_Names_Exists()
         {
             // Arrange
             var mockRepo = new Mock<ICategoryRepo>();
+            var names = new[] { "cat1", "cat2", "cat3" };
 
-            mockRepo.Setup(repo => repo.ExistsAsync("ExistingCategory")).ReturnsAsync(true);
+            mockRepo.Setup(repo => repo.ExistsAsync("cat1")).ReturnsAsync(true);
+            mockRepo.Setup(repo => repo.ExistsAsync("cat2")).ReturnsAsync(false);
+            mockRepo.Setup(repo => repo.ExistsAsync("cat3")).ReturnsAsync(true);
 
             var service = new CategoryService(mockRepo.Object);
 
             // Act
-            var result = await service.CreateAsync("ExistingCategory", "Description");
+            var result = await service.ExistsAsync(names);
 
             // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal(Guid.Empty, result.Value);
-            Assert.NotEmpty(result.Errors);
-            Assert.Equal("Category already exist.", result.Errors[0]);
+            Assert.False(result);
+
+            // Verify
+            mockRepo.Verify(repo => repo.ExistsAsync(It.IsAny<string>()), Times.Exactly(2));
+            mockRepo.Verify(repo => repo.ExistsAsync("cat3"), Times.Never);
+        }
+
+        [Fact]
+        public async Task Create_With_valid_data() 
+        {
+            // Arrange
+            var mockRepo = new Mock<ICategoryRepo>();
+            var name = "name";
+
+            mockRepo.Setup(repo => repo.ExistsAsync(name)).ReturnsAsync(false);
+            mockRepo.Setup(repo => repo.AddAsync(It.IsAny<Category>())).Returns(Task.CompletedTask);
+
+            var service = new CategoryService(mockRepo.Object);
+
+            // Act
+            var (result, validation) = await service.CreateAsync(name);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(validation.IsValid);
+            Assert.NotEqual(Guid.Empty, result.Id);
+            Assert.Equal(name, result.Name);
+
+            // Verify
+            mockRepo.Verify(repo => repo.AddAsync(It.Is<Category>(c => c.Name == name )), Times.Once);
+        }
+
+        [Fact]
+        public async Task Create_With_Existing_Name() 
+        {
+            // Arrange
+            var mockRepo = new Mock<ICategoryRepo>();
+            var name = "name";
+
+            mockRepo.Setup(repo => repo.ExistsAsync(name)).ReturnsAsync(true);
+
+            var service = new CategoryService(mockRepo.Object);
+
+            // Act
+            var (result, validation) = await service.CreateAsync(name);
+
+            // Assert
+            Assert.Null(result);
+            Assert.False(validation.IsValid);
+            Assert.Single(validation.Errors);
+            Assert.Equal("Name", validation.Errors[0].PropertyName);
+            Assert.Contains("Name is already in use.", validation.Errors[0].ErrorMessage);
 
             // Verify
             mockRepo.Verify(repo => repo.AddAsync(It.IsAny<Category>()), Times.Never);
-        }*/
+        }
+
+        [Fact]
+        public async Task Delete_With_Existent_Id()
+        {
+            // Arrange
+            var mockRepo = new Mock<ICategoryRepo>();
+            var name = "name";
+            var category = new Category(name);
+
+            mockRepo.Setup(repo => repo.GetByIdAsync(category.Id)).ReturnsAsync(category);
+
+            var service = new CategoryService(mockRepo.Object);
+
+            // Act
+            var result = await service.DeleteAsync(category.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(category.Id, result.Id);
+            Assert.Equal(category.Name, result.Name);
+            Assert.Equal(category.Created, result.Created);
+            Assert.False(category.Active);
+        }
+
+        [Fact]
+        public async Task Delete_With_Non_Existent_Id() 
+        {
+            // Arrange
+            var mockRepo = new Mock<ICategoryRepo>();
+            var id = Guid.NewGuid();
+
+            mockRepo.Setup(repo => repo.GetByIdAsync(id)).ReturnsAsync((Category?)null);
+
+            var service = new CategoryService(mockRepo.Object);
+
+            // Act
+            var result = await service.DeleteAsync(id);
+
+            // Assert
+            Assert.Null(result);
+        }
     }
 }
