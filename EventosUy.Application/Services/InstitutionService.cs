@@ -140,7 +140,7 @@ namespace EventosUy.Application.Services
             {
                 validationResult.Errors.Add
                     (
-                        new ValidationFailure("id", "Institution not found.")
+                        new ValidationFailure("Id", "Institution not found.")
                     );
 
                 return (null, validationResult);
