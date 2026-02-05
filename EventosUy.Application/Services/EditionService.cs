@@ -14,13 +14,11 @@ namespace EventosUy.Application.Services
     {
         private readonly IEditionRepo _repo;
         private readonly IEventService _eventService;
-        private readonly IInstitutionService _institutionService;
 
-        public EditionService(IEditionRepo editionRepo, IEventService eventService, IInstitutionService institutionService)
+        public EditionService(IEditionRepo editionRepo, IEventService eventService)
         {
             _repo = editionRepo;
             _eventService = eventService;
-            _institutionService = institutionService;
         }
 
         public async Task<(DTEdition? dt, ValidationResult validation)> CreateAsync(DTInsertEdition dtInsert)
@@ -202,14 +200,11 @@ namespace EventosUy.Application.Services
                 return (null, validationResult);
             }
 
-            var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.Event);
-            
-
             if (!edition.Name.Equals(dtUpdate.Name, StringComparison.OrdinalIgnoreCase) && await _repo.ExistsByNameAsync(dtUpdate.Name))
             {
                 validationResult.Errors.Add
                     (
-                        new ValidationFailure("Name", "Event already in use.")
+                        new ValidationFailure("Name", "Name already in use.")
                     );
             }
 
@@ -246,6 +241,8 @@ namespace EventosUy.Application.Services
             edition.Number = dtUpdate.Number;
             edition.Floor = dtUpdate.Floor;
 
+            var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.Event);
+            
             var dt = new DTEdition
                 (
                 id: edition.Id,
