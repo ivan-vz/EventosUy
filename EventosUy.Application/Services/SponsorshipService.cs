@@ -63,6 +63,8 @@ namespace EventosUy.Application.Services
                     );
             }
 
+            if (!validationResult.IsValid) { return (null, validationResult); }
+
             if (dtInsert.Amount < ranges.min)
             {
                 validationResult.Errors.Add
