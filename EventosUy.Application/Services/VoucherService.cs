@@ -33,8 +33,6 @@ namespace EventosUy.Application.Services
                     (
                         new ValidationFailure("Sponsorship", "Sponsorship not found.")
                     );
-
-                return (null, validationResult);
             }
 
             if (await _repo.ExistsAsync(dtInsert.Code)) 
@@ -44,6 +42,8 @@ namespace EventosUy.Application.Services
                             new ValidationFailure("Code", "Code already in use.")
                         );
             }
+
+            if (!validationResult.IsValid) { return (null, validationResult); }
 
             int quota = (int)Math.Floor((0.2m * dtSponsor.Amount) / dtSponsor.RegisterType.Price);
 
@@ -59,7 +59,7 @@ namespace EventosUy.Application.Services
                     sponsorId: dtSponsor.Id
                 );
 
-            // TODO: En el apartado de consulta de Sponsor tiene que haber un voton que mande el create al VoucherController con discount = 100 y automatic = false 
+            // TODO: En el apartado de consulta de Sponsor tiene que haber un boton que mande el create al VoucherController con discount = 100 y automatic = false 
 
             await _repo.AddAsync(voucher);
             
@@ -91,8 +91,6 @@ namespace EventosUy.Application.Services
                     (
                         new ValidationFailure("Register Type", "Register Type not found.")
                     );
-
-                return (null, validationResult);
             }
 
             if (await _repo.ExistsAsync(dtInsert.Code))
@@ -102,6 +100,8 @@ namespace EventosUy.Application.Services
                             new ValidationFailure("Code", "Code already in use.")
                         );
             }
+
+            if (!validationResult.IsValid) { return (null, validationResult); }
 
             var voucher = new Voucher
                 (
@@ -141,6 +141,7 @@ namespace EventosUy.Application.Services
             if (voucher is null) { return (null, null); }
 
             var (dtSponsor, sponsorCard) = voucher.Sponsor is Guid sponsorId ? await _sponsorshipService.GetByIdAsync(sponsorId) : (null, null);
+            var (dtRType, rtCard) = await _registerTypeService.GetByIdAsync(voucher.RegisterType);
 
             var dt = new DTVoucher
                 (
@@ -151,8 +152,8 @@ namespace EventosUy.Application.Services
                 used: voucher.Used,
                 created: voucher.Created,
                 state: voucher.State,
-                editionCard: dtSponsor!.Edition,
-                registerTypeCard: dtSponsor!.RegisterType,
+                editionCard: dtRType.Edition,
+                registerTypeCard: rtCard,
                 sponsorCard: sponsorCard
                 );
 
@@ -168,6 +169,7 @@ namespace EventosUy.Application.Services
             if (voucher is null) { return (null, null); }
 
             var (dtSponsor, sponsorCard) = voucher.Sponsor is Guid sponsorId ? await _sponsorshipService.GetByIdAsync(sponsorId) : (null, null);
+            var (dtRType, rtCard) = await _registerTypeService.GetByIdAsync(voucher.RegisterType);
 
             var dt = new DTVoucher
                 (
@@ -178,8 +180,8 @@ namespace EventosUy.Application.Services
                 used: voucher.Used,
                 created: voucher.Created,
                 state: voucher.State,
-                editionCard: dtSponsor!.Edition,
-                registerTypeCard: dtSponsor!.RegisterType,
+                editionCard: dtRType.Edition,
+                registerTypeCard: rtCard,
                 sponsorCard: sponsorCard
                 );
 
