@@ -19,7 +19,7 @@ namespace EventosUy.Infrastructure.Repositories
 
         public Task<List<Register>> GetAllByEditionAsync(Guid editionId) { return Task.FromResult(_registers.Where(register => register.Edition == editionId).ToList()); }
 
-        public Task<List<Register>> GetAllByPersonAsync(Guid personId) { return Task.FromResult(_registers.Where(register => register.Client == personId).ToList()); }
+        public Task<List<Register>> GetAllByClientAsync(Guid clientId) { return Task.FromResult(_registers.Where(register => register.Client == clientId).ToList()); }
 
         public Task<Register?> GetByIdAsync(Guid id) { return Task.FromResult(_registers.SingleOrDefault(register => register.Id == id)); }
 

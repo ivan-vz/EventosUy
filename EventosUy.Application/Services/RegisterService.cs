@@ -59,7 +59,7 @@ namespace EventosUy.Application.Services
             {
                 validationResult.Errors.Add
                     (
-                        new ValidationFailure("voucher", "voucher not found.")
+                        new ValidationFailure("Voucher", "voucher not found.")
                     );
             }
 
@@ -230,7 +230,7 @@ namespace EventosUy.Application.Services
 
         public async Task<IEnumerable<RegisterCardByClient>> GetAllByClientAsync(Guid id)
         {
-            var registers = await _repo.GetAllByPersonAsync(id);
+            var registers = await _repo.GetAllByClientAsync(id);
 
             List<RegisterCardByClient> cards = [];
             foreach (Register register in registers)
