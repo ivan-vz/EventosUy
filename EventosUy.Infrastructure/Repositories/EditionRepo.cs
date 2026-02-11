@@ -31,7 +31,7 @@ namespace EventosUy.Infrastructure.Repositories
                 && edition.Street.Equals(street, StringComparison.OrdinalIgnoreCase)
                 && edition.Number.Equals(number, StringComparison.OrdinalIgnoreCase)
                 && edition.Floor == floor
-                && edition.To <= from ) );
+                && edition.To >= from ) );
         }
 
         public Task<List<Edition>> GetAllAsync() { return Task.FromResult( _editions.Where(edition => edition.State is EditionState.ONGOING).ToList() ); }

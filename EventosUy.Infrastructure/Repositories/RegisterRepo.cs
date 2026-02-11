@@ -15,7 +15,7 @@ namespace EventosUy.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
-        public Task<bool> ExistsAsync(Guid personId, Guid editionId) { return Task.FromResult(_registers.Any(register => register.Client == personId && register.Edition == editionId)); }
+        public Task<bool> ExistsAsync(Guid clientId, Guid editionId) { return Task.FromResult(_registers.Any(register => register.Client == clientId && register.Edition == editionId)); }
 
         public Task<List<Register>> GetAllByEditionAsync(Guid editionId) { return Task.FromResult(_registers.Where(register => register.Edition == editionId).ToList()); }
 
