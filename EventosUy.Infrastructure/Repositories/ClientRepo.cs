@@ -1,5 +1,7 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
+using EventosUy.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventosUy.Infrastructure.Repositories
 {
@@ -7,31 +9,32 @@ namespace EventosUy.Infrastructure.Repositories
     {
         private readonly HashSet<Client> _clients;
 
-        public ClientRepo() { _clients = []; }
+        private ApplicationDbContext _context;
 
-        public Task AddAsync(Client client)
-        {
-            _clients.Add(client);
-            return Task.CompletedTask;
-        }
-
-        public Task<bool> ExistsByEmailAsync(string email) 
+        public ClientRepo(ApplicationDbContext context) 
         { 
-            return Task.FromResult(_clients.Any(client => client.Active && client.Email.Equals(email, StringComparison.OrdinalIgnoreCase))); 
+            _clients = []; 
+            _context = context;
         }
 
-        public Task<bool> ExistsByNicknameAsync(string nickname) { return Task.FromResult(_clients.Any(client => client.Active && client.Nickname == nickname)); }
+        public async Task AddAsync(Client client) => await _context.Clients.AddAsync(client);
 
-        public Task<bool> ExistsByCiAsync(string ci) { return Task.FromResult(_clients.Any(client => client.Active && client.Ci == ci)); }
+        public async Task<bool> ExistsByEmailAsync(string email) => await _context.Clients.AnyAsync(x => x.Email == email);
 
-        public Task<List<Client>> GetAllAsync() { return Task.FromResult(_clients.Where(client => client.Active).ToList()); }
+        public async Task<bool> ExistsByNicknameAsync(string nickname) => await _context.Clients.AnyAsync(x => x.Nickname == nickname);
 
-        public Task<Client?> GetByIdAsync(Guid id) { return Task.FromResult(_clients.SingleOrDefault(client => client.Active && client.Id == id)); }
+        public async Task<bool> ExistsByCiAsync(string ci) => await _context.Clients.AnyAsync(x => x.Ci == ci);
 
-        public Task<bool> RemoveAsync(Guid id)
+        public async Task<IEnumerable<Client>> GetAllAsync() => await _context.Clients.ToListAsync();
+
+        public async Task<Client?> GetByIdAsync(Guid id) => await _context.Clients.FirstOrDefaultAsync(x => x.Id == id);
+
+        public void Update(Client client) 
         {
-            int result = _clients.RemoveWhere(client => client.Id == id);
-            return Task.FromResult(result > 0);
+            _context.Clients.Attach(client);
+            _context.Clients.Entry(client).State = EntityState.Modified;
         }
+
+        public async Task Save() => await _context.SaveChangesAsync();
     }
 }

@@ -78,7 +78,6 @@ namespace EventosUy.Application.Services
 
             if (category is null) { return null; }
 
-            category.Name = $"{category.Name}_deleted_{Guid.NewGuid()}";
             category.Active = false;
 
             var dt = new DTCategory(id: category.Id, name: category.Name, created: category.Created);

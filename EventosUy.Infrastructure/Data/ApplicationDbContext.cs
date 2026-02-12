@@ -24,6 +24,11 @@ namespace EventosUy.Infrastructure.Data
             modelBuilder.HasPostgresExtension("citext");
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+            modelBuilder.Entity<Client>().HasQueryFilter(x => x.Active);
+
+            modelBuilder.Entity<Institution>().HasQueryFilter(x => x.Active);
+
         }
     }
 }

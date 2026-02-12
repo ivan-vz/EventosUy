@@ -57,6 +57,7 @@ namespace EventosUy.Application.Services
             );
             
             await _repo.AddAsync(client);
+            await _repo.Save();
 
             var dtClient = new DTClient(
                 id: client.Id,
@@ -76,7 +77,7 @@ namespace EventosUy.Application.Services
 
         public async Task<IEnumerable<UserCard>> GetAllAsync()
         {
-            List<Client> clients = await _repo.GetAllAsync();
+            var clients = await _repo.GetAllAsync();
             List<UserCard> cards = [.. clients.Select(client => new UserCard(client.Id, client.Nickname, client.Email) )];
 
             return cards;
@@ -145,6 +146,9 @@ namespace EventosUy.Application.Services
 
             if (!PasswordHasher.Verify(dtUpdate.Password, client.Password)) { client.Password = PasswordHasher.Hash(dtUpdate.Password); }
 
+            _repo.Update(client);
+            await _repo.Save();
+
             var dt = new DTClient(
                 id: client.Id,
                 nickname: client.Nickname,
@@ -168,6 +172,9 @@ namespace EventosUy.Application.Services
             if (client == null) { return null; }
 
             client.Active = false;
+
+            _repo.Update(client);
+            await _repo.Save();
 
             var dt = new DTClient(
                 id: client.Id,
