@@ -373,8 +373,8 @@ namespace EventosUy.Tests.Application
                 );
 
             mockRepo.Setup(repo => repo.GetByIdAsync(sponsor.Id)).ReturnsAsync(sponsor);
-            mockInstitutionService.Setup(s => s.GetByIdAsync(sponsor.Institution)).ReturnsAsync((dtIns, cardIns));
-            mockRegisterTypeService.Setup(s => s.GetByIdAsync(sponsor.RegisterType)).ReturnsAsync((dtRegType, cardRT));
+            mockInstitutionService.Setup(s => s.GetByIdAsync(sponsor.InstitutionId)).ReturnsAsync((dtIns, cardIns));
+            mockRegisterTypeService.Setup(s => s.GetByIdAsync(sponsor.RegisterTypeId)).ReturnsAsync((dtRegType, cardRT));
 
             var service = new SponsorshipService(mockRepo.Object, mockInstitutionService.Object, mockRegisterTypeService.Object);
 
@@ -472,8 +472,8 @@ namespace EventosUy.Tests.Application
                 );
 
             mockRepo.Setup(repo => repo.GetByIdAsync(sponsor.Id)).ReturnsAsync(sponsor);
-            mockInstitutionService.Setup(s => s.GetByIdAsync(sponsor.Institution)).ReturnsAsync((dtIns, cardIns));
-            mockRegisterTypeService.Setup(s => s.GetByIdAsync(sponsor.RegisterType)).ReturnsAsync((dtRegType, cardRT));
+            mockInstitutionService.Setup(s => s.GetByIdAsync(sponsor.InstitutionId)).ReturnsAsync((dtIns, cardIns));
+            mockRegisterTypeService.Setup(s => s.GetByIdAsync(sponsor.RegisterTypeId)).ReturnsAsync((dtRegType, cardRT));
 
             var service = new SponsorshipService(mockRepo.Object, mockInstitutionService.Object, mockRegisterTypeService.Object);
 

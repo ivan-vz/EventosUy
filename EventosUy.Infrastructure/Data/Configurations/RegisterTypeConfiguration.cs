@@ -10,7 +10,7 @@ namespace EventosUy.Infrastructure.Data.Configurations
         {
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Name).HasMaxLength(100).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.Name).HasColumnType("citext").HasMaxLength(100).IsRequired();
 
             builder.Property(x => x.Description).IsRequired();
 
@@ -24,12 +24,12 @@ namespace EventosUy.Infrastructure.Data.Configurations
 
             builder.Property(x => x.Active).IsRequired();
 
-            builder.Property(x => x.Edition).IsRequired();
+            builder.Property(x => x.EditionId).IsRequired();
 
-            builder.HasOne<Edition>().WithMany().HasForeignKey(x => x.Edition).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Edition>().WithMany().HasForeignKey(x => x.EditionId).OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(x => x.Name).IsUnique().HasFilter("\"Active\" = true");
-            builder.HasIndex(x => x.Edition).IsUnique().HasFilter("\"Active\" = true");
+            builder.HasIndex(x => x.EditionId).IsUnique().HasFilter("\"Active\" = true");
         }
     }
 }

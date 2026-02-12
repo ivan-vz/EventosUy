@@ -8,7 +8,17 @@ namespace EventosUy.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Client> builder) 
         {
-            builder.ToTable("Clients");
+            builder.HasKey(x => x.Id);
+
+            builder.Property(x => x.Nickname).HasColumnType("citext").HasMaxLength(100).IsRequired();
+
+            builder.Property(x => x.Password).HasMaxLength(500).IsRequired();
+
+            builder.Property(x => x.Email).HasColumnType("citext").HasMaxLength(255).IsRequired();
+
+            builder.Property(x => x.Created).IsRequired();
+
+            builder.Property(x => x.Active).IsRequired();
 
             builder.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
 
@@ -22,6 +32,8 @@ namespace EventosUy.Infrastructure.Data.Configurations
 
             builder.Property(x => x.Ci).HasMaxLength(8).IsRequired();
 
+            builder.HasIndex(x => x.Nickname).IsUnique().HasFilter("\"Active\" = true");
+            builder.HasIndex(x => x.Email).IsUnique().HasFilter("\"Active\" = true");
             builder.HasIndex(x => x.Ci).IsUnique().HasFilter("\"Active\" = true");
         }
     }

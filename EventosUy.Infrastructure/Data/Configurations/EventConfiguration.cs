@@ -10,9 +10,9 @@ namespace EventosUy.Infrastructure.Data.Configurations
         {
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Name).HasMaxLength(100).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.Name).HasColumnType("citext").HasMaxLength(100).IsRequired();
 
-            builder.Property(x => x.Initials).HasMaxLength(10).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.Initials).HasColumnType("citext").HasMaxLength(10).IsRequired();
 
             builder.Property(x => x.Description).IsRequired();
 
@@ -20,13 +20,13 @@ namespace EventosUy.Infrastructure.Data.Configurations
 
             builder.Property(x => x.Categories).HasColumnType("text[]").IsRequired();
 
-            builder.Property(x => x.Institution).IsRequired();
+            builder.Property(x => x.InstitutionId).IsRequired();
 
-            builder.HasOne<Institution>().WithMany().HasForeignKey(x => x.Institution).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Institution>().WithMany().HasForeignKey(x => x.InstitutionId).OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(x => x.Active).IsRequired();
 
-            builder.HasIndex(x => x.Institution);
+            builder.HasIndex(x => x.InstitutionId);
             builder.HasIndex(x => x.Active);
             builder.HasIndex(x => x.Initials).IsUnique().HasFilter("\"Active\" = true");
             builder.HasIndex(x => x.Name).IsUnique().HasFilter("\"Active\" = true");

@@ -557,7 +557,7 @@ namespace EventosUy.Tests.Application
                     );
 
             mockRepo.Setup(repo => repo.GetByIdAsync(edition.Id)).ReturnsAsync(edition);
-            mockEventService.Setup(s => s.GetByIdAsync(edition.Event)).ReturnsAsync((dtEvent, cardEvent));
+            mockEventService.Setup(s => s.GetByIdAsync(edition.EventId)).ReturnsAsync((dtEvent, cardEvent));
 
             var service = new EditionService(mockRepo.Object, mockEventService.Object);
 

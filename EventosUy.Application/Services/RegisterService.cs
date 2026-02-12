@@ -220,7 +220,7 @@ namespace EventosUy.Application.Services
             List<RegisterCardByEdition> cards = [];
             foreach (Register register in registers) 
             {
-                var card = (await _clientService.GetByIdAsync(register.Client)).card;
+                var card = (await _clientService.GetByIdAsync(register.ClientId)).card;
 
                 cards.Add( new RegisterCardByEdition(register.Id, card!.Nickname, register.Created) );
             }
@@ -235,7 +235,7 @@ namespace EventosUy.Application.Services
             List<RegisterCardByClient> cards = [];
             foreach (Register register in registers)
             {
-                var card = (await _editionService.GetByIdAsync(register.Edition)).card;
+                var card = (await _editionService.GetByIdAsync(register.EditionId)).card;
 
                 cards.Add( new RegisterCardByClient(register.Id, card!.Name, register.Created) );
             }

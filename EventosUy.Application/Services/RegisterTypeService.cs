@@ -82,7 +82,7 @@ namespace EventosUy.Application.Services
 
             if (registerType is null) { return (null, null); }
 
-            var editionCard = (await _editionService.GetByIdAsync(registerType.Edition)).card;
+            var editionCard = (await _editionService.GetByIdAsync(registerType.EditionId)).card;
 
             var dt = new DTRegisterType(
                     id: registerType.Id,
@@ -109,7 +109,7 @@ namespace EventosUy.Application.Services
 
             registerType.Active = false;
 
-            var editionCard = (await _editionService.GetByIdAsync(registerType.Edition)).card;
+            var editionCard = (await _editionService.GetByIdAsync(registerType.EditionId)).card;
 
             var dt = new DTRegisterType(
                     id: registerType.Id,

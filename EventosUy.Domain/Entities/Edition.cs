@@ -28,7 +28,7 @@ namespace EventosUy.Domain.Entities
         public string Number { get; set; } = number;
         public int Floor { get; set; } = floor;
         public EditionState State { get; set; } = EditionState.PENDING;
-        public Guid Event { get; init; } = eventId;
-        public Guid Institution { get; init; } = institutionId;
+        public Guid EventId { get; init; } = eventId;
+        public Guid InstitutionId { get; init; } = institutionId;
     }
 }

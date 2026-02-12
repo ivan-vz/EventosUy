@@ -5,9 +5,9 @@
         public Guid Id { get; init; } = Guid.NewGuid();
         public DateTimeOffset Created { get; init; } = DateTimeOffset.UtcNow;
         public decimal Total { get; init; } = total;
-        public Guid Client { get; init; } = clientId;
-        public Guid Edition { get; init; } = editionId;
-        public Guid RegisterType { get; init; } = registerTypeId;
-        public Guid? Voucher { get; init; } = voucherId;
+        public Guid ClientId { get; init; } = clientId;
+        public Guid EditionId { get; init; } = editionId;
+        public Guid RegisterTypeId { get; init; } = registerTypeId;
+        public Guid? VoucherId { get; init; } = voucherId;
     }
 }

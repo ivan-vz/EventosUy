@@ -1,6 +1,8 @@
 using EventosUy.API;
 using EventosUy.Application;
 using EventosUy.Infrastructure;
+using EventosUy.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(); //Maneja todos los repositorios Internos
 builder.Services.AddApplication(); //Maneja todos los servicios internos
 builder.Services.AddController(); //Manjea todos los validadores
+
+// Entity Framework
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 builder.Services.AddControllers().AddJsonOptions(options => 
 {

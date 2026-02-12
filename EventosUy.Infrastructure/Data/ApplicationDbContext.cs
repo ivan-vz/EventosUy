@@ -7,7 +7,6 @@ namespace EventosUy.Infrastructure.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {}
 
-        public DbSet<User> Users { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<Institution> Institutions { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -17,5 +16,14 @@ namespace EventosUy.Infrastructure.Data
         public DbSet<Sponsorship> Sponsorships { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<Register> Registers { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            
+            modelBuilder.HasPostgresExtension("citext");
+
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        }
     }
 }

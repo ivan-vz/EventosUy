@@ -25,7 +25,7 @@ namespace EventosUy.Infrastructure.Repositories
 
         public Task<List<Event>> GetAllByInstitutionAsync(Guid institutionId) 
         { 
-            return Task.FromResult(_events.Where(ev => ev.Active && ev.Institution == institutionId).ToList()); 
+            return Task.FromResult(_events.Where(ev => ev.Active && ev.InstitutionId == institutionId).ToList()); 
         }
 
         public Task<Event?> GetByIdAsync(Guid id) { return Task.FromResult(_events.SingleOrDefault(ev => ev.Active && ev.Id == id)); }

@@ -22,7 +22,7 @@ namespace EventosUy.Infrastructure.Repositories
 
         public Task<List<RegisterType>> GetAllByEditionAsync(Guid editionId) 
         { 
-            return Task.FromResult(_registerTypes.Where(registerType => registerType.Active && registerType.Edition == editionId).ToList()); 
+            return Task.FromResult(_registerTypes.Where(registerType => registerType.Active && registerType.EditionId == editionId).ToList()); 
         }
 
         public Task<RegisterType?> GetByIdAsync(Guid id) { return Task.FromResult(_registerTypes.SingleOrDefault(registerType => registerType.Active && registerType.Id == id)); }

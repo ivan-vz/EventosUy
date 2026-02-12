@@ -205,7 +205,7 @@ namespace EventosUy.Application.Services
             if (institution == null) { return null; }
 
             institution.Active = false;
-
+            
             var dt = new DTInstitution
                 (
                     id: institution.Id,

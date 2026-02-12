@@ -10,7 +10,7 @@ namespace EventosUy.Infrastructure.Data.Configurations
         {
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Name).HasMaxLength(100).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.Name).HasColumnType("citext").HasMaxLength(100).IsRequired();
 
             builder.Property(x => x.Code).IsRequired();
 
@@ -26,17 +26,17 @@ namespace EventosUy.Infrastructure.Data.Configurations
 
             builder.Property(x => x.State).HasConversion<string>().IsRequired();
 
-            builder.Property(x => x.Edition).IsRequired();
+            builder.Property(x => x.EditionId).IsRequired();
 
-            builder.HasOne<Edition>().WithMany().HasForeignKey(x => x.Edition).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Edition>().WithMany().HasForeignKey(x => x.EditionId).OnDelete(DeleteBehavior.Restrict);
 
-            builder.Property(x => x.RegisterType).IsRequired();
+            builder.Property(x => x.RegisterTypeId).IsRequired();
 
-            builder.HasOne<RegisterType>().WithMany().HasForeignKey(x => x.RegisterType).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<RegisterType>().WithMany().HasForeignKey(x => x.RegisterTypeId).OnDelete(DeleteBehavior.Restrict);
 
-            builder.Property(x => x.Sponsor);
+            builder.Property(x => x.SponsorId);
 
-            builder.HasOne<Sponsorship>().WithMany().HasForeignKey(x => x.Sponsor).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Sponsorship>().WithMany().HasForeignKey(x => x.SponsorId).OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(x => x.Code).HasFilter("\"State\" = 'AVAILABLE'");
         }

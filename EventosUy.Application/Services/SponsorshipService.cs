@@ -95,9 +95,9 @@ namespace EventosUy.Application.Services
                 name: dtInsert.Name, 
                 amount: dtInsert.Amount, 
                 tier: dtInsert.Tier, 
-                edition: dtRegisterType!.Edition.Id, 
-                institution: dtInsert.Institution,
-                registerType: dtInsert.RegisterType
+                editionId: dtRegisterType!.Edition.Id, 
+                institutionId: dtInsert.Institution,
+                registerTypeId: dtInsert.RegisterType
                 );
 
             await _repo.AddAsync(sponsorship);
@@ -137,8 +137,8 @@ namespace EventosUy.Application.Services
             Sponsorship? sponsor = await _repo.GetByIdAsync(id);
             if (sponsor is null) { return (null, null); }
 
-            var userCard = (await _institutionService.GetByIdAsync(sponsor.Institution)).card;
-            var (dtRegisterType, registerTypeCard) = await _registerTypeService.GetByIdAsync(sponsor.RegisterType);
+            var userCard = (await _institutionService.GetByIdAsync(sponsor.InstitutionId)).card;
+            var (dtRegisterType, registerTypeCard) = await _registerTypeService.GetByIdAsync(sponsor.RegisterTypeId);
 
             var dt = new DTSponsorship(
                     id: sponsor.Id,
@@ -164,8 +164,8 @@ namespace EventosUy.Application.Services
 
             sponsor.Active = false;
 
-            var userCard = (await _institutionService.GetByIdAsync(sponsor.Institution)).card;
-            var (dtRegisterType, registerTypeCard) = await _registerTypeService.GetByIdAsync(sponsor.RegisterType);
+            var userCard = (await _institutionService.GetByIdAsync(sponsor.InstitutionId)).card;
+            var (dtRegisterType, registerTypeCard) = await _registerTypeService.GetByIdAsync(sponsor.RegisterTypeId);
 
             var dt = new DTSponsorship(
                     id: sponsor.Id,

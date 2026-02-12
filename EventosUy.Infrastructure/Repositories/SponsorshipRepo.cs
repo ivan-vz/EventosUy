@@ -15,11 +15,11 @@ namespace EventosUy.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
-        public Task<bool> ExistsAsync(Guid editionId, Guid institutionId) { return Task.FromResult(_sponsorships.Any(sponsor => sponsor.Edition == editionId && sponsor.Institution == institutionId)); }
+        public Task<bool> ExistsAsync(Guid editionId, Guid institutionId) { return Task.FromResult(_sponsorships.Any(sponsor => sponsor.EditionId == editionId && sponsor.InstitutionId == institutionId)); }
 
-        public Task<List<Sponsorship>> GetAllByEditionAsync(Guid editionId) { return Task.FromResult(_sponsorships.Where(sponsor => sponsor.Edition == editionId).ToList()); }
+        public Task<List<Sponsorship>> GetAllByEditionAsync(Guid editionId) { return Task.FromResult(_sponsorships.Where(sponsor => sponsor.EditionId == editionId).ToList()); }
 
-        public Task<List<Sponsorship>> GetAllByInstitutionAsync(Guid institutionId) { return Task.FromResult(_sponsorships.Where(sponsor => sponsor.Institution == institutionId).ToList()); }
+        public Task<List<Sponsorship>> GetAllByInstitutionAsync(Guid institutionId) { return Task.FromResult(_sponsorships.Where(sponsor => sponsor.InstitutionId == institutionId).ToList()); }
 
         public Task<Sponsorship?> GetByIdAsync(Guid id) { return Task.FromResult(_sponsorships.SingleOrDefault(sponsor => sponsor.Id == id)); }
 

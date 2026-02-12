@@ -14,27 +14,27 @@ namespace EventosUy.Infrastructure.Data.Configurations
 
             builder.Property(x => x.Created).IsRequired();
 
-            builder.Property(x => x.Client);
+            builder.Property(x => x.ClientId);
 
-            builder.HasOne<Client>().WithMany().HasForeignKey(x => x.Client).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Client>().WithMany().HasForeignKey(x => x.ClientId).OnDelete(DeleteBehavior.Restrict);
 
-            builder.Property(x => x.Edition).IsRequired();
+            builder.Property(x => x.EditionId).IsRequired();
 
-            builder.HasOne<Edition>().WithMany().HasForeignKey(x => x.Edition).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Edition>().WithMany().HasForeignKey(x => x.EditionId).OnDelete(DeleteBehavior.Restrict);
 
-            builder.Property(x => x.RegisterType).IsRequired();
+            builder.Property(x => x.RegisterTypeId).IsRequired();
 
-            builder.HasOne<RegisterType>().WithMany().HasForeignKey(x => x.RegisterType).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<RegisterType>().WithMany().HasForeignKey(x => x.RegisterTypeId).OnDelete(DeleteBehavior.Restrict);
 
-            builder.Property(x => x.Voucher);
+            builder.Property(x => x.VoucherId);
 
-            builder.HasOne<Voucher>().WithMany().HasForeignKey(x => x.Voucher).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Voucher>().WithMany().HasForeignKey(x => x.VoucherId).OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasIndex(x => new { x.Client, x.Edition });
+            builder.HasIndex(x => new { x.ClientId, x.EditionId });
 
-            builder.HasIndex(x => x.Client);
+            builder.HasIndex(x => x.ClientId);
 
-            builder.HasIndex(x => x.Edition);
+            builder.HasIndex(x => x.EditionId);
         }
     }
 }

@@ -137,7 +137,7 @@ namespace EventosUy.Application.Services
 
             if (edition is null || edition.State is not EditionState.ONGOING) { return (null, null); }
 
-            var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.Event);
+            var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.EventId);
 
             var dt = new DTEdition
                 (
@@ -241,7 +241,7 @@ namespace EventosUy.Application.Services
             edition.Number = dtUpdate.Number;
             edition.Floor = dtUpdate.Floor;
 
-            var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.Event);
+            var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.EventId);
             
             var dt = new DTEdition
                 (
@@ -272,7 +272,7 @@ namespace EventosUy.Application.Services
 
             edition.State = EditionState.CANCELLED;
 
-            var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.Event);
+            var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.EventId);
 
             var dt = new DTEdition
                 (

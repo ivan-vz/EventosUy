@@ -215,7 +215,7 @@ namespace EventosUy.Tests.Application
                 );
 
             mockRepo.Setup(repo => repo.GetByIdAsync(registerType.Id)).ReturnsAsync(registerType);
-            mockEditionService.Setup(s => s.GetByIdAsync(registerType.Edition)).ReturnsAsync((dtEdition, cardEdition));
+            mockEditionService.Setup(s => s.GetByIdAsync(registerType.EditionId)).ReturnsAsync((dtEdition, cardEdition));
 
             var service = new RegisterTypeService(mockRepo.Object, mockEditionService.Object);
 
@@ -297,7 +297,7 @@ namespace EventosUy.Tests.Application
                 );
 
             mockRepo.Setup(repo => repo.GetByIdAsync(registerType.Id)).ReturnsAsync(registerType);
-            mockEditionService.Setup(s => s.GetByIdAsync(registerType.Edition)).ReturnsAsync((dtEdition, cardEdition));
+            mockEditionService.Setup(s => s.GetByIdAsync(registerType.EditionId)).ReturnsAsync((dtEdition, cardEdition));
 
             var service = new RegisterTypeService(mockRepo.Object, mockEditionService.Object);
 

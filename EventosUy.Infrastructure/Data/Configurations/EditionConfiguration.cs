@@ -10,9 +10,9 @@ namespace EventosUy.Infrastructure.Data.Configurations
         {
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Name).HasMaxLength(100).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.Name).HasColumnType("citext").HasMaxLength(100).IsRequired();
 
-            builder.Property(x => x.Initials).HasMaxLength(10).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.Initials).HasColumnType("citext").HasMaxLength(10).IsRequired();
 
             builder.Property(x => x.From).IsRequired();
 
@@ -20,11 +20,11 @@ namespace EventosUy.Infrastructure.Data.Configurations
 
             builder.Property(x => x.Created).IsRequired();
 
-            builder.Property(x => x.Country).HasMaxLength(100).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.Country).HasColumnType("citext").HasMaxLength(100).IsRequired();
 
-            builder.Property(x => x.City).HasMaxLength(100).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.City).HasColumnType("citext").HasMaxLength(100).IsRequired();
 
-            builder.Property(x => x.Street).HasMaxLength(200).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.Street).HasColumnType("citext").HasMaxLength(200).IsRequired();
 
             builder.Property(x => x.Number).HasMaxLength(5).IsRequired();
 
@@ -32,20 +32,20 @@ namespace EventosUy.Infrastructure.Data.Configurations
 
             builder.Property(x => x.State).HasConversion<string>().IsRequired();
             
-            builder.Property(x => x.Event).IsRequired();
+            builder.Property(x => x.EventId).IsRequired();
 
-            builder.HasOne<Event>().WithMany().HasForeignKey(x => x.Event).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Event>().WithMany().HasForeignKey(x => x.EventId).OnDelete(DeleteBehavior.Restrict);
 
-            builder.Property(x => x.Institution).IsRequired();
+            builder.Property(x => x.InstitutionId).IsRequired();
 
-            builder.HasOne<Institution>().WithMany().HasForeignKey(x => x.Institution).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne<Institution>().WithMany().HasForeignKey(x => x.InstitutionId).OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasIndex(x => x.Institution);
-            builder.HasIndex(x => x.Event);
+            builder.HasIndex(x => x.InstitutionId);
+            builder.HasIndex(x => x.EventId);
             builder.HasIndex(x => x.State);
 
-            builder.HasIndex(x => new { x.Institution, x.State });
-            builder.HasIndex(x => new { x.Event, x.State });
+            builder.HasIndex(x => new { x.InstitutionId, x.State });
+            builder.HasIndex(x => new { x.EventId, x.State });
 
             builder.HasIndex(x => x.Initials).IsUnique().HasFilter("\"State\" = 'CANCELLED'");
             builder.HasIndex(x => x.Name).IsUnique().HasFilter("\"State\" = 'CANCELLED'");

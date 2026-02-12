@@ -65,8 +65,8 @@ namespace EventosUy.Application.Services
             var eventInstance = new Event(
                 name: dtInsert.Name, 
                 initials: dtInsert.Initials, 
-                description: dtInsert.Description, 
-                institution: dtInsert.Institution,
+                description: dtInsert.Description,
+                institutionId: dtInsert.Institution,
                 categories: categories
                 );
 
@@ -99,7 +99,7 @@ namespace EventosUy.Application.Services
 
             if (eventInstance is null) { return (null, null); }
 
-            var userCard = (await _institutionService.GetByIdAsync(eventInstance.Institution)).card;
+            var userCard = (await _institutionService.GetByIdAsync(eventInstance.InstitutionId)).card;
             
             var dt = new DTEvent(
                     id: eventInstance.Id,
@@ -164,7 +164,7 @@ namespace EventosUy.Application.Services
             eventInstance.Description = dtUpdate.Description;
             eventInstance.Categories = categories;
 
-            var userCard = (await _institutionService.GetByIdAsync(eventInstance.Institution)).card;
+            var userCard = (await _institutionService.GetByIdAsync(eventInstance.InstitutionId)).card;
             
             var dt = new DTEvent(
                     id: eventInstance.Id,
@@ -187,7 +187,7 @@ namespace EventosUy.Application.Services
 
             eventInstance.Active = false;
 
-            var userCard = (await _institutionService.GetByIdAsync(eventInstance.Institution)).card;
+            var userCard = (await _institutionService.GetByIdAsync(eventInstance.InstitutionId)).card;
 
             var dt = new DTEvent(
                     id: eventInstance.Id,

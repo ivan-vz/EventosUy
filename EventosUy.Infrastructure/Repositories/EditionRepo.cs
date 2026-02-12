@@ -38,14 +38,14 @@ namespace EventosUy.Infrastructure.Repositories
 
         public Task<List<Edition>> GetAllByEventAsync(Guid eventId) 
         { 
-            return Task.FromResult(_editions.Where(edition => edition.State is EditionState.ONGOING && edition.Event == eventId).ToList()); 
+            return Task.FromResult(_editions.Where(edition => edition.State is EditionState.ONGOING && edition.EventId == eventId).ToList()); 
         }
 
-        public Task<List<Edition>> GetAllByInstitutionAsync(Guid institutionId) { return Task.FromResult(_editions.Where(edition => edition.Institution == institutionId).ToList()); }
+        public Task<List<Edition>> GetAllByInstitutionAsync(Guid institutionId) { return Task.FromResult(_editions.Where(edition => edition.InstitutionId == institutionId).ToList()); }
 
         public Task<List<Edition>> GetAllPendingByEventAsync(Guid eventId) 
         {
-            return Task.FromResult(_editions.Where(edition => edition.State == EditionState.PENDING && edition.Event == eventId).ToList());
+            return Task.FromResult(_editions.Where(edition => edition.State == EditionState.PENDING && edition.EventId == eventId).ToList());
         }
 
         public Task<Edition?> GetByIdAsync(Guid id) { return Task.FromResult(_editions.SingleOrDefault(edition => edition.Id == id)); }

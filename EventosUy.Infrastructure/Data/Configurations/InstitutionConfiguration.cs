@@ -8,28 +8,38 @@ namespace EventosUy.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Institution> builder)
         {
-            builder.ToTable("Institutions");
+            builder.HasKey(x => x.Id);
+
+            builder.Property(x => x.Nickname).HasColumnType("citext").HasMaxLength(100).IsRequired();
+
+            builder.Property(x => x.Password).HasMaxLength(500).IsRequired();
+
+            builder.Property(x => x.Email).HasColumnType("citext").HasMaxLength(255).IsRequired();
+
+            builder.Property(x => x.Created).IsRequired();
+
+            builder.Property(x => x.Active).IsRequired();
 
             builder.Property(x => x.Name).HasMaxLength(100).IsRequired();
 
-            builder.Property(x => x.Acronym).HasMaxLength(100).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.Acronym).HasColumnType("citext").HasMaxLength(100).IsRequired();
 
             builder.Property(x => x.Description).IsRequired();
 
-            builder.Property(x => x.Url).HasMaxLength(255).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.Url).HasColumnType("citext").HasMaxLength(255).IsRequired();
 
-            builder.Property(x => x.Country).HasMaxLength(100).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.Country).HasColumnType("citext").HasMaxLength(100).IsRequired();
 
-            builder.Property(x => x.City).HasMaxLength(100).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.City).HasColumnType("citext").HasMaxLength(100).IsRequired();
 
-            builder.Property(x => x.Street).HasMaxLength(200).UseCollation("case_insensitive").IsRequired();
+            builder.Property(x => x.Street).HasColumnType("citext").HasMaxLength(200).IsRequired();
 
             builder.Property(x => x.Number).HasMaxLength(5).IsRequired();
 
             builder.Property(x => x.Floor).IsRequired();
 
-            builder.Property(x => x.Active).IsRequired();
-
+            builder.HasIndex(x => x.Nickname).IsUnique().HasFilter("\"Active\" = true");
+            builder.HasIndex(x => x.Email).IsUnique().HasFilter("\"Active\" = true");
             builder.HasIndex(x => x.Acronym).IsUnique().HasFilter("\"Active\" = true");
             builder.HasIndex(x => x.Url).IsUnique().HasFilter("\"Active\" = true");
             builder.HasIndex(x => new { x.Country, x.City, x.Street, x.Number, x.Floor }).IsUnique().HasFilter("\"Active\" = true");

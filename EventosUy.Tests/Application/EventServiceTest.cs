@@ -216,7 +216,7 @@ namespace EventosUy.Tests.Application
                     );
 
             mockRepo.Setup(repo => repo.GetByIdAsync(expected.Id)).ReturnsAsync(expected);
-            mockInstitutionService.Setup(s => s.GetByIdAsync(expected.Institution)).ReturnsAsync((dtInst, cardInst));
+            mockInstitutionService.Setup(s => s.GetByIdAsync(expected.InstitutionId)).ReturnsAsync((dtInst, cardInst));
 
             var service = new EventService(mockRepo.Object, mockCategoryService.Object, mockInstitutionService.Object);
 
@@ -389,7 +389,7 @@ namespace EventosUy.Tests.Application
             mockRepo.Setup(repo => repo.ExistsByInitialsAsync(dtUpdate.Name)).ReturnsAsync(false);
             mockCategoryService.Setup(s => s.ExistsAsync(dtUpdate.Categories)).ReturnsAsync(true);
 
-            mockInstitutionService.Setup(s => s.GetByIdAsync(_event.Institution)).ReturnsAsync((dtInst, cardInst));
+            mockInstitutionService.Setup(s => s.GetByIdAsync(_event.InstitutionId)).ReturnsAsync((dtInst, cardInst));
 
             var service = new EventService(mockRepo.Object, mockCategoryService.Object, mockInstitutionService.Object);
 
@@ -473,7 +473,7 @@ namespace EventosUy.Tests.Application
                     );
 
             mockRepo.Setup(repo => repo.GetByIdAsync(_event.Id)).ReturnsAsync(_event);
-            mockInstitutionService.Setup(s => s.GetByIdAsync(_event.Institution)).ReturnsAsync((dtInst, cardInst));
+            mockInstitutionService.Setup(s => s.GetByIdAsync(_event.InstitutionId)).ReturnsAsync((dtInst, cardInst));
 
             var service = new EventService(mockRepo.Object, mockCategoryService.Object, mockInstitutionService.Object);
 

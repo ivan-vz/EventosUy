@@ -10,6 +10,6 @@
         public int Used { get; set; } = 0;
         public bool Active { get; set; } = true;
         public DateTimeOffset Created { get; init; } = DateTimeOffset.UtcNow;
-        public Guid Edition { get; init; } = editionId;
+        public Guid EditionId { get; init; } = editionId;
     }
 }
