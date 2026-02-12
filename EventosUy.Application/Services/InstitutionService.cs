@@ -73,6 +73,7 @@ namespace EventosUy.Application.Services
                 );
 
             await _repo.AddAsync(institution);
+            await _repo.Save();
 
             var dtInstitution = new DTInstitution
                 (
@@ -96,7 +97,7 @@ namespace EventosUy.Application.Services
 
         public async Task<IEnumerable<UserCard>> GetAllAsync()
         {
-            List<Institution> institutions = await _repo.GetAllAsync();
+            var institutions = await _repo.GetAllAsync();
             List<UserCard> cards = [.. institutions.Select(institution => new UserCard(institution.Id, institution.Nickname, institution.Email))];
 
             return cards;
@@ -178,6 +179,9 @@ namespace EventosUy.Application.Services
             institution.Url = dtUpdate.Url;
             if (!PasswordHasher.Verify(dtUpdate.Password, institution.Password)) { institution.Password = PasswordHasher.Hash(dtUpdate.Password); }
 
+            _repo.Update(institution);
+            await _repo.Save();
+
             var dt = new DTInstitution
                 (
                     id: institution.Id,
@@ -205,7 +209,10 @@ namespace EventosUy.Application.Services
             if (institution == null) { return null; }
 
             institution.Active = false;
-            
+
+            _repo.Update(institution);
+            await _repo.Save();
+
             var dt = new DTInstitution
                 (
                     id: institution.Id,

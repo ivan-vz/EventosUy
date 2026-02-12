@@ -71,6 +71,7 @@ namespace EventosUy.Application.Services
                 );
 
             await _repo.AddAsync(eventInstance);
+            await _repo.Save();
 
             var dt = new DTEvent(
                     id: eventInstance.Id, 
@@ -87,7 +88,7 @@ namespace EventosUy.Application.Services
 
         public async Task<IEnumerable<EventCard>> GetAllAsync()
         {
-            List<Event> events = await _repo.GetAllAsync();
+            var events = await _repo.GetAllAsync();
             List<EventCard> cards = [.. events.Select(eventInstance => new EventCard(eventInstance.Id, eventInstance.Name, eventInstance.Initials) )];
 
             return cards;
@@ -164,6 +165,9 @@ namespace EventosUy.Application.Services
             eventInstance.Description = dtUpdate.Description;
             eventInstance.Categories = categories;
 
+            _repo.Update(eventInstance);
+            await _repo.Save();
+
             var userCard = (await _institutionService.GetByIdAsync(eventInstance.InstitutionId)).card;
             
             var dt = new DTEvent(
@@ -186,6 +190,9 @@ namespace EventosUy.Application.Services
             if (eventInstance is null) { return null; }
 
             eventInstance.Active = false;
+
+            _repo.Update(eventInstance);
+            await _repo.Save();
 
             var userCard = (await _institutionService.GetByIdAsync(eventInstance.InstitutionId)).card;
 

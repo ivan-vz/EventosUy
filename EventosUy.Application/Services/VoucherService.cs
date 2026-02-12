@@ -62,6 +62,7 @@ namespace EventosUy.Application.Services
             // TODO: En el apartado de consulta de Sponsor tiene que haber un boton que mande el create al VoucherController con discount = 100 y automatic = false 
 
             await _repo.AddAsync(voucher);
+            await _repo.Save();
             
             var dt = new DTVoucher
                 (
@@ -116,6 +117,7 @@ namespace EventosUy.Application.Services
                 );
 
             await _repo.AddAsync(voucher);
+            await _repo.Save();
 
             var dt = new DTVoucher
                 (
@@ -202,6 +204,9 @@ namespace EventosUy.Application.Services
                 {
                     voucher.State = VoucherState.COMPLETED;
                 }
+
+                _repo.Update(voucher);
+                await _repo.Save();
             }
         }
     }

@@ -26,8 +26,7 @@ namespace EventosUy.Infrastructure.Data.Configurations
 
             builder.Property(x => x.Active).IsRequired();
 
-            builder.HasIndex(x => x.InstitutionId);
-            builder.HasIndex(x => x.Active);
+            builder.HasIndex(x => x.InstitutionId).HasFilter("\"Active\" = true");
             builder.HasIndex(x => x.Initials).IsUnique().HasFilter("\"Active\" = true");
             builder.HasIndex(x => x.Name).IsUnique().HasFilter("\"Active\" = true");
         }

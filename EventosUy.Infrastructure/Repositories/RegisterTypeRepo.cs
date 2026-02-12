@@ -1,36 +1,33 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
+using EventosUy.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventosUy.Infrastructure.Repositories
 {
     internal class RegisterTypeRepo : IRegisterTypeRepo
     {
-        private readonly HashSet<RegisterType> _registerTypes;
+        private readonly ApplicationDbContext _context;
 
-        public RegisterTypeRepo() { _registerTypes = []; }
-
-        public Task AddAsync(RegisterType registerType)
-        {
-            _registerTypes.Add(registerType);
-            return Task.CompletedTask;
-        }
-
-        public Task<bool> ExistsAsync(string name) 
+        public RegisterTypeRepo(ApplicationDbContext context) 
         { 
-            return Task.FromResult(_registerTypes.Any(registerType => registerType.Active && registerType.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); 
+            _context = context; 
         }
 
-        public Task<List<RegisterType>> GetAllByEditionAsync(Guid editionId) 
-        { 
-            return Task.FromResult(_registerTypes.Where(registerType => registerType.Active && registerType.EditionId == editionId).ToList()); 
-        }
+        public async Task AddAsync(RegisterType registerType) => await _context.RegisterTypes.AddAsync(registerType);
 
-        public Task<RegisterType?> GetByIdAsync(Guid id) { return Task.FromResult(_registerTypes.SingleOrDefault(registerType => registerType.Active && registerType.Id == id)); }
+        public async Task<bool> ExistsAsync(string name) => await _context.RegisterTypes.AnyAsync(x => x.Name == name);
 
-        public Task<bool> RemoveAsync(Guid id)
+        public async Task<IEnumerable<RegisterType>> GetAllByEditionAsync(Guid editionId) => await _context.RegisterTypes.Where(x => x.EditionId == editionId).ToListAsync();
+
+        public async Task<RegisterType?> GetByIdAsync(Guid id) => await _context.RegisterTypes.FirstOrDefaultAsync(x => x.Id == id);
+
+        public void Update(RegisterType registerType)
         {
-            int result = _registerTypes.RemoveWhere(registerType => registerType.Id == id);
-            return Task.FromResult(result > 0);
+            _context.RegisterTypes.Attach(registerType);
+            _context.RegisterTypes.Entry(registerType).State = EntityState.Modified;
         }
+
+        public async Task Save() => await _context.SaveChangesAsync();
     }
 }

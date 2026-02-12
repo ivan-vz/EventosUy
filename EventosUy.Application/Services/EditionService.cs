@@ -77,6 +77,7 @@ namespace EventosUy.Application.Services
                 );
 
             await _repo.AddAsync(edition);
+            await _repo.Save();
 
             var dt = new DTEdition
                 (
@@ -101,7 +102,7 @@ namespace EventosUy.Application.Services
 
         public async Task<IEnumerable<EditionCard>> GetAllAsync()
         {
-            List<Edition> editions = await _repo.GetAllAsync();
+            var editions = await _repo.GetAllAsync();
             List<EditionCard> cards = [.. editions.Select(edition => new EditionCard(Id: edition.Id, Name: edition.Name, Initials: edition.Initials, State: edition.State)) ];
 
             return cards;
@@ -109,7 +110,7 @@ namespace EventosUy.Application.Services
 
         public async Task<IEnumerable<EditionCard>> GetAllByEventAsync(Guid eventId)
         {
-            List<Edition> editions = await _repo.GetAllByEventAsync(eventId);
+            var editions = await _repo.GetAllByEventAsync(eventId);
             List<EditionCard> cards = [.. editions.Select(edition => new EditionCard(edition.Id, edition.Name, edition.Initials, State: edition.State) )];
 
             return cards;
@@ -117,7 +118,7 @@ namespace EventosUy.Application.Services
 
         public async Task<IEnumerable<EditionCard>> GetAllByInstitutionAsync(Guid institutionId)
         {
-            List<Edition> editions = await _repo.GetAllByInstitutionAsync(institutionId);
+            var editions = await _repo.GetAllByInstitutionAsync(institutionId);
             List<EditionCard> cards = [.. editions.Select(edition => new EditionCard(edition.Id, edition.Name, edition.Initials, State: edition.State))];
 
             return cards;
@@ -125,7 +126,7 @@ namespace EventosUy.Application.Services
 
         public async Task<IEnumerable<EditionCard>> GetAllPendingByEventAsync(Guid eventId)
         {
-            List<Edition> editions = await _repo.GetAllPendingByEventAsync(eventId);
+            var editions = await _repo.GetAllPendingByEventAsync(eventId);
             List<EditionCard> cards = [.. editions.Select(edition => new EditionCard(edition.Id, edition.Name, edition.Initials, State: edition.State))];
 
             return cards;
@@ -170,6 +171,9 @@ namespace EventosUy.Application.Services
 
             edition.State = EditionState.ONGOING;
 
+            _repo.Update(edition);
+            await _repo.Save();
+
             return true;
         }
 
@@ -180,6 +184,9 @@ namespace EventosUy.Application.Services
             if (edition is null || edition.State is not EditionState.PENDING) { return false; }
 
             edition.State = EditionState.CANCELLED;
+
+            _repo.Update(edition);
+            await _repo.Save();
 
             return true;
         }
@@ -241,6 +248,9 @@ namespace EventosUy.Application.Services
             edition.Number = dtUpdate.Number;
             edition.Floor = dtUpdate.Floor;
 
+            _repo.Update(edition);
+            await _repo.Save();
+
             var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.EventId);
             
             var dt = new DTEdition
@@ -271,6 +281,9 @@ namespace EventosUy.Application.Services
             if (edition is null || edition.State is EditionState.CANCELLED) { return null; }
 
             edition.State = EditionState.CANCELLED;
+
+            _repo.Update(edition);
+            await _repo.Save();
 
             var (dtEvent, eventCard) = await _eventService.GetByIdAsync(edition.EventId);
 

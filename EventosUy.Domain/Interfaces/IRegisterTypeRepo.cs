@@ -5,9 +5,10 @@ namespace EventosUy.Domain.Interfaces
     public interface IRegisterTypeRepo
     {
         public Task<RegisterType?> GetByIdAsync(Guid id);
-        public Task<List<RegisterType>> GetAllByEditionAsync(Guid editionId);
+        public Task<IEnumerable<RegisterType>> GetAllByEditionAsync(Guid editionId);
         public Task<bool> ExistsAsync(string name);
         public Task AddAsync(RegisterType registerType);
-        public Task<bool> RemoveAsync(Guid id);
+        public void Update(RegisterType registerType);
+        public Task Save();
     }
 }

@@ -8,6 +8,7 @@ namespace EventosUy.Domain.Interfaces
         public Task<Voucher?> GetByIdAsync(Guid id);
         public Task<bool> ExistsAsync(string code);
         public Task AddAsync(Voucher instance);
-        public Task<bool> RemoveAsync(string code);
+        public void Update(Voucher voucher);
+        public Task Save();
     }
 }

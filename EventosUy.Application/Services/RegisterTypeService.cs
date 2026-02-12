@@ -52,6 +52,7 @@ namespace EventosUy.Application.Services
                 );
 
             await _repo.AddAsync(registerType);
+            await _repo.Save();
 
             var dt = new DTRegisterType(
                     id: registerType.Id,
@@ -70,7 +71,7 @@ namespace EventosUy.Application.Services
 
         public async Task<IEnumerable<RegisterTypeCard>> GetAllByEditionAsync(Guid editionId)
         {
-            List<RegisterType> registerTypes = await _repo.GetAllByEditionAsync(editionId);
+            var registerTypes = await _repo.GetAllByEditionAsync(editionId);
             List<RegisterTypeCard> cards = [.. registerTypes.Select(rt => new RegisterTypeCard(rt.Id, rt.Name, rt.Price, rt.Quota) )];
 
             return cards;
@@ -109,6 +110,9 @@ namespace EventosUy.Application.Services
 
             registerType.Active = false;
 
+            _repo.Update(registerType);
+            await _repo.Save();
+
             var editionCard = (await _editionService.GetByIdAsync(registerType.EditionId)).card;
 
             var dt = new DTRegisterType(
@@ -138,6 +142,9 @@ namespace EventosUy.Application.Services
                 { 
                     registerType.Active = false; 
                 }
+
+                _repo.Update(registerType);
+                await _repo.Save();
             }
         }
     }

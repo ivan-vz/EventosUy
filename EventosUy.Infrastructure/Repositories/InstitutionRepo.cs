@@ -1,60 +1,48 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
+using EventosUy.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventosUy.Infrastructure.Repositories
 {
     internal class InstitutionRepo : IInstitutionRepo
     {
-        private readonly HashSet<Institution> _institutions;
+        private readonly ApplicationDbContext _context;
 
-        public InstitutionRepo() { _institutions = []; }
-
-        public Task AddAsync(Institution institution)
+        public InstitutionRepo(ApplicationDbContext context) 
         {
-            _institutions.Add(institution);
-            return Task.CompletedTask;
+            _context = context; 
         }
 
-        public Task<bool> ExistsByAcronymAsync(string acronym) 
-        { 
-            return Task.FromResult(_institutions.Any(institution => institution.Active && institution.Acronym.Equals(acronym, StringComparison.OrdinalIgnoreCase))); 
-        }
+        public async Task AddAsync(Institution institution) => await _context.Institutions.AddAsync(institution);
 
-        public Task<bool> ExistsByAddressAsync(string country, string city, string street, string number, int floor) 
-        { 
-            return Task.FromResult(_institutions.Any(institution =>
-                institution.Active && 
-                institution.Country.Equals(country, StringComparison.OrdinalIgnoreCase) &&
-                institution.City.Equals(city, StringComparison.OrdinalIgnoreCase) &&
-                institution.Street.Equals(street, StringComparison.OrdinalIgnoreCase) &&
-                institution.Number == number &&
-                institution.Floor == floor
-                )); 
-        }
-
-        public Task<bool> ExistsByEmailAsync(string email) 
-        { 
-            return Task.FromResult(_institutions.Any(institution => institution.Active && institution.Email.Equals(email, StringComparison.OrdinalIgnoreCase))); 
-        }
+        public async Task<bool> ExistsByAcronymAsync(string acronym) => await _context.Institutions.AnyAsync(x => x.Acronym == acronym); 
         
-        public Task<bool> ExistsByNicknameAsync(string nickname) 
+
+        public async Task<bool> ExistsByAddressAsync(string country, string city, string street, string number, int floor) => await _context.Institutions.AnyAsync(x =>
+                x.Country == country 
+                && x.City == city
+                && x.Street == street
+                && x.Number == number
+                && x.Floor == floor
+                );
+
+        public async Task<bool> ExistsByEmailAsync(string email) => await _context.Institutions.AnyAsync(x => x.Email == email);
+        
+        public async Task<bool> ExistsByNicknameAsync(string nickname)  => await _context.Institutions.AnyAsync(x => x.Nickname == nickname);
+
+        public async Task<bool> ExistsByUrlAsync(string url) => await _context.Institutions.AnyAsync(x => x.Url == url);
+
+        public async Task<IEnumerable<Institution>> GetAllAsync() => await _context.Institutions.ToListAsync();
+
+        public async Task<Institution?> GetByIdAsync(Guid id) => await _context.Institutions.FirstOrDefaultAsync(x => x.Id == id);
+
+        public void Update(Institution institution)
         {
-            return Task.FromResult(_institutions.Any(institution => institution.Active && institution.Nickname == nickname)); 
+            _context.Institutions.Attach(institution);
+            _context.Institutions.Entry(institution).State = EntityState.Modified;
         }
 
-        public Task<bool> ExistsByUrlAsync(string url) 
-        { 
-            return Task.FromResult(_institutions.Any(institution => institution.Active && institution.Url.Equals(url, StringComparison.OrdinalIgnoreCase))); 
-        }
-
-        public Task<List<Institution>> GetAllAsync() { return Task.FromResult(_institutions.Where(institution => institution.Active).ToList()); }
-
-        public Task<Institution?> GetByIdAsync(Guid id) { return Task.FromResult(_institutions.SingleOrDefault(institution => institution.Active && institution.Id == id)); }
-
-        public Task<bool> RemoveAsync(Guid id)
-        {
-            int result = _institutions.RemoveWhere(institution => institution.Id == id);
-            return Task.FromResult(result > 0);
-        }
+        public async Task Save() => await _context.SaveChangesAsync();
     }
 }

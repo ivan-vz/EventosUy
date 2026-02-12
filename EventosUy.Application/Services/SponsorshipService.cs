@@ -101,6 +101,7 @@ namespace EventosUy.Application.Services
                 );
 
             await _repo.AddAsync(sponsorship);
+            await _repo.Save();
             
             var dt = new DTSponsorship(
                     id: sponsorship.Id,
@@ -118,7 +119,7 @@ namespace EventosUy.Application.Services
 
         public async Task<IEnumerable<SponsorshipCard>> GetAllByEditionAsync(Guid editionId)
         {
-            List<Sponsorship> sponsorships = await _repo.GetAllByEditionAsync(editionId);
+            var sponsorships = await _repo.GetAllByEditionAsync(editionId);
             List<SponsorshipCard> cards = [.. sponsorships.Select(sponsor => new SponsorshipCard(sponsor.Id, sponsor.Name, sponsor.Tier) )];
 
             return cards;
@@ -126,7 +127,7 @@ namespace EventosUy.Application.Services
 
         public async Task<IEnumerable<SponsorshipCard>> GetAllByInstitutionAsync(Guid institutionId)
         {
-            List<Sponsorship> sponsorships = await _repo.GetAllByInstitutionAsync(institutionId);
+            var sponsorships = await _repo.GetAllByInstitutionAsync(institutionId);
             List<SponsorshipCard> cards = [.. sponsorships.Select(sponsor => new SponsorshipCard(sponsor.Id, sponsor.Name, sponsor.Tier))];
             
             return cards;
@@ -163,6 +164,9 @@ namespace EventosUy.Application.Services
             if (sponsor is null) { return null; }
 
             sponsor.Active = false;
+
+            _repo.Update(sponsor);
+            await _repo.Save();
 
             var userCard = (await _institutionService.GetByIdAsync(sponsor.InstitutionId)).card;
             var (dtRegisterType, registerTypeCard) = await _registerTypeService.GetByIdAsync(sponsor.RegisterTypeId);

@@ -1,39 +1,37 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
+using EventosUy.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventosUy.Infrastructure.Repositories
 {
     internal class EventRepo : IEventRepo
     {
-        private readonly HashSet<Event> _events;
+        private readonly ApplicationDbContext _context;
 
-        public EventRepo() { _events = []; }
-
-        public Task AddAsync(Event ev) { return Task.FromResult(_events.Add(ev)); }
-
-        public Task<bool> ExistsByInitialsAsync(string initials)
+        public EventRepo(ApplicationDbContext context) 
         {
-            return Task.FromResult( _events.Any(ev => ev.Active && ev.Initials.Equals(initials, StringComparison.OrdinalIgnoreCase)) );
+            _context = context;
         }
 
-        public Task<bool> ExistsByNameAsync(string name)
+        public async Task AddAsync(Event ev) => await _context.Event.AddAsync(ev);
+
+        public async Task<bool> ExistsByInitialsAsync(string initials) => await _context.Event.AnyAsync(x => x.Initials == initials);
+
+        public async Task<bool> ExistsByNameAsync(string name) => await _context.Event.AnyAsync(x => x.Name == name);
+
+        public async Task<IEnumerable<Event>> GetAllAsync() => await _context.Event.ToListAsync();
+
+        public async Task<IEnumerable<Event>> GetAllByInstitutionAsync(Guid institutionId) => await _context.Event.Where(x => x.InstitutionId == institutionId).ToListAsync();
+
+        public async Task<Event?> GetByIdAsync(Guid id) => await _context.Event.FirstOrDefaultAsync(x => x.Id == id);
+
+        public void Update(Event ev)
         {
-            return Task.FromResult(_events.Any(ev => ev.Active && ev.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
+            _context.Event.Attach(ev);
+            _context.Event.Entry(ev).State = EntityState.Modified;
         }
 
-        public Task<List<Event>> GetAllAsync() { return Task.FromResult(_events.Where(ev => ev.Active).ToList()); }
-
-        public Task<List<Event>> GetAllByInstitutionAsync(Guid institutionId) 
-        { 
-            return Task.FromResult(_events.Where(ev => ev.Active && ev.InstitutionId == institutionId).ToList()); 
-        }
-
-        public Task<Event?> GetByIdAsync(Guid id) { return Task.FromResult(_events.SingleOrDefault(ev => ev.Active && ev.Id == id)); }
-
-        public Task<bool> RemoveAsync(Guid id) 
-        {
-            int result = _events.RemoveWhere(ev => ev.Id == id);
-            return Task.FromResult(result > 0); 
-        }
+        public async Task Save() => await _context.SaveChangesAsync();
     }
 }

@@ -1,31 +1,33 @@
 ﻿using EventosUy.Domain.Entities;
-using EventosUy.Domain.Enumerates;
 using EventosUy.Domain.Interfaces;
+using EventosUy.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventosUy.Infrastructure.Repositories
 {
     internal class VoucherRepo : IVoucherRepo
     {
-        private readonly HashSet<Voucher> _vouchers;
+        private readonly ApplicationDbContext _context;
 
-        public VoucherRepo() { _vouchers = []; }
-
-        public Task AddAsync(Voucher instance)
+        public VoucherRepo(ApplicationDbContext context) 
         {
-            _vouchers.Add(instance);
-            return Task.CompletedTask;
+            _context = context; 
         }
 
-        public Task<bool> ExistsAsync(string code) { return Task.FromResult(_vouchers.Any(voucher => voucher.State.Equals(VoucherState.AVAILABLE) && voucher.Code.Equals(code))); }
+        public async Task AddAsync(Voucher instance) => await _context.Vouchers.AddAsync(instance);
 
-        public Task<Voucher?> GetByCodeAsync(string code) { return Task.FromResult(_vouchers.SingleOrDefault(voucher => voucher.State.Equals(VoucherState.AVAILABLE) && voucher.Code.Equals(code))); }
+        public async Task<bool> ExistsAsync(string code) => await _context.Vouchers.AnyAsync(x => x.Code == code);
 
-        public Task<Voucher?> GetByIdAsync(Guid id) { return Task.FromResult(_vouchers.SingleOrDefault(voucher => voucher.State.Equals(VoucherState.AVAILABLE) && voucher.Id == id)); }
+        public async Task<Voucher?> GetByCodeAsync(string code) => await _context.Vouchers.FirstOrDefaultAsync(x => x.Code == code);
 
-        public Task<bool> RemoveAsync(string code)
+        public async Task<Voucher?> GetByIdAsync(Guid id) => await _context.Vouchers.FirstOrDefaultAsync(x => x.Id == id);
+
+        public void Update(Voucher voucher)
         {
-            int result = _vouchers.RemoveWhere(voucher => voucher.Code == code);
-            return Task.FromResult(result > 0);
+            _context.Vouchers.Attach(voucher);
+            _context.Vouchers.Entry(voucher).State = EntityState.Modified;
         }
+
+        public async Task Save() => await _context.SaveChangesAsync();
     }
 }

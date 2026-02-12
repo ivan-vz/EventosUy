@@ -9,15 +9,15 @@ namespace EventosUy.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services) 
         {
-            services.AddSingleton<ICategoryRepo, CategoryRepo>();
+            services.AddScoped<ICategoryRepo, CategoryRepo>();
             services.AddScoped<IClientRepo, ClientRepo>();
-            services.AddSingleton<IInstitutionRepo, InstitutionRepo>();
-            services.AddSingleton<IEventRepo, EventRepo>();
-            services.AddSingleton<IEditionRepo, EditionRepo>();
-            services.AddSingleton<IRegisterTypeRepo, RegisterTypeRepo>();
-            services.AddSingleton<ISponsorshipRepo, SponsorshipRepo>();
-            services.AddSingleton<IVoucherRepo, VoucherRepo>();
-            services.AddSingleton<IRegisterRepo, RegisterRepo>();
+            services.AddScoped<IInstitutionRepo, InstitutionRepo>();
+            services.AddScoped<IEventRepo, EventRepo>();
+            services.AddScoped<IEditionRepo, EditionRepo>();
+            services.AddScoped<IRegisterTypeRepo, RegisterTypeRepo>();
+            services.AddScoped<ISponsorshipRepo, SponsorshipRepo>();
+            services.AddScoped<IVoucherRepo, VoucherRepo>();
+            services.AddScoped<IRegisterRepo, RegisterRepo>();
 
             return services;
         }

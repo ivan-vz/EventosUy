@@ -1,32 +1,35 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
+using EventosUy.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventosUy.Infrastructure.Repositories
 {
     internal class SponsorshipRepo : ISponsorshipRepo
     {
-        private readonly HashSet<Sponsorship> _sponsorships;
+        private readonly ApplicationDbContext _context;
 
-        public SponsorshipRepo() { _sponsorships = []; }
-
-        public Task AddAsync(Sponsorship sponsorship)
+        public SponsorshipRepo(ApplicationDbContext context) 
         {
-            _sponsorships.Add(sponsorship);
-            return Task.CompletedTask;
+            _context = context; 
         }
 
-        public Task<bool> ExistsAsync(Guid editionId, Guid institutionId) { return Task.FromResult(_sponsorships.Any(sponsor => sponsor.EditionId == editionId && sponsor.InstitutionId == institutionId)); }
+        public async Task AddAsync(Sponsorship sponsorship) => await _context.Sponsorships.AddAsync(sponsorship);
 
-        public Task<List<Sponsorship>> GetAllByEditionAsync(Guid editionId) { return Task.FromResult(_sponsorships.Where(sponsor => sponsor.EditionId == editionId).ToList()); }
+        public async Task<bool> ExistsAsync(Guid editionId, Guid institutionId) => await _context.Sponsorships.AnyAsync(x => x.InstitutionId == institutionId && x.EditionId == editionId);
 
-        public Task<List<Sponsorship>> GetAllByInstitutionAsync(Guid institutionId) { return Task.FromResult(_sponsorships.Where(sponsor => sponsor.InstitutionId == institutionId).ToList()); }
+        public async Task<IEnumerable<Sponsorship>> GetAllByEditionAsync(Guid editionId) => await _context.Sponsorships.Where(x => x.EditionId == editionId).ToListAsync();
 
-        public Task<Sponsorship?> GetByIdAsync(Guid id) { return Task.FromResult(_sponsorships.SingleOrDefault(sponsor => sponsor.Id == id)); }
+        public async Task<IEnumerable<Sponsorship>> GetAllByInstitutionAsync(Guid institutionId) => await _context.Sponsorships.Where(x => x.InstitutionId == institutionId).ToListAsync();
 
-        public Task<bool> RemoveAsync(Guid id)
+        public async Task<Sponsorship?> GetByIdAsync(Guid id) => await _context.Sponsorships.FirstOrDefaultAsync(x => x.Id == id);
+
+        public void Update(Sponsorship sponsor)
         {
-            int result = _sponsorships.RemoveWhere(sponsor => sponsor.Id == id);
-            return Task.FromResult(result > 0);
+            _context.Sponsorships.Attach(sponsor);
+            _context.Sponsorships.Entry(sponsor).State = EntityState.Modified;
         }
+
+        public async Task Save() => await _context.SaveChangesAsync();
     }
 }

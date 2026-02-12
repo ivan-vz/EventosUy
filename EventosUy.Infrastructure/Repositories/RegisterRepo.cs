@@ -1,32 +1,35 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
+using EventosUy.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventosUy.Infrastructure.Repositories
 {
     internal class RegisterRepo : IRegisterRepo
     {
-        private readonly HashSet<Register> _registers;
+        private readonly ApplicationDbContext _context;
 
-        public RegisterRepo() { _registers = []; }
-
-        public Task AddAsync(Register register)
+        public RegisterRepo(ApplicationDbContext context) 
         {
-            _registers.Add(register);
-            return Task.CompletedTask;
+            _context = context; 
         }
 
-        public Task<bool> ExistsAsync(Guid clientId, Guid editionId) { return Task.FromResult(_registers.Any(register => register.ClientId == clientId && register.EditionId == editionId)); }
+        public async Task AddAsync(Register register) => await _context.Registers.AddAsync(register);
 
-        public Task<List<Register>> GetAllByEditionAsync(Guid editionId) { return Task.FromResult(_registers.Where(register => register.EditionId == editionId).ToList()); }
+        public async Task<bool> ExistsAsync(Guid clientId, Guid editionId) => await _context.Registers.AnyAsync(x => x.ClientId == clientId && x.EditionId == editionId);
 
-        public Task<List<Register>> GetAllByClientAsync(Guid clientId) { return Task.FromResult(_registers.Where(register => register.ClientId == clientId).ToList()); }
+        public async Task<IEnumerable<Register>> GetAllByEditionAsync(Guid editionId) => await _context.Registers.Where(x => x.EditionId == editionId).ToListAsync();
 
-        public Task<Register?> GetByIdAsync(Guid id) { return Task.FromResult(_registers.SingleOrDefault(register => register.Id == id)); }
+        public async Task<IEnumerable<Register>> GetAllByClientAsync(Guid clientId) => await _context.Registers.Where(x => x.ClientId == clientId).ToListAsync();
 
-        public Task<bool> RemoveAsync(Guid id)
+        public async Task<Register?> GetByIdAsync(Guid id) => await _context.Registers.FirstOrDefaultAsync(x => x.Id == id);
+
+        public void Update(Register register)
         {
-            int result = _registers.RemoveWhere(register => register.Id == id);
-            return Task.FromResult(result > 0);
+            _context.Registers.Attach(register);
+            _context.Registers.Entry(register).State = EntityState.Modified;
         }
+
+        public async Task Save() => await _context.SaveChangesAsync();
     }
 }

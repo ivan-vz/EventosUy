@@ -122,6 +122,7 @@ namespace EventosUy.Application.Services
             await _registerTypeService.UseSpotAsync(registerTypeCard.Id);
             
             await _repo.AddAsync(register);
+            await _repo.Save();
 
             var dt = new DTRegister
                 (
@@ -198,6 +199,7 @@ namespace EventosUy.Application.Services
             await _registerTypeService.UseSpotAsync(dtRegisterType.Id);
 
             await _repo.AddAsync(register);
+            await _repo.Save();
 
             var dt = new DTRegister
                 (

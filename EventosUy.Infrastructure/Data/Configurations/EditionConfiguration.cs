@@ -47,9 +47,9 @@ namespace EventosUy.Infrastructure.Data.Configurations
             builder.HasIndex(x => new { x.InstitutionId, x.State });
             builder.HasIndex(x => new { x.EventId, x.State });
 
-            builder.HasIndex(x => x.Initials).IsUnique().HasFilter("\"State\" = 'CANCELLED'");
-            builder.HasIndex(x => x.Name).IsUnique().HasFilter("\"State\" = 'CANCELLED'");
-            builder.HasIndex(x => new { x.Country, x.City, x.Street, x.Number, x.Floor, x.To }).HasFilter("\"State\" = 'CANCELLED'");
+            builder.HasIndex(x => x.Initials).IsUnique().HasFilter("\"State\" != 'CANCELLED'");
+            builder.HasIndex(x => x.Name).IsUnique().HasFilter("\"State\" != 'CANCELLED'");
+            builder.HasIndex(x => new { x.Country, x.City, x.Street, x.Number, x.Floor, x.To }).HasFilter("\"State\" != 'CANCELLED'");
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using EventosUy.Domain.Entities;
+using EventosUy.Domain.Enumerates;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventosUy.Infrastructure.Data
@@ -29,6 +30,17 @@ namespace EventosUy.Infrastructure.Data
 
             modelBuilder.Entity<Institution>().HasQueryFilter(x => x.Active);
 
+            modelBuilder.Entity<Category>().HasQueryFilter(x => x.Active);
+
+            modelBuilder.Entity<Event>().HasQueryFilter(x => x.Active);
+
+            modelBuilder.Entity<Edition>().HasQueryFilter(x => EditionState.PENDING != x.State && EditionState.CANCELLED != x.State);
+
+            modelBuilder.Entity<RegisterType>().HasQueryFilter(x => x.Active);
+
+            modelBuilder.Entity<Sponsorship>().HasQueryFilter(x => x.Active);
+
+            modelBuilder.Entity<Voucher>().HasQueryFilter(x => VoucherState.AVAILABLE == x.State);
         }
     }
 }

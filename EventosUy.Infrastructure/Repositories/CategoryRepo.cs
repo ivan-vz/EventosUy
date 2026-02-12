@@ -1,33 +1,33 @@
 ﻿using EventosUy.Domain.Entities;
 using EventosUy.Domain.Interfaces;
+using EventosUy.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventosUy.Infrastructure.Repositories
 {
     internal class CategoryRepo : ICategoryRepo
     {
-        private readonly HashSet<Category> _categories;
+        private readonly ApplicationDbContext _context;
 
-        public CategoryRepo() { _categories = []; }
-
-        public Task AddAsync(Category category)
+        public CategoryRepo(ApplicationDbContext context) 
         {
-            _categories.Add(category);
-            return Task.CompletedTask;
+            _context = context; 
         }
+
+        public async Task AddAsync(Category category) => await _context.Categories.AddAsync(category);
         
-        public Task<bool> ExistsAsync(string name) 
-        { 
-            return Task.FromResult(_categories.Any(category => category.Active && category.Name.Equals(name, StringComparison.OrdinalIgnoreCase))); 
-        }
+        public async Task<bool> ExistsAsync(string name) => await _context.Categories.AnyAsync(x => x.Name == name);
 
-        public Task<List<Category>> GetAllAsync() { return Task.FromResult(_categories.Where(category => category.Active).ToList()); }
+        public async Task<IEnumerable<Category>> GetAllAsync() => await _context.Categories.ToListAsync();
 
-        public Task<Category?> GetByIdAsync(Guid id) { return Task.FromResult(_categories.SingleOrDefault(category => category.Active && category.Id == id)); }
+        public async Task<Category?> GetByIdAsync(Guid id) => await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
 
-        public Task<bool> RemoveAsync(Guid id)
+        public void Update(Category category)
         {
-            int result = _categories.RemoveWhere(category => category.Id == id);
-            return Task.FromResult(result > 0);
+            _context.Categories.Attach(category);
+            _context.Categories.Entry(category).State = EntityState.Modified;
         }
+
+        public async Task Save() => await _context.SaveChangesAsync();
     }
 }

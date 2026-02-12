@@ -32,6 +32,7 @@ namespace EventosUy.Application.Services
             var category = new Category(name: name);
 
             await _repo.AddAsync(category);
+            await _repo.Save();
 
             var dt = new DTCategory(id: category.Id, name: category.Name, created: category.Created);
 
@@ -55,7 +56,7 @@ namespace EventosUy.Application.Services
 
         public async Task<IEnumerable<string>> GetAllAsync()
         {
-            List<Category> categories = await _repo.GetAllAsync();
+            var categories = await _repo.GetAllAsync();
             List<string> names = [.. categories.Select(category => category.Name) ];
 
             return names;
@@ -79,6 +80,9 @@ namespace EventosUy.Application.Services
             if (category is null) { return null; }
 
             category.Active = false;
+
+            _repo.Update(category);
+            await _repo.Save();
 
             var dt = new DTCategory(id: category.Id, name: category.Name, created: category.Created);
 

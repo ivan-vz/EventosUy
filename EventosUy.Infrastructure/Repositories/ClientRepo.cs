@@ -7,13 +7,11 @@ namespace EventosUy.Infrastructure.Repositories
 {
     internal class ClientRepo : IClientRepo
     {
-        private readonly HashSet<Client> _clients;
 
-        private ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
         public ClientRepo(ApplicationDbContext context) 
-        { 
-            _clients = []; 
+        {  
             _context = context;
         }
 
